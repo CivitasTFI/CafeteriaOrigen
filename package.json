@@ -4,10 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node src/server.js",
-    "test": "jest",
-    "test:watch": "jest --watch"
-  },
+  "dev": "tsx watch src/server.ts",
+  "build": "tsc",
+  "start": "node dist/src/server.js",
+  "test": "jest",
+  "test:watch": "jest --watch"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
