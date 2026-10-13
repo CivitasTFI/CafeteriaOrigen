@@ -1,5 +1,7 @@
 import request from "supertest";
+import express from "express";
 import app from "../src/app";
+import { errorHandler } from "../src/middleware/errorHandler";
 
 describe("Aplicación", () => {
   test("debe responder 404 para una ruta inexistente", async () => {
@@ -12,7 +14,15 @@ describe("Aplicación", () => {
   });
 
   test("debe responder 500 ante un error interno", async () => {
-    const response = await request(app).get("/test-error");
+    const testApp = express();
+
+    testApp.get("/error", () => {
+      throw new Error("Error de prueba");
+    });
+
+    testApp.use(errorHandler);
+
+    const response = await request(testApp).get("/error");
 
     expect(response.status).toBe(500);
     expect(response.body).toEqual({
