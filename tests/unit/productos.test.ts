@@ -1,6 +1,6 @@
-import { Expreso } from '../src/models/expreso';
-import { Filtrado } from '../src/models/filtrado';
-import { Pasteleria } from '../src/models/pasteleria';
+import { Expreso } from '../../src/models/expreso';
+import { Filtrado } from '../../src/models/filtrado';
+import { Pasteleria } from '../../src/models/pasteleria';
 
 describe('calcularPrecios', () => {
     it('deberia calcular el precio de 3 expresos de distinto tamaño y variedad', () => {
