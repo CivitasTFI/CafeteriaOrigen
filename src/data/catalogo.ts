@@ -1,3 +1,4 @@
+import { Producto } from '../models/producto';
 import { Expreso } from '../models/expreso';
 import { Filtrado } from '../models/filtrado';
 import { Pasteleria } from '../models/pasteleria';
@@ -24,3 +25,30 @@ const filtradoGrandeEtiopia = new Filtrado(18, 'Filtrado Taza Grande Etiopia', '
 
 const muffinDeChocolate = new Pasteleria(19, 'Muffin de Chocolate', 'muffin de chocolate');
 const tortaSelvaNegra = new Pasteleria(20, 'Torta Selva Negra', 'torta selva negra');
+
+export const catalogoProductos: Producto[] = [
+    expresoPocilloBrasil,
+    expresoPocilloColombia,
+    expresoPocilloEtiopia,
+    expresoMedianoBrasil,
+    expresoMedianoColombia,
+    expresoMedianoEtiopia,
+    expresoGrandeBrasil,
+    expresoGrandeColombia,
+    expresoGrandeEtiopia,
+    filtradoPocilloBrasil,
+    filtradoPocilloColombia,
+    filtradoPocilloEtiopia,
+    filtradoMedianoBrasil,
+    filtradoMedianoColombia,
+    filtradoMedianoEtiopia,
+    filtradoGrandeBrasil,
+    filtradoGrandeColombia,
+    filtradoGrandeEtiopia,
+    muffinDeChocolate,
+    tortaSelvaNegra
+];
+
+export function obtenerProducto(id: number): Producto | undefined {
+    return catalogoProductos.find(p => p.id === id);
+}
