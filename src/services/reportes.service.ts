@@ -1,7 +1,6 @@
-// 1.  Total de un pedido: suma de calcularPrecio() × cantidad. 
-// 2.  Facturación total: suma de los totales de todos los pedidos. 
-// 3.  Cantidad vendida por producto: { "Espresso": 10, "Filtrado": 4 }. 
-// 4.  Producto más vendido: parte del resultado anterior.
+// Pedido: id, items: [{ productoId, cantidad }, { productoId, cantidad }], estado 
+// calcularPrecio() es una función que devuelve el precio de un producto dado su id
+
 import { obtenerProducto } from '../data/catalogo';
 interface Pedido {
     id: number;
@@ -9,6 +8,7 @@ interface Pedido {
     estado: string;
     calcularTotal: () => number;
 }
+
 // * Facturación total (suma de los totales de todos los pedidos) 
 // Caso borde: sin pedidos
 export function calcularFacturacionTotal(pedidos: Pedido[]): number {
@@ -17,8 +17,7 @@ export function calcularFacturacionTotal(pedidos: Pedido[]): number {
     }, 0);
     return facturacionTotal;
 }
-// Pedido: id, items: [{ productoId, cantidad }, { productoId, cantidad }], estado 
-// calcularPrecio() es una función que devuelve el precio de un producto dado su id
+
 // * Cantidad vendida por producto (formato { "Espresso": 10, "Filtrado": 4 }) 
 // Caso borde: empate en el mas vendido.
 export function cantidadVendidaPorProducto(pedidos: Pedido[]): Record<string, number> { 
@@ -45,4 +44,23 @@ export function cantidadVendidaPorProducto(pedidos: Pedido[]): Record<string, nu
     return ventasPorProducto;
 }
 
-// * Producto más vendido, calculado a partir del resultado anterior. 
+// Producto más vendido, calculado a partir del resultado anterior. 
+export function productoMasVendido(pedidos: Pedido[]): string[] {
+    const listaVentasPorProducto = cantidadVendidaPorProducto(pedidos);
+    let masVendidos: string[] = [];
+    let maxCantidad = 0;
+    for (const producto in listaVentasPorProducto) { 
+        const cantidadDelProducto = listaVentasPorProducto[producto];
+        // Si la cantidad del producto es mayor a la cantidad maxima encontrada hasta ahora: 
+        // actualizo la cantidad maxima encontrada y reemplazo todo lo que haya en el array de mas vendidos por el nuevo producto con mas ventas.
+        if ( cantidadDelProducto > maxCantidad) {
+            maxCantidad = cantidadDelProducto;
+            masVendidos = [producto]; 
+        } else if (cantidadDelProducto === maxCantidad){
+            // Si la cantidad del producto es igual a la cantidad maxima encontrada hasta ahora:
+            // agrego el producto al array de mas vendidos.
+            masVendidos.push(producto);
+        }
+    }
+    return masVendidos;
+}
