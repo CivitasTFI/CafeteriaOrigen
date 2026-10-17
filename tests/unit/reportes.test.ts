@@ -1,17 +1,4 @@
-// * Facturación total (suma de los totales de todos los pedidos), 
-// * Cantidad vendida por producto (formato { "Espresso": 10, "Filtrado": 4 }) 
-// * Producto más vendido, calculado a partir del resultado anterior.
-
-// Casos borde: sin pedidos y empate en el más vendido.
-// Tests unitarios y de endpoints.
-
-// Pedido: id, items: [{ productoId, cantidad }], estado 
-// 1.  Total de un pedido: suma de calcularPrecio() × cantidad. 
-// 2.  Facturación total: suma de los totales de todos los pedidos. 
-// 3.  Cantidad vendida por producto: { "Espresso": 10, "Filtrado": 4 }. 
-// 4.  Producto más vendido: parte del resultado anterior.
-
-import { calcularFacturacionTotal, cantidadVendidaPorProducto, productoMasVendido } from '../src/services/reportes.service';
+import { calcularFacturacionTotal, cantidadVendidaPorProducto, productoMasVendido } from '../../src/services/reportes.service';
 
 interface Pedido {
     id: number;

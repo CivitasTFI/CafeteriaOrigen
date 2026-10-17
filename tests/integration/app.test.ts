@@ -1,7 +1,7 @@
 import request from "supertest";
 import express from "express";
-import app from "../src/app";
-import { errorHandler } from "../src/middleware/errorHandler";
+import app from "../../src/app";
+import { errorHandler } from "../../src/middleware/errorHandler";
 
 describe("Aplicación", () => {
   test("debe responder 404 para una ruta inexistente", async () => {
