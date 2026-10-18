@@ -23,5 +23,14 @@ describe('Endpoints de productos', () => {
                 })
             );
         });
+
+        it('deberia devolver 404 si el producto no existe', async () => {
+            const response = await request(app).get('/productos/999');
+
+            expect(response.status).toBe(404);
+            expect(response.body).toEqual({
+                error: 'Producto no encontrado'
+            });
+        });
     });
 });
