@@ -8,7 +8,13 @@ const app = express();
 app.use(express.json());
 
 app.get("/productos", (_req, res) => {
-  res.status(200).json(catalogoProductos);
+  const productos = catalogoProductos.map((producto) => ({
+    id: producto.id,
+    nombre: producto.nombre,
+    precio: producto.calcularPrecio(),
+  }));
+
+  res.status(200).json(productos);
 });
 
 app.get("/productos/:id", (req, res) => {
