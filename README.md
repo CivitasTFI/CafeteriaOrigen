@@ -1,5 +1,14 @@
 # Cafetería Origen
 
+## Grupo 14
+
+## Integrantes
+
+- Homero Colombo
+- Matías Oviedo
+- Nicolás Espulef
+- Federico Heinrich
+
 API REST desarrollada para la gestión de productos, pedidos y reportes de la cafetería Origen.
 
 Proyecto realizado para la materia Programación IV de la Tecnicatura Universitaria en Programación.
@@ -169,10 +178,3 @@ curl http://localhost:3000/reportes/facturacion
 ```bash
 curl http://localhost:3000/reportes/mas-vendido
 ```
-
-## Integrantes
-
-- Homero
-- Matías
-- Nicolás
-- Federico
