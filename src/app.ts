@@ -26,7 +26,11 @@ app.get("/productos/:id", (req, res) => {
     });
   }
 
-  return res.status(200).json(producto);
+  return res.status(200).json({
+    id: producto.id,
+    nombre: producto.nombre,
+    precio: producto.calcularPrecio(),
+  });
 });
 
 app.use(notFound);
