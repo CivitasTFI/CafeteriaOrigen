@@ -37,13 +37,11 @@ npm run dev
 
 El servidor se ejecuta por defecto en:
 
-```text
-http://localhost:3000
-```
+`http://localhost:3000`
 
 ## Tests
 
-Para ejecutar los tests:
+Para ejecutar todos los tests:
 
 ```bash
 npm test
@@ -73,33 +71,42 @@ npm start
 
 ```text
 src/
+├── controllers/
+├── data/
 ├── middleware/
-│   ├── errorHandler.ts
-│   └── notFound.ts
+├── models/
+├── routes/
+├── services/
 ├── app.ts
 └── server.ts
 
 tests/
-└── app.test.ts
+├── integration/
+└── unit/
 ```
 
-- `app.ts`: configuración de la aplicación Express.
+- `app.ts`: configuración de la aplicación Express y registro de endpoints.
 - `server.ts`: inicio del servidor.
+- `data/`: datos y catálogo de productos.
+- `models/`: modelos del dominio.
+- `services/`: lógica de negocio.
 - `middleware/`: middlewares comunes de la aplicación.
-- `tests/`: tests automatizados.
+- `controllers/` y `routes/`: estructura destinada a controladores y rutas de la API.
+- `tests/unit/`: tests unitarios.
+- `tests/integration/`: tests de integración y endpoints.
 
 ## API
 
 > **Estado:** En desarrollo.
 
-La API contará con endpoints para la gestión de productos, pedidos y reportes. Los endpoints se irán habilitando a medida que avance el desarrollo.
+La API cuenta con endpoints para la gestión de productos y contará con endpoints para pedidos y reportes a medida que avance el desarrollo.
 
 ### Productos
 
 | Método | Endpoint | Descripción | Estado |
 |---|---|---|---|
-| GET | `/productos` | Obtener todos los productos | En desarrollo |
-| GET | `/productos/:id` | Obtener un producto por ID | En desarrollo |
+| GET | `/productos` | Obtener todos los productos | Implementado |
+| GET | `/productos/:id` | Obtener un producto por ID | Implementado |
 
 ### Pedidos
 
@@ -118,7 +125,7 @@ La API contará con endpoints para la gestión de productos, pedidos y reportes.
 
 ## Ejemplos de requests
 
-> Los siguientes requests corresponden a la API planificada y estarán disponibles a medida que se implementen los endpoints.
+Los siguientes ejemplos utilizan `curl` y asumen que el servidor está ejecutándose en `http://localhost:3000`.
 
 ### Obtener todos los productos
 
@@ -132,31 +139,9 @@ curl http://localhost:3000/productos
 curl http://localhost:3000/productos/1
 ```
 
-### Obtener todos los pedidos
+### Pedidos y reportes
 
-```bash
-curl http://localhost:3000/pedidos
-```
-
-### Obtener un pedido por ID
-
-```bash
-curl http://localhost:3000/pedidos/1
-```
-
-### Obtener facturación total
-
-```bash
-curl http://localhost:3000/reportes/facturacion
-```
-
-### Obtener producto más vendido
-
-```bash
-curl http://localhost:3000/reportes/mas-vendido
-```
-
-El ejemplo de `POST /pedidos` se agregará cuando se defina e implemente el formato definitivo del cuerpo del pedido.
+Los ejemplos de requests para pedidos y reportes se agregarán una vez que sus endpoints estén implementados e integrados.
 
 ## Integrantes
 
