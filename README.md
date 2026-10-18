@@ -4,10 +4,10 @@
 
 ## Integrantes
 
-- Homero Colombo
-- Matías Oviedo
-- Nicolás Espulef
-- Federico Heinrich
+- Homero Colombo | Legajo: 23086
+- Matías Oviedo | Legajo: 22737
+- Nicolás Espulef | Legajo: 22901
+- Federico Heinrich | Legajo: 21317
 
 API REST desarrollada para la gestión de productos, pedidos y reportes de la cafetería Origen.
 
