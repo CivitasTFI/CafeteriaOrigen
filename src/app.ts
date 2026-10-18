@@ -3,6 +3,7 @@ import { notFound } from "./middleware/notFound";
 import { errorHandler } from "./middleware/errorHandler";
 import { catalogoProductos, obtenerProducto } from "./data/catalogo";
 import { getFacturacionTotal, getProductoMasVendido } from "./controllers/reportes.controllers";
+import { getPedido, getPedidoID, postPedidos } from "./controllers/pedidos.controllers";
 
 const app = express();
 
@@ -33,8 +34,13 @@ app.get("/productos/:id", (req, res) => {
     precio: producto.calcularPrecio(),
   });
 });
+
 app.get("/reportes/facturacion", getFacturacionTotal);
 app.get("/reportes/mas-vendido", getProductoMasVendido);
+
+app.get("/pedidos", getPedido);
+app.get("/pedidos/:id", getPedidoID);
+app.post("/pedidos", postPedidos);
 
 app.use(notFound);
 app.use(errorHandler);
