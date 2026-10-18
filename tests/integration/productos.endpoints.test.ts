@@ -22,12 +22,11 @@ describe('Endpoints de productos', () => {
             const response = await request(app).get('/productos/1');
 
             expect(response.status).toBe(200);
-            expect(response.body).toEqual(
-                expect.objectContaining({
-                    id: 1,
-                    nombre: 'Expreso Pocillo Brasil'
-                })
-            );
+            expect(response.body).toEqual({
+                id: 1,
+                nombre: 'Expreso Pocillo Brasil',
+                precio: 5020
+            });
         });
 
         it('deberia devolver 404 si el producto no existe', async () => {
