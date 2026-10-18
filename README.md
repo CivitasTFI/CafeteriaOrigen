@@ -43,7 +43,7 @@ http://localhost:3000
 
 ## Tests
 
-Para ejecutar los tests:
+Para ejecutar todos los tests:
 
 ```bash
 npm test
@@ -73,52 +73,58 @@ npm start
 
 ```text
 src/
+├── controllers/
+├── data/
 ├── middleware/
-│   ├── errorHandler.ts
-│   └── notFound.ts
+├── models/
+├── services/
 ├── app.ts
 └── server.ts
 
 tests/
-└── app.test.ts
+├── integration/
+└── unit/
 ```
 
+- `controllers/`: manejo de requests y responses de la API.
+- `data/`: datos y almacenamiento en memoria.
+- `middleware/`: middlewares comunes de la aplicación.
+- `models/`: modelos del dominio.
+- `services/`: lógica de negocio.
 - `app.ts`: configuración de la aplicación Express.
 - `server.ts`: inicio del servidor.
-- `middleware/`: middlewares comunes de la aplicación.
-- `tests/`: tests automatizados.
+- `tests/unit/`: tests unitarios.
+- `tests/integration/`: tests de endpoints e integración entre funcionalidades.
 
 ## API
 
-> **Estado:** En desarrollo.
-
-La API contará con endpoints para la gestión de productos, pedidos y reportes. Los endpoints se irán habilitando a medida que avance el desarrollo.
+La API permite consultar productos, crear y consultar pedidos y obtener reportes de ventas.
 
 ### Productos
 
-| Método | Endpoint | Descripción | Estado |
-|---|---|---|---|
-| GET | `/productos` | Obtener todos los productos | En desarrollo |
-| GET | `/productos/:id` | Obtener un producto por ID | En desarrollo |
+| Método | Endpoint | Descripción |
+|---|---|---|
+| GET | `/productos` | Obtener todos los productos |
+| GET | `/productos/:id` | Obtener un producto por ID |
 
 ### Pedidos
 
-| Método | Endpoint | Descripción | Estado |
-|---|---|---|---|
-| POST | `/pedidos` | Crear un nuevo pedido | En desarrollo |
-| GET | `/pedidos` | Obtener todos los pedidos | En desarrollo |
-| GET | `/pedidos/:id` | Obtener un pedido por ID | En desarrollo |
+| Método | Endpoint | Descripción |
+|---|---|---|
+| POST | `/pedidos` | Crear un nuevo pedido y obtener su total |
+| GET | `/pedidos` | Obtener todos los pedidos |
+| GET | `/pedidos/:id` | Obtener un pedido por ID |
 
 ### Reportes
 
-| Método | Endpoint | Descripción | Estado |
-|---|---|---|---|
-| GET | `/reportes/facturacion` | Obtener la facturación total | En desarrollo |
-| GET | `/reportes/mas-vendido` | Obtener el producto más vendido | En desarrollo |
+| Método | Endpoint | Descripción |
+|---|---|---|
+| GET | `/reportes/facturacion` | Obtener la facturación total |
+| GET | `/reportes/mas-vendido` | Obtener el producto más vendido |
 
 ## Ejemplos de requests
 
-> Los siguientes requests corresponden a la API planificada y estarán disponibles a medida que se implementen los endpoints.
+Con el servidor ejecutándose en `http://localhost:3000`:
 
 ### Obtener todos los productos
 
@@ -130,6 +136,14 @@ curl http://localhost:3000/productos
 
 ```bash
 curl http://localhost:3000/productos/1
+```
+
+### Crear un pedido
+
+```bash
+curl -X POST http://localhost:3000/pedidos \
+  -H "Content-Type: application/json" \
+  -d '{"items":[{"productoId":1,"cantidad":2}],"estado":"pendiente"}'
 ```
 
 ### Obtener todos los pedidos
@@ -155,8 +169,6 @@ curl http://localhost:3000/reportes/facturacion
 ```bash
 curl http://localhost:3000/reportes/mas-vendido
 ```
-
-El ejemplo de `POST /pedidos` se agregará cuando se defina e implemente el formato definitivo del cuerpo del pedido.
 
 ## Integrantes
 
