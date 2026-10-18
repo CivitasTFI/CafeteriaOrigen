@@ -37,7 +37,9 @@ npm run dev
 
 El servidor se ejecuta por defecto en:
 
-`http://localhost:3000`
+```text
+http://localhost:3000
+```
 
 ## Tests
 
@@ -75,7 +77,6 @@ src/
 ├── data/
 ├── middleware/
 ├── models/
-├── routes/
 ├── services/
 ├── app.ts
 └── server.ts
@@ -85,47 +86,45 @@ tests/
 └── unit/
 ```
 
-- `app.ts`: configuración de la aplicación Express y registro de endpoints.
-- `server.ts`: inicio del servidor.
-- `data/`: datos y catálogo de productos.
+- `controllers/`: manejo de requests y responses de la API.
+- `data/`: datos y almacenamiento en memoria.
+- `middleware/`: middlewares comunes de la aplicación.
 - `models/`: modelos del dominio.
 - `services/`: lógica de negocio.
-- `middleware/`: middlewares comunes de la aplicación.
-- `controllers/` y `routes/`: estructura destinada a controladores y rutas de la API.
+- `app.ts`: configuración de la aplicación Express.
+- `server.ts`: inicio del servidor.
 - `tests/unit/`: tests unitarios.
-- `tests/integration/`: tests de integración y endpoints.
+- `tests/integration/`: tests de endpoints e integración entre funcionalidades.
 
 ## API
 
-> **Estado:** En desarrollo.
-
-La API cuenta con endpoints para la gestión de productos y contará con endpoints para pedidos y reportes a medida que avance el desarrollo.
+La API permite consultar productos, crear y consultar pedidos y obtener reportes de ventas.
 
 ### Productos
 
-| Método | Endpoint | Descripción | Estado |
-|---|---|---|---|
-| GET | `/productos` | Obtener todos los productos | Implementado |
-| GET | `/productos/:id` | Obtener un producto por ID | Implementado |
+| Método | Endpoint | Descripción |
+|---|---|---|
+| GET | `/productos` | Obtener todos los productos |
+| GET | `/productos/:id` | Obtener un producto por ID |
 
 ### Pedidos
 
-| Método | Endpoint | Descripción | Estado |
-|---|---|---|---|
-| POST | `/pedidos` | Crear un nuevo pedido | En desarrollo |
-| GET | `/pedidos` | Obtener todos los pedidos | En desarrollo |
-| GET | `/pedidos/:id` | Obtener un pedido por ID | En desarrollo |
+| Método | Endpoint | Descripción |
+|---|---|---|
+| POST | `/pedidos` | Crear un nuevo pedido y obtener su total |
+| GET | `/pedidos` | Obtener todos los pedidos |
+| GET | `/pedidos/:id` | Obtener un pedido por ID |
 
 ### Reportes
 
-| Método | Endpoint | Descripción | Estado |
-|---|---|---|---|
-| GET | `/reportes/facturacion` | Obtener la facturación total | En desarrollo |
-| GET | `/reportes/mas-vendido` | Obtener el producto más vendido | En desarrollo |
+| Método | Endpoint | Descripción |
+|---|---|---|
+| GET | `/reportes/facturacion` | Obtener la facturación total |
+| GET | `/reportes/mas-vendido` | Obtener el producto más vendido |
 
 ## Ejemplos de requests
 
-Los siguientes ejemplos utilizan `curl` y asumen que el servidor está ejecutándose en `http://localhost:3000`.
+Con el servidor ejecutándose en `http://localhost:3000`:
 
 ### Obtener todos los productos
 
@@ -139,9 +138,37 @@ curl http://localhost:3000/productos
 curl http://localhost:3000/productos/1
 ```
 
-### Pedidos y reportes
+### Crear un pedido
 
-Los ejemplos de requests para pedidos y reportes se agregarán una vez que sus endpoints estén implementados e integrados.
+```bash
+curl -X POST http://localhost:3000/pedidos \
+  -H "Content-Type: application/json" \
+  -d '{"items":[{"productoId":1,"cantidad":2}],"estado":"pendiente"}'
+```
+
+### Obtener todos los pedidos
+
+```bash
+curl http://localhost:3000/pedidos
+```
+
+### Obtener un pedido por ID
+
+```bash
+curl http://localhost:3000/pedidos/1
+```
+
+### Obtener facturación total
+
+```bash
+curl http://localhost:3000/reportes/facturacion
+```
+
+### Obtener producto más vendido
+
+```bash
+curl http://localhost:3000/reportes/mas-vendido
+```
 
 ## Integrantes
 
