@@ -2,7 +2,7 @@
 // calcularPrecio() es una función que devuelve el precio de un producto dado su id
 
 import { obtenerProducto } from '../data/catalogo';
-interface Pedido {
+export interface Pedido {
     id: number;
     items: { productoId: number; cantidad: number }[];
     estado: string;
