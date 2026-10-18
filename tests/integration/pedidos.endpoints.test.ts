@@ -32,6 +32,23 @@ describe("Endpoints de pedidos", () => {
         expect(response.body.pedido).toHaveProperty("id");
     });
 
+    it("POST /pedidos devuelve el total calculado", async () => {
+        const response = await request(app)
+            .post("/pedidos")
+            .send({
+                items: [
+                    {
+                        productoId: 1,
+                        cantidad: 2
+                    }
+                ],
+                estado: "pendiente"
+            });
+
+        expect(response.status).toBe(201);
+        expect(response.body.pedido.total).toBe(10040);
+    });
+
     it("POST /pedidos rechaza un pedido sin items", async () => {
         const response = await request(app)
             .post("/pedidos")
