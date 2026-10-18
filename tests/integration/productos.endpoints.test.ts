@@ -8,6 +8,12 @@ describe('Endpoints de productos', () => {
 
             expect(response.status).toBe(200);
             expect(response.body).toHaveLength(20);
+
+            expect(response.body[0]).toEqual({
+                id: 1,
+                nombre: 'Expreso Pocillo Brasil',
+                precio: 5020
+            });
         });
     });
 
