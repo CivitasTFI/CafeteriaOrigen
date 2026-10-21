@@ -1,4 +1,5 @@
 import { obtenerProducto } from "../data/catalogo";
+import { Pedido } from "../models/pedido";
 import {
     guardarPedidos,
     obtenerPedidos,
@@ -35,6 +36,16 @@ export function validarPedido(
     }
 }
 
+// Devuelve la representación pública de un pedido
+function formatearPedido(pedido: Pedido) {
+    return {
+        id: pedido.id,
+        items: pedido.items,
+        estado: pedido.estado,
+        total: pedido.calcularTotal()
+    };
+}
+
 // Crea un pedido y devuelve sus datos con el total calculado
 export function crearPedido(
     items: { productoId: number; cantidad: number }[],
@@ -44,20 +55,21 @@ export function crearPedido(
 
     const pedido = guardarPedidos(items, estado);
 
-    return {
-        id: pedido.id,
-        items: pedido.items,
-        estado: pedido.estado,
-        total: pedido.calcularTotal()
-    };
+    return formatearPedido(pedido);
 }
 
-// Devuelve todos los pedidos guardados
+// Devuelve todos los pedidos guardados con su total calculado
 export function listarPedidos() {
-    return obtenerPedidos();
+    return obtenerPedidos().map(formatearPedido);
 }
 
-// Busca un pedido por su ID
+// Busca un pedido por su ID y devuelve su total calculado
 export function buscarPedidoPorId(id: number) {
-    return obtenerPedido(id);
+    const pedido = obtenerPedido(id);
+
+    if (!pedido) {
+        return undefined;
+    }
+
+    return formatearPedido(pedido);
 }
