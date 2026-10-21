@@ -106,7 +106,7 @@ describe("Endpoints de pedidos", () => {
         });
     });
 
-    it("GET /pedidos devuelve la lista de pedidos", async () => {
+    it("GET /pedidos devuelve la lista de pedidos con su total", async () => {
         await request(app)
             .post("/pedidos")
             .send({
@@ -132,7 +132,8 @@ describe("Endpoints de pedidos", () => {
                     cantidad: 1
                 }
             ],
-            estado: "pendiente"
+            estado: "pendiente",
+            total: 5020
         });
     });
 
@@ -144,7 +145,7 @@ describe("Endpoints de pedidos", () => {
         expect(response.body).toEqual([]);
     });
 
-    it("GET /pedidos/:id devuelve un pedido existente", async () => {
+    it("GET /pedidos/:id devuelve un pedido existente con su total", async () => {
         const creacion = await request(app)
             .post("/pedidos")
             .send({
@@ -171,7 +172,8 @@ describe("Endpoints de pedidos", () => {
                     cantidad: 1
                 }
             ],
-            estado: "pendiente"
+            estado: "pendiente",
+            total: 5740
         });
     });
 

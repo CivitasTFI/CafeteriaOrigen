@@ -12,5 +12,4 @@ export const getFacturacionTotal = (req: Request, res: Response) => {
 export const getProductoMasVendido = (req: Request, res: Response) => {
     const productosMasVendidos = productoMasVendido(pedidos);
     res.status(200).json({ productosMasVendidos });
-
- }
+}

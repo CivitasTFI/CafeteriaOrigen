@@ -1,9 +1,5 @@
 import { Request, Response } from "express";
-import {
-    crearPedido,
-    listarPedidos,
-    buscarPedidoPorId
-} from "../services/pedidos.service";
+import { crearPedido, listarPedidos, buscarPedidoPorId } from "../services/pedidos.service";
 
 // POST pedidos
 export const postPedidos = (req: Request, res: Response) => {
