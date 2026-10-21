@@ -22,3 +22,8 @@ export function obtenerPedidos(): Pedido[] {
 export function obtenerPedido(id: number): Pedido | undefined {
     return pedidos.find(p => p.id === id);
 }
+
+export function reiniciarPedidos(): void {
+    pedidos.length = 0;
+    siguienteID = 1;
+}
