@@ -34,6 +34,14 @@ describe("Servicio de pedidos", () => {
         });
     });
 
+    it("rechaza un pedido inválido sin guardarlo", () => {
+        expect(() => {
+            crearPedido([], "pendiente");
+        }).toThrow("El pedido debe contener al menos un producto");
+
+        expect(listarPedidos()).toHaveLength(0);
+    });
+
     it("lista los pedidos guardados", () => {
         crearPedido(
             [
@@ -78,5 +86,11 @@ describe("Servicio de pedidos", () => {
         expect(pedidoEncontrado).toBeDefined();
         expect(pedidoEncontrado?.id).toBe(1);
         expect(pedidoEncontrado?.estado).toBe("pendiente");
+    });
+
+    it("devuelve undefined si el pedido no existe", () => {
+        const pedido = buscarPedidoPorId(999);
+
+        expect(pedido).toBeUndefined();
     });
 });
