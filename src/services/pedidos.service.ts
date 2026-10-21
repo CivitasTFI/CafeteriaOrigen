@@ -1,5 +1,9 @@
 import { obtenerProducto } from "../data/catalogo";
-import { guardarPedidos } from "../data/pedidos";
+import {
+    guardarPedidos,
+    obtenerPedidos,
+    obtenerPedido
+} from "../data/pedidos";
 
 // Valida los datos del pedido
 export function validarPedido(
@@ -46,4 +50,14 @@ export function crearPedido(
         estado: pedido.estado,
         total: pedido.calcularTotal()
     };
+}
+
+// Devuelve todos los pedidos guardados
+export function listarPedidos() {
+    return obtenerPedidos();
+}
+
+// Busca un pedido por su ID
+export function buscarPedidoPorId(id: number) {
+    return obtenerPedido(id);
 }
