@@ -86,6 +86,7 @@ src/
 ├── data/
 ├── middleware/
 ├── models/
+├── routes/
 ├── services/
 ├── app.ts
 └── server.ts
@@ -99,8 +100,9 @@ tests/
 - `data/`: datos y almacenamiento en memoria.
 - `middleware/`: middlewares comunes de la aplicación.
 - `models/`: modelos del dominio.
+- `routes/`: definición y agrupación de los endpoints de la API.
 - `services/`: lógica de negocio.
-- `app.ts`: configuración de la aplicación Express.
+- `app.ts`: configuración de la aplicación Express y registro de las rutas.
 - `server.ts`: inicio del servidor.
 - `tests/unit/`: tests unitarios.
 - `tests/integration/`: tests de endpoints e integración entre funcionalidades.
@@ -121,8 +123,8 @@ La API permite consultar productos, crear y consultar pedidos y obtener reportes
 | Método | Endpoint | Descripción |
 |---|---|---|
 | POST | `/pedidos` | Crear un nuevo pedido y obtener su total |
-| GET | `/pedidos` | Obtener todos los pedidos |
-| GET | `/pedidos/:id` | Obtener un pedido por ID |
+| GET | `/pedidos` | Obtener todos los pedidos con sus totales |
+| GET | `/pedidos/:id` | Obtener un pedido por ID con su total |
 
 ### Reportes
 
@@ -133,21 +135,23 @@ La API permite consultar productos, crear y consultar pedidos y obtener reportes
 
 ## Ejemplos de requests
 
-Con el servidor ejecutándose en `http://localhost:3000`:
+Con el servidor ejecutándose en `http://localhost:3000`.
 
-### Obtener todos los productos
+### Bash / Git Bash
+
+#### Obtener todos los productos
 
 ```bash
 curl http://localhost:3000/productos
 ```
 
-### Obtener un producto por ID
+#### Obtener un producto por ID
 
 ```bash
 curl http://localhost:3000/productos/1
 ```
 
-### Crear un pedido
+#### Crear un pedido
 
 ```bash
 curl -X POST http://localhost:3000/pedidos \
@@ -155,26 +159,98 @@ curl -X POST http://localhost:3000/pedidos \
   -d '{"items":[{"productoId":1,"cantidad":2}],"estado":"pendiente"}'
 ```
 
-### Obtener todos los pedidos
+#### Obtener todos los pedidos
 
 ```bash
 curl http://localhost:3000/pedidos
 ```
 
-### Obtener un pedido por ID
+#### Obtener un pedido por ID
 
 ```bash
 curl http://localhost:3000/pedidos/1
 ```
 
-### Obtener facturación total
+#### Obtener facturación total
 
 ```bash
 curl http://localhost:3000/reportes/facturacion
 ```
 
-### Obtener producto más vendido
+#### Obtener producto más vendido
 
 ```bash
 curl http://localhost:3000/reportes/mas-vendido
+```
+
+## Ejemplos en PowerShell
+
+En PowerShell se puede utilizar `Invoke-RestMethod` para realizar las mismas requests.
+
+### Obtener todos los productos
+
+```powershell
+Invoke-RestMethod `
+    -Uri "http://localhost:3000/productos" `
+    -Method Get
+```
+
+### Obtener un producto por ID
+
+```powershell
+Invoke-RestMethod `
+    -Uri "http://localhost:3000/productos/1" `
+    -Method Get
+```
+
+### Crear un pedido
+
+```powershell
+$body = @{
+    items = @(
+        @{
+            productoId = 1
+            cantidad = 2
+        }
+    )
+    estado = "pendiente"
+} | ConvertTo-Json -Depth 3
+
+Invoke-RestMethod `
+    -Uri "http://localhost:3000/pedidos" `
+    -Method Post `
+    -ContentType "application/json" `
+    -Body $body
+```
+
+### Obtener todos los pedidos
+
+```powershell
+Invoke-RestMethod `
+    -Uri "http://localhost:3000/pedidos" `
+    -Method Get
+```
+
+### Obtener un pedido por ID
+
+```powershell
+Invoke-RestMethod `
+    -Uri "http://localhost:3000/pedidos/1" `
+    -Method Get
+```
+
+### Obtener facturación total
+
+```powershell
+Invoke-RestMethod `
+    -Uri "http://localhost:3000/reportes/facturacion" `
+    -Method Get
+```
+
+### Obtener producto más vendido
+
+```powershell
+Invoke-RestMethod `
+    -Uri "http://localhost:3000/reportes/mas-vendido" `
+    -Method Get
 ```
