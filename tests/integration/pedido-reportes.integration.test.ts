@@ -1,10 +1,10 @@
 import request from "supertest";
 import app from "../../src/app";
-import { pedidos } from "../../src/data/pedidos";
+import { reiniciarPedidos } from "../../src/data/pedidos";
 
 describe("Integración entre pedidos y reportes", () => {
     beforeEach(() => {
-        pedidos.length = 0;
+        reiniciarPedidos();
     });
 
     it("actualiza la facturación al crear un pedido", async () => {
