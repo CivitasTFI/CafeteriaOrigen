@@ -1,9 +1,14 @@
-
-import { obtenerProducto} from "../data/catalogo";
-
+import { obtenerProducto } from "../data/catalogo";
+import {
+    guardarPedidos,
+    obtenerPedidos,
+    obtenerPedido
+} from "../data/pedidos";
 
 // Valida los datos del pedido
-export function validarPedido(pedido:{productoId:number, cantidad:number}[]): void {
+export function validarPedido(
+    pedido: { productoId: number; cantidad: number }[]
+): void {
 
     // Validar que haya items
     if (!pedido || pedido.length === 0) {
@@ -28,4 +33,31 @@ export function validarPedido(pedido:{productoId:number, cantidad:number}[]): vo
             );
         }
     }
+}
+
+// Crea un pedido y devuelve sus datos con el total calculado
+export function crearPedido(
+    items: { productoId: number; cantidad: number }[],
+    estado: string
+) {
+    validarPedido(items);
+
+    const pedido = guardarPedidos(items, estado);
+
+    return {
+        id: pedido.id,
+        items: pedido.items,
+        estado: pedido.estado,
+        total: pedido.calcularTotal()
+    };
+}
+
+// Devuelve todos los pedidos guardados
+export function listarPedidos() {
+    return obtenerPedidos();
+}
+
+// Busca un pedido por su ID
+export function buscarPedidoPorId(id: number) {
+    return obtenerPedido(id);
 }

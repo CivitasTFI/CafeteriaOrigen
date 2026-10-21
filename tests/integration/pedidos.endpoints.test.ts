@@ -1,7 +1,12 @@
 import request from "supertest";
 import app from "../../src/app";
+import { reiniciarPedidos } from "../../src/data/pedidos";
 
 describe("Endpoints de pedidos", () => {
+    beforeEach(() => {
+        reiniciarPedidos();
+    });
+
     it("POST /pedidos crea un pedido válido", async () => {
         const response = await request(app)
             .post("/pedidos")
@@ -102,12 +107,41 @@ describe("Endpoints de pedidos", () => {
     });
 
     it("GET /pedidos devuelve la lista de pedidos", async () => {
+        await request(app)
+            .post("/pedidos")
+            .send({
+                items: [
+                    {
+                        productoId: 1,
+                        cantidad: 1
+                    }
+                ],
+                estado: "pendiente"
+            });
+
         const response = await request(app)
             .get("/pedidos");
 
         expect(response.status).toBe(200);
-        expect(Array.isArray(response.body)).toBe(true);
-        expect(response.body.length).toBeGreaterThan(0);
+        expect(response.body).toHaveLength(1);
+        expect(response.body[0]).toMatchObject({
+            id: 1,
+            items: [
+                {
+                    productoId: 1,
+                    cantidad: 1
+                }
+            ],
+            estado: "pendiente"
+        });
+    });
+
+    it("GET /pedidos devuelve una lista vacía si no hay pedidos", async () => {
+        const response = await request(app)
+            .get("/pedidos");
+
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual([]);
     });
 
     it("GET /pedidos/:id devuelve un pedido existente", async () => {
@@ -142,14 +176,14 @@ describe("Endpoints de pedidos", () => {
     });
 
     it("GET /pedidos/:id devuelve 404 si el pedido no existe", async () => {
-    const response = await request(app)
-        .get("/pedidos/999999");
+        const response = await request(app)
+            .get("/pedidos/999999");
 
-    expect(response.status).toBe(404);
-    expect(response.body).toEqual({
-        error: "No se encontró un pedido con ese ID"
+        expect(response.status).toBe(404);
+        expect(response.body).toEqual({
+            error: "No se encontró un pedido con ese ID"
+        });
     });
-});
 
     it("GET /pedidos/:id rechaza un ID inválido", async () => {
         const response = await request(app)
