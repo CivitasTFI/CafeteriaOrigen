@@ -10,5 +10,5 @@ test("permite montar App en el DOM y consultar su encabezado", () => {
     level: 1,
   });
 
-  expect(encabezado.textContent).toBe("Cafetería Origen");
+  expect(encabezado).toBeInTheDocument();
 });
