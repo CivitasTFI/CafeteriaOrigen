@@ -1,0 +1,22 @@
+{
+  "name": "cafeteria-origen",
+  "private": true,
+  "version": "1.0.0",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "scripts": {
+    "install:all": "npm --prefix backend ci && npm --prefix frontend ci",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "npm --prefix backend run test -- --runInBand",
+    "test:frontend": "npm --prefix frontend run test --",
+    "test:watch:backend": "npm --prefix backend run test:watch --",
+    "test:watch:frontend": "npm --prefix frontend run test:watch --",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "npm --prefix backend run build",
+    "build:frontend": "npm --prefix frontend run build",
+    "lint": "npm --prefix frontend run lint"
+  }
+}
