@@ -12,3 +12,14 @@ test("permite montar App en el DOM y consultar su encabezado", () => {
 
   expect(encabezado).toBeInTheDocument();
 });
+
+test("mantiene el DOM aislado al montar App en otra prueba", () => {
+  render(<App />);
+
+  const encabezado = screen.getByRole("heading", {
+    name: "Cafetería Origen",
+    level: 1,
+  });
+
+  expect(encabezado).toBeInTheDocument();
+});
