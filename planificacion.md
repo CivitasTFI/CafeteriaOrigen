@@ -8,6 +8,8 @@ Objetivo: construir el menú de mesa sobre la API del Parcial I, con los cambios
 
 El proyecto tiene una API en Node.js, Express y TypeScript con `strict: true`, organizada en modelos, datos, servicios, controladores y rutas. Los productos y pedidos se almacenan en memoria.
 
+La API, sus configuraciones, dependencias y pruebas están en `backend/`. Los comandos actuales de npm se ejecutan desde esa carpeta. `frontend/` ya está creada y vacía; falta inicializar la aplicación. Las referencias a comandos raíz en las tareas siguientes son objetivos de integración pendientes.
+
 | Área | Qué existe | Qué falta para TP3 |
 | --- | --- | --- |
 | Productos | Catálogo de 20 productos; clases `Producto`, `Cafe`, `Expreso`, `Filtrado` y `Pasteleria`; cálculo de precios en el dominio. | Exponer `tipo` y datos estructurados de tamaño y origen, con su descripción, para armar el selector sin interpretar nombres. |
@@ -16,7 +18,7 @@ El proyecto tiene una API en Node.js, Express y TypeScript con `strict: true`, o
 | Errores | Respuestas `{ "error": "mensaje" }` en los errores previstos; middleware genérico de 500. | Cubrir cuerpos malformados y validaciones faltantes; evitar que errores del cliente, como JSON inválido, terminen como 500. |
 | Conexión desde el navegador | Express con JSON y tres grupos de rutas. | Configurar CORS o proxy de Vite hacia la API. |
 | Preparación de E2E | Función interna `reiniciarPedidos()` que vacía pedidos y reinicia IDs. | Endpoints HTTP de reset y seed disponibles únicamente con `NODE_ENV=test`. |
-| Frontend | No existe `frontend/`. | Crear la aplicación completa con el stack y los niveles de pruebas requeridos. |
+| Frontend | Existe `frontend/`, vacía. | Crear la aplicación completa con el stack y los niveles de pruebas requeridos. |
 | Regresión | Jest y Supertest para API, dominio y reportes. | Mantener esta cobertura mientras se agregan las pruebas de TP3. |
 
 Verificación inicial: `npm test -- --runInBand` pasó **9 suites y 38 tests**. La comprobación `tsc --noEmit` también pasó. Esto describe la base existente, no el cumplimiento de TP3.
@@ -52,7 +54,7 @@ Cada integrante escribe primero los tests de su funcionalidad y luego la impleme
 
 ### H1. Preparar el frontend y las herramientas
 
-- [ ] Crear `frontend/` con Vite, React y TypeScript, con `strict: true` y sin `any`.
+- [ ] Inicializar `frontend/` con Vite, React y TypeScript, con `strict: true` y sin `any`.
 - [ ] Fijar las versiones del stack exigido y configurar Vitest, React Testing Library, user-event, jest-dom, entorno DOM y MSW 2.
 - [ ] Separar el descubrimiento de pruebas: Jest ejecuta las de la API y Vitest las del frontend; evitar que uno recoja las del otro.
 - [ ] Configurar el proxy de Vite y scripts para desarrollo, compilación y pruebas.
@@ -81,7 +83,7 @@ Cada integrante escribe primero los tests de su funcionalidad y luego la impleme
 - [ ] Documentar las decisiones de mesas, el ejemplo de pedido del PDF y los comandos de reset/seed para E2E.
 - [ ] Coordinar la comprobación final de scripts, compilación y ausencia de conflictos entre configuraciones.
 
-**Archivos previstos:** `frontend/package.json`, configuraciones Vite/Vitest/TypeScript, `frontend/src/api/`, `frontend/src/test/`, componente de carga del menú, `src/middleware/errorHandler.ts`, scripts raíz y `README.md`.
+**Archivos previstos:** `frontend/package.json`, configuraciones Vite/Vitest/TypeScript, `frontend/src/api/`, `frontend/src/test/`, componente de carga del menú, `backend/src/middleware/errorHandler.ts`, scripts raíz y `README.md`.
 
 **Aceptación:** el frontend puede consumir la API mediante el cliente, rechaza datos que no cumplen el contrato, permite reintentar la carga y las pruebas normales funcionan sin levantar Express.
 
@@ -146,7 +148,7 @@ Cada integrante escribe primero los tests de su funcionalidad y luego la impleme
 - [ ] Dar etiquetas y nombres accesibles a controles; coordinar con Federico y Nicolas la revisión de sus componentes.
 - [ ] Comprobar selector, pastelería y página integrada a 375 px sin scroll horizontal.
 
-**Archivos principales:** `src/models/`, `src/data/catalogo.ts`, `src/controllers/productos.controllers.ts`, tests de productos y nuevos módulos de selección, pastelería y estilos en `frontend/src/`.
+**Archivos principales:** `backend/src/models/`, `backend/src/data/catalogo.ts`, `backend/src/controllers/productos.controllers.ts`, tests de productos en `backend/tests/` y nuevos módulos de selección, pastelería y estilos en `frontend/src/`.
 
 **Aceptación:** se elige cualquier café por sus tres atributos, los precios salen de la API y ambas opciones de pastelería se agregan al carrito. Por ejemplo, el expreso mediano de Colombia muestra **$7.360**.
 
@@ -180,7 +182,7 @@ Cada integrante escribe primero los tests de su funcionalidad y luego la impleme
 - [ ] Agregar consulta de estado con `GET /pedidos/:id`, sin recargar, con estados de carga y error.
 - [ ] Escribir integración con MSW: pedido completo verificando el cuerpo del POST, pedido para barra, rechazo 4xx que conserva el carrito y consulta de estado. Cubrir respuesta de pedido incompatible con el contrato.
 
-**Archivos principales:** `src/models/pedido.ts`, `src/data/pedidos.ts`, servicio y controlador de pedidos, nuevas rutas de test y su registro en `src/app.ts`, tests de API y módulos de mesa, confirmación y seguimiento en `frontend/src/`.
+**Archivos principales:** `backend/src/models/pedido.ts`, `backend/src/data/pedidos.ts`, servicio y controlador de pedidos, nuevas rutas de test y su registro en `backend/src/app.ts`, tests de API en `backend/tests/` y módulos de mesa, confirmación y seguimiento en `frontend/src/`.
 
 **Aceptación:** cada pedido queda asociado a la mesa correcta o a barra; la confirmación usa la respuesta de API, los errores conservan el carrito y el estado se puede consultar sin recargar.
 

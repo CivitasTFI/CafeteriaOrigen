@@ -11,6 +11,8 @@
 
 API REST desarrollada para la gestión de productos, pedidos y reportes de la cafetería Origen.
 
+El backend está en `backend/`. La carpeta `frontend/` está vacía, reservada para la aplicación del TP3. La documentación general y la consigna se mantienen en la raíz.
+
 Proyecto realizado para la materia Programación IV de la Tecnicatura Universitaria en Programación.
 
 ## Tecnologías utilizadas
@@ -30,11 +32,14 @@ Para ejecutar el proyecto es necesario tener instalado:
 
 ## Instalación
 
-Clonar el repositorio e instalar las dependencias:
+Clonar el repositorio y, desde su raíz, instalar las dependencias del backend:
 
 ```bash
-npm install
+cd backend
+npm ci
 ```
+
+Los comandos de ejecución, pruebas y compilación de las siguientes secciones se ejecutan desde `backend/`. Sus dependencias se instalan en `backend/node_modules/`, que no se versiona. Cuando se inicialice el frontend, tendrá su propio `package.json` y sus dependencias.
 
 ## Ejecución
 
@@ -81,20 +86,33 @@ npm start
 ## Estructura del proyecto
 
 ```text
-src/
-├── controllers/
-├── data/
-├── middleware/
-├── models/
-├── routes/
-├── services/
-├── app.ts
-└── server.ts
-
-tests/
-├── integration/
-└── unit/
+backend/
+├── src/
+│   ├── controllers/
+│   ├── data/
+│   ├── middleware/
+│   ├── models/
+│   ├── routes/
+│   ├── services/
+│   ├── app.ts
+│   └── server.ts
+├── tests/
+│   ├── integration/
+│   └── unit/
+├── jest.config.js
+├── package.json
+├── package-lock.json
+└── tsconfig.json
+frontend/               # Vacía, reservada para el TP3
+.gitignore
+LICENSE
+README.md
+planificacion.md
+Reparto del trabajo – Cafetería Origen (Parcial I).md
+TP3.pdf
 ```
+
+Las rutas descritas a continuación son relativas a `backend/`.
 
 - `controllers/`: manejo de requests y responses de la API.
 - `data/`: datos y almacenamiento en memoria.
