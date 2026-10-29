@@ -1,7 +1,31 @@
+# Dependencias
 node_modules/
-coverage/
-.env
+
+# Compilación y cachés
 dist/
+.vite/
+*.tsbuildinfo
+.eslintcache
+
+# Cobertura y reportes de pruebas
+coverage/
+playwright-report/
+test-results/
+blob-report/
+**/playwright/.cache/
+
+# Logs
+*.log
+
+# Entorno local (las plantillas se versionan)
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
 
 # Consigna
 Parcial I.pdf

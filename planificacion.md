@@ -8,32 +8,40 @@ Objetivo: construir el menú de mesa sobre la API del Parcial I, con los cambios
 
 El proyecto tiene una API en Node.js, Express y TypeScript con `strict: true`, organizada en modelos, datos, servicios, controladores y rutas. Los productos y pedidos se almacenan en memoria.
 
+La API, sus configuraciones, dependencias y pruebas están en `backend/`. `frontend/` tiene una base de React, Vite y TypeScript estricto, con dependencias instaladas, ESLint y pruebas de infraestructura. El `package.json` raíz agrupa los comandos de instalación, desarrollo, pruebas, compilación y lint, manteniendo separados los paquetes de backend y frontend.
+
+La documentación se centraliza en la raíz: [README.md](README.md) es la entrada general y describe la API actual; [FRONTEND.md](FRONTEND.md) explica la base del frontend, las pruebas y el flujo TDD. Esta planificación conserva las tareas y propuestas del TP3. Las propuestas de contratos no deben confundirse con funcionalidades ya implementadas.
+
 | Área | Qué existe | Qué falta para TP3 |
 | --- | --- | --- |
 | Productos | Catálogo de 20 productos; clases `Producto`, `Cafe`, `Expreso`, `Filtrado` y `Pasteleria`; cálculo de precios en el dominio. | Exponer `tipo` y datos estructurados de tamaño y origen, con su descripción, para armar el selector sin interpretar nombres. |
 | Consulta de productos | `GET /productos` y `GET /productos/:id` ya devuelven `id`, `nombre` y `precio`, calculado con `calcularPrecio()`. | Ampliar ambas respuestas y actualizar sus tests, algunos de los cuales comparan el objeto completo. |
 | Pedidos | Alta y consulta por ID, validación de cantidades y productos, respuesta con ítems, estado y total. | Aceptar, validar, guardar y devolver `mesaId` opcional. Asignar `pendiente` cuando no se envía estado: hoy el servicio recibe el estado del cliente sin valor por defecto. |
 | Errores | Respuestas `{ "error": "mensaje" }` en los errores previstos; middleware genérico de 500. | Cubrir cuerpos malformados y validaciones faltantes; evitar que errores del cliente, como JSON inválido, terminen como 500. |
-| Conexión desde el navegador | Express con JSON y tres grupos de rutas. | Configurar CORS o proxy de Vite hacia la API. |
+| Conexión desde el navegador | Vite redirige `/productos` y `/pedidos`, incluidas subrutas, a `http://localhost:3000`. Pruebas de integración del proxy. | Usar esas rutas desde el cliente de H2 y definir la conexión de producción al preparar el despliegue. |
 | Preparación de E2E | Función interna `reiniciarPedidos()` que vacía pedidos y reinicia IDs. | Endpoints HTTP de reset y seed disponibles únicamente con `NODE_ENV=test`. |
-| Frontend | No existe `frontend/`. | Crear la aplicación completa con el stack y los niveles de pruebas requeridos. |
-| Regresión | Jest y Supertest para API, dominio y reportes. | Mantener esta cobertura mientras se agregan las pruebas de TP3. |
+| Frontend | Aplicación mínima con encabezado; Vite 7, Vitest 3, MSW 2 y Zod 4 con versiones exactas; jsdom, Testing Library y jest-dom preparados. | Implementar contratos Zod, cliente HTTP, menú y funcionalidades. Bootstrap/SASS y Playwright corresponden a las tareas pendientes de sus responsables. |
+| Regresión | 38 tests de backend y 7 tests de infraestructura del frontend. `npm test` raíz ejecuta ambos paquetes sin servidores externos levantados. | Mantener esa base e incorporar las pruebas de cada funcionalidad, incluidos los E2E reales. |
 
-Verificación inicial: `npm test -- --runInBand` pasó **9 suites y 38 tests**. La comprobación `tsc --noEmit` también pasó. Esto describe la base existente, no el cumplimiento de TP3.
+Verificación inicial de la API, hoy ubicada en `backend/`: `npm test -- --runInBand` pasó **9 suites y 38 tests**. La comprobación `tsc --noEmit` también pasó. Esto describe la base existente, no el cumplimiento de TP3; ese comando individual se ejecuta desde el paquete backend.
+
+Avance de infraestructura: se verificaron desde la raíz `npm test` (**38 tests de backend y 7 de frontend**), `npm run build` y `npm run lint`. La compilación del frontend comprueba también los tipos de sus tests y de la configuración de Vitest. Los 14 archivos de pruebas vacíos de la plantilla se conservaron con extensión `.pending`; cada responsable los activa al empezar su ciclo RED. No representan cobertura implementada.
+
+Antes de compartir la base resta comprobar la instalación limpia con `npm run install:all` y el arranque conjunto siguiendo el README. El proveedor del carrito y el comando E2E dependen de la integración con Federico. El middleware de JSON inválido, los cambios de productos/pedidos y las funcionalidades del menú siguen pendientes.
 
 El reparto anterior del Parcial I sirve como referencia de experiencia. Para equilibrar TP3, cada integrante tendrá implementación y pruebas propias; Federico pasa a ocuparse del carrito y los E2E, porque los reportes ya están implementados.
 
 ## 2. Acuerdos iniciales y contrato compartido
 
-Estas son decisiones propuestas para comenzar; deben quedar documentadas en el README antes de implementar las pantallas.
+Las decisiones de infraestructura de los puntos 1 y 7 ya están implementadas y documentadas en README y FRONTEND. Los contratos, mesas, reglas de negocio y seed siguen siendo propuestas para acordar con el equipo antes de implementar las pantallas.
 
-1. **Ubicación y herramientas:** crear `frontend/` con Vite + React + TypeScript estricto y sin `any`. Fijar versiones exactas compatibles con las mayores exigidas: Vite 7, Vitest 3, MSW 2 y Zod 4; guardar el lockfile y verificar una versión de Node compatible. Mantener Jest y Supertest en la API.
+1. **Ubicación y herramientas:** `frontend/` ya utiliza Vite + React + TypeScript estricto y una regla de ESLint que rechaza `any` explícito. Vite 7, Vitest 3, MSW 2 y Zod 4 están instalados con versiones exactas y lockfile. El requisito de Node es `^20.19.0 || >=22.12.0`. La API mantiene Jest y Supertest en su propio paquete.
 2. **Productos:** conservar IDs y precios actuales. Agregar `tipo: "expreso" | "filtrado" | "pasteleria"`; para cafés, exponer `tamanio` y `variedad: { nombre, descripcion }`. La descripción debe incluir acidez, cuerpo y notas de cada origen. `gramosCafe` puede exponerse como en el ejemplo del PDF, pero el frontend no lo usará para calcular precios.
 3. **Mesas:** acordar un conjunto explícito de mesas válidas que incluya la 4 del ejemplo. No hay una cantidad de mesas definida en el PDF. `mesaId` omitido significa retiro en barra; una mesa no existente enviada a la API produce 400 o 404. Un valor ausente o inválido de `?mesa` en la URL se interpreta como barra y no se envía como una mesa inválida.
 4. **Pedidos:** `POST /pedidos` acepta `{ mesaId?, items: [{ productoId, cantidad }] }` y asigna `pendiente` por defecto. Conservar la respuesta actual `{ mensaje, pedido }`; `pedido` debe incluir `id`, `items`, `estado`, `total` y `mesaId` cuando corresponda. Mantener `GET /pedidos/:id` como objeto directo del pedido con esa información.
 5. **Precios:** la API define los precios unitarios y el total confirmado. El carrito solo multiplica los precios recibidos por las cantidades y suma subtotales orientativos. La confirmación muestra exactamente el total devuelto por la API.
 6. **Red y validación:** usar un único cliente HTTP y esquemas Zod para cada respuesta consumida, incluidos los errores. Derivar los tipos con `z.infer`; validar antes de utilizar los datos. Ningún componente hará `fetch` directo.
-7. **Conectividad:** usar como opción inicial un proxy de Vite hacia Express; documentar puertos y rutas para desarrollo y E2E.
+7. **Conectividad:** el proxy de Vite hacia Express ya está configurado para `/productos` y `/pedidos`. README y FRONTEND documentan los puertos y las rutas de desarrollo; la preparación E2E se completará con Federico y Nicolas.
 8. **Seguimiento:** ofrecer un botón para consultar `GET /pedidos/:id` sin recargar la página. El PDF no exige implementar un endpoint nuevo para cambiar el estado.
 9. **Preparación de tests:** acordar respuestas de `POST /__test__/reset` y `POST /__test__/seed`, y datos iniciales deterministas. Ambas rutas quedan ausentes fuera de `NODE_ENV=test`.
 
@@ -52,12 +60,17 @@ Cada integrante escribe primero los tests de su funcionalidad y luego la impleme
 
 ### H1. Preparar el frontend y las herramientas
 
-- [ ] Crear `frontend/` con Vite, React y TypeScript, con `strict: true` y sin `any`.
-- [ ] Fijar las versiones del stack exigido y configurar Vitest, React Testing Library, user-event, jest-dom, entorno DOM y MSW 2.
-- [ ] Separar el descubrimiento de pruebas: Jest ejecuta las de la API y Vitest las del frontend; evitar que uno recoja las del otro.
-- [ ] Configurar el proxy de Vite y scripts para desarrollo, compilación y pruebas.
-- [ ] Definir con el equipo la estructura de módulos y preparar el montaje de la aplicación y del proveedor de carrito.
-- [ ] Integrar comandos raíz para que `npm test` ejecute pruebas de API y frontend sin necesitar un servidor API levantado; `npm run test:e2e` ejecutará Playwright. Coordinar este último script con Federico.
+- [x] Inicializar `frontend/` con Vite, React y TypeScript, con `strict: true` y sin `any`.
+- [x] Fijar las versiones del stack exigido y configurar Vitest, React Testing Library, user-event, jest-dom, entorno DOM y MSW 2.
+- [x] Separar el descubrimiento de pruebas: Jest ejecuta las de la API y Vitest las del frontend; evitar que uno recoja las del otro.
+- [x] Configurar el proxy de Vite y scripts para desarrollo, compilación y pruebas.
+- [x] Preparar la estructura de módulos y el montaje inicial de `App`.
+- [x] Integrar comandos raíz para que `npm test` ejecute las pruebas de API y frontend sin necesitar un servidor API levantado.
+- [ ] Confirmar con el equipo la estructura compartida y montar el proveedor del carrito cuando Federico lo implemente.
+- [ ] Integrar `npm run test:e2e` con la configuración de Playwright de Federico.
+- [ ] Completar la verificación final de instalación limpia y arranque de ambas aplicaciones.
+
+La guía de la base está en [FRONTEND.md](FRONTEND.md). La infraestructura implementada incluye registro de jest-dom, limpieza del DOM, inicio/cierre y reinicio de handlers de MSW, verificación de tipos de los tests y pruebas del proxy. Los componentes y pruebas de funcionalidades permanecen reservados para sus responsables; `handlers.ts`, fixtures y esquemas se completan en H2.
 
 ### H2. Implementar contratos y cliente HTTP
 
@@ -77,11 +90,12 @@ Cada integrante escribe primero los tests de su funcionalidad y luego la impleme
 
 ### H4. Documentar y coordinar la integración
 
-- [ ] Actualizar README: instalación, ejecución de API y frontend, entorno de test, cada nivel de pruebas y contrato HTTP consumido.
+- [x] Centralizar en README y FRONTEND la instalación, ejecución, configuraciones, comandos y pruebas disponibles de la base, junto con el contrato actual de la API.
+- [ ] Completar la documentación del contrato HTTP consumido por las pantallas y los comandos E2E cuando se implementen.
 - [ ] Documentar las decisiones de mesas, el ejemplo de pedido del PDF y los comandos de reset/seed para E2E.
 - [ ] Coordinar la comprobación final de scripts, compilación y ausencia de conflictos entre configuraciones.
 
-**Archivos previstos:** `frontend/package.json`, configuraciones Vite/Vitest/TypeScript, `frontend/src/api/`, `frontend/src/test/`, componente de carga del menú, `src/middleware/errorHandler.ts`, scripts raíz y `README.md`.
+**Archivos previstos:** `frontend/package.json`, configuraciones Vite/Vitest/TypeScript, `frontend/src/api/`, `frontend/src/test/`, componente de carga del menú, `backend/src/middleware/errorHandler.ts`, scripts raíz, `README.md` y `FRONTEND.md`. Toda la documentación del proyecto se mantiene en la raíz.
 
 **Aceptación:** el frontend puede consumir la API mediante el cliente, rechaza datos que no cumplen el contrato, permite reintentar la carga y las pruebas normales funcionan sin levantar Express.
 
@@ -146,7 +160,7 @@ Cada integrante escribe primero los tests de su funcionalidad y luego la impleme
 - [ ] Dar etiquetas y nombres accesibles a controles; coordinar con Federico y Nicolas la revisión de sus componentes.
 - [ ] Comprobar selector, pastelería y página integrada a 375 px sin scroll horizontal.
 
-**Archivos principales:** `src/models/`, `src/data/catalogo.ts`, `src/controllers/productos.controllers.ts`, tests de productos y nuevos módulos de selección, pastelería y estilos en `frontend/src/`.
+**Archivos principales:** `backend/src/models/`, `backend/src/data/catalogo.ts`, `backend/src/controllers/productos.controllers.ts`, tests de productos en `backend/tests/` y nuevos módulos de selección, pastelería y estilos en `frontend/src/`.
 
 **Aceptación:** se elige cualquier café por sus tres atributos, los precios salen de la API y ambas opciones de pastelería se agregan al carrito. Por ejemplo, el expreso mediano de Colombia muestra **$7.360**.
 
@@ -180,7 +194,7 @@ Cada integrante escribe primero los tests de su funcionalidad y luego la impleme
 - [ ] Agregar consulta de estado con `GET /pedidos/:id`, sin recargar, con estados de carga y error.
 - [ ] Escribir integración con MSW: pedido completo verificando el cuerpo del POST, pedido para barra, rechazo 4xx que conserva el carrito y consulta de estado. Cubrir respuesta de pedido incompatible con el contrato.
 
-**Archivos principales:** `src/models/pedido.ts`, `src/data/pedidos.ts`, servicio y controlador de pedidos, nuevas rutas de test y su registro en `src/app.ts`, tests de API y módulos de mesa, confirmación y seguimiento en `frontend/src/`.
+**Archivos principales:** `backend/src/models/pedido.ts`, `backend/src/data/pedidos.ts`, servicio y controlador de pedidos, nuevas rutas de test y su registro en `backend/src/app.ts`, tests de API en `backend/tests/` y módulos de mesa, confirmación y seguimiento en `frontend/src/`.
 
 **Aceptación:** cada pedido queda asociado a la mesa correcta o a barra; la confirmación usa la respuesta de API, los errores conservan el carrito y el estado se puede consultar sin recargar.
 
@@ -197,6 +211,8 @@ No se fijan fechas porque el PDF no indica una fecha de entrega. Las etapas sigu
 | 5. Entrega | Homero consolida README; cada integrante verifica lo documentado para su módulo y realiza su revisión cruzada. | Checklist final completo y PR integrados a `main`. |
 
 Los nombres de archivos nuevos son orientativos. Para evitar conflictos, Homero integra cambios en scripts raíz y configuraciones comunes, Matias mantiene el SASS compartido y Nicolas coordina el registro de las rutas de test. Cada integrante trabaja en ramas por funcionalidad, no en una única rama para todo su trabajo.
+
+Para compartir esta base, Homero prevé integrar `feature/inicializacion` en `develop`; el destino del PR debe confirmarse con el equipo. Esa integración es una etapa intermedia: la entrega y los PR finales a `main` siguen siendo requisitos de la consigna. Se deben conservar los commits que muestran RED, GREEN y REFACTOR.
 
 ## 9. Cobertura de las nueve funcionalidades del PDF
 
@@ -215,6 +231,8 @@ Los nombres de archivos nuevos son orientativos. Para evitar conflictos, Homero 
 ## 10. TDD y pruebas obligatorias
 
 - **Ciclo por funcionalidad:** escribir y ejecutar un test que falle por la conducta faltante; guardar ese test en un commit; implementar y guardar el código que lo vuelve verde en un commit posterior; refactorizar conservando los tests verdes.
+- **Formato de commits:** `RED test: descripción`, `GREEN tipo: descripción` y `REFACTOR tipo: descripción`. Un cambio administrativo, de documentación o dependencias usa su tipo (`chore`, `docs`, etc.) sin inventar una etapa TDD. Cada integrante realiza sus propios commits; el asistente no los crea.
+- **Reservas de pruebas:** quitar `.pending` del archivo correspondiente al comenzar la funcionalidad y escribir su primer test. La convención y los ejemplos están en FRONTEND; los archivos vacíos no se cuentan como pruebas implementadas.
 - **Historial y PR:** una rama por funcionalidad y un PR a `main`, con revisión cruzada. Preservar los commits que muestran rojo y verde; evitar un squash que elimine esa evidencia. Cada integrante aporta commits frecuentes de sus tareas durante el desarrollo.
 - **API:** conservar Jest/Supertest y agregar tests para cada cambio exigido: productos ampliados, mesa, pedidos, errores, conexión por proxy o CORS y reset/seed.
 - **Unitarios con Vitest:** muchos casos de reducer del carrito, búsqueda de café, formato de precio y lectura de mesa desde URL; también esquemas y funciones puras que lo requieran.
@@ -226,11 +244,11 @@ Los nombres de archivos nuevos son orientativos. Para evitar conflictos, Homero 
 
 ## 11. Checklist de entrega
 
-- [ ] API original y `frontend/` conviven en el mismo repositorio.
+- [x] API original y `frontend/` conviven en el mismo repositorio.
 - [ ] Los nueve comportamientos del menú están implementados contra la API del grupo.
 - [ ] Ambos endpoints de productos incluyen precio de dominio y tipo, más la información necesaria para la selección.
 - [ ] Pedidos admiten mesa opcional, validan sus datos y devuelven estado, ítems y total; errores previstos responden 400/404 con `{ error }`.
-- [ ] Proxy de Vite o CORS resuelve la conexión desde el navegador.
+- [x] Proxy de Vite o CORS resuelve la conexión desde el navegador.
 - [ ] Reset y seed funcionan por HTTP solo con `NODE_ENV=test` y se ejecutan antes de cada E2E.
 - [ ] Versiones exigidas fijadas, TypeScript estricto sin `any`, esquemas Zod y tipos inferidos.
 - [ ] Carga mediante unión discriminada, carrito en Context, cliente HTTP único y ausencia de `fetch` en componentes.
