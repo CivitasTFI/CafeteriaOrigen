@@ -7,7 +7,10 @@ beforeAll(() => {
   server.listen({ onUnhandledRequest: "error" });
 });
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  server.resetHandlers();
+});
 
 afterAll(() => {
   server.close();
