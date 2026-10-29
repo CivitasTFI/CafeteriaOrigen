@@ -5,7 +5,7 @@ export default mergeConfig(
   viteConfig,
   defineConfig({
     test: {
-      environment: "node",
+      environment: "jsdom",
       globals: false,
       include: ["src/test/**/*.{test,spec}.{ts,tsx}"],
       api: false,
