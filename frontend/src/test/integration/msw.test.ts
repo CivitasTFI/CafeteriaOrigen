@@ -2,6 +2,8 @@ import { http, HttpResponse } from "msw";
 import { expect, test, vi } from "vitest";
 import { server } from "../mocks/server";
 
+const handlersIniciales = server.listHandlers();
+
 test("MSW intercepta una consulta de productos sin levantar la API", async () => {
   const responder = vi.fn(() => HttpResponse.json([]));
 
@@ -12,4 +14,8 @@ test("MSW intercepta una consulta de productos sin levantar la API", async () =>
   expect(responder).toHaveBeenCalledOnce();
   expect(response.status).toBe(200);
   await expect(response.json()).resolves.toEqual([]);
+});
+
+test("restaura los handlers iniciales antes de la siguiente prueba", () => {
+  expect(server.listHandlers()).toEqual(handlersIniciales);
 });
