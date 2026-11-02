@@ -1,6 +1,7 @@
 import { Cafe } from "./cafe";
 
 export class Expreso extends Cafe {
+    public readonly tipoCafe: 'Expreso' = 'Expreso';
     protected readonly precioBase: number = 2500;
 
     constructor(id: number, nombre: string, tamaño: string, variedad: string) {
