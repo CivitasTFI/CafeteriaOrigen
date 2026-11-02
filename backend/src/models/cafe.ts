@@ -11,9 +11,9 @@ export abstract class Cafe extends Producto {
         'etiopia': 240,
     };
 
-    constructor(id: number, nombre: string, private readonly gramos: number, variedad: string) {
+    constructor(id: number, nombre: string, private readonly gramos: number, public readonly variedad: string) {
         super(id, nombre);
-        this.precioVariedad = this.variedadesPrecio[variedad];
+        this.precioVariedad = this.variedadesPrecio[this.variedad];
     }
 
     public calcularPrecio(): number {
