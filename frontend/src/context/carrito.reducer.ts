@@ -1,8 +1,6 @@
 import { Producto } from "../api/esquemas/productos";
 
-type AccionCarrito = 
-    | { type: "AGREGAR"; producto: Producto } 
-    | { type: "QUITAR"; productoId: number };
+type AccionCarrito = { type: "AGREGAR"; producto: Producto };
 
 type ItemCarrito = {
     productoId: number;
