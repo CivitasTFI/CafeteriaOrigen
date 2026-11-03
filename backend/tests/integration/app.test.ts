@@ -4,6 +4,18 @@ import app from "../../src/app";
 import { errorHandler } from "../../src/middleware/errorHandler";
 
 describe("Aplicación", () => {
+  test("debe responder 400 con un mensaje claro si el cuerpo contiene JSON inválido", async () => {
+    const response = await request(app)
+      .post("/pedidos")
+      .set("Content-Type", "application/json")
+      .send('{"items":');
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      error: "El cuerpo de la solicitud contiene JSON inválido",
+    });
+  });
+
   test("debe responder 404 para una ruta inexistente", async () => {
     const response = await request(app).get("/ruta-inexistente");
 
