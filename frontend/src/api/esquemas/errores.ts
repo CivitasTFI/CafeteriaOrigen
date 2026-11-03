@@ -1,4 +1,7 @@
 import { z } from "zod";
 
-// Base provisional del RED: todavía no valida el contrato de errores.
-export const esquemaError = z.unknown();
+export const esquemaError = z.object({
+  error: z.string(),
+});
+
+export type ErrorApi = z.infer<typeof esquemaError>;
