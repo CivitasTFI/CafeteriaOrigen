@@ -1,7 +1,7 @@
 import { Producto } from "./producto";
 
 export class Pasteleria extends Producto {
-    public readonly tipo: 'Pasteleria' = 'Pasteleria';
+    public readonly tipo: 'pasteleria' = 'pasteleria';
     protected readonly precioBase: number;
 
     private readonly variedadesPrecio: { [key: string]: number } = {
