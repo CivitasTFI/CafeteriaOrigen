@@ -26,26 +26,26 @@ Toda la documentación del proyecto se mantiene en esta carpeta principal.
 ## Requisitos
 
 - Node.js compatible con `^20.19.0 || >=22.12.0`, como declara el proyecto.
-- pnpm (recomendado: `corepack enable` y la versión indicada en `packageManager` del `package.json` raíz).
+- npm.
 - Git para trabajar con las ramas y conservar el historial de TDD.
 
-La base se verificó con Node.js 20.20.2 y pnpm 10.
+La base se verificó con Node.js 20.20.2 y npm 10.8.2.
 
 ## Instalación
 
 Desde la raíz de `CafeteriaOrigen/`:
 
 ```bash
-pnpm install
+npm run install:all
 ```
 
-También podés usar `pnpm run install:all` (equivale a `pnpm install`). El monorepo usa `pnpm-workspace.yaml` con `backend/` y `frontend/`; el lockfile único es `pnpm-lock.yaml` en la raíz. Los `node_modules/` no se versionan.
+El comando ejecuta `npm ci` en backend y frontend, utilizando el lockfile de cada aplicación. Cada una conserva su propio `node_modules/`, que no se versiona.
 
-Para instalar dependencias de un paquete desde la raíz:
+El `package.json` raíz agrupa comandos y no declara dependencias ni workspaces. No hace falta instalar paquetes en la raíz. Para instalar solo una aplicación:
 
 ```bash
-pnpm --dir backend install
-pnpm --dir frontend install
+npm --prefix backend ci
+npm --prefix frontend ci
 ```
 
 ## Desarrollo
@@ -55,13 +55,13 @@ Desde la raíz, abrir dos terminales.
 Primera terminal, API:
 
 ```bash
-pnpm run dev:backend
+npm run dev:backend
 ```
 
 Segunda terminal, frontend:
 
 ```bash
-pnpm run dev:frontend
+npm run dev:frontend
 ```
 
 | Aplicación | Dirección predeterminada |
@@ -79,47 +79,47 @@ El backend admite cambiar su puerto mediante `PORT`. Si se cambia, también se d
 
 | Comando | Función |
 | --- | --- |
-| `pnpm install` | Instalar backend y frontend (workspace). |
-| `pnpm run dev:backend` | Iniciar la API con recarga en desarrollo. |
-| `pnpm run dev:frontend` | Iniciar Vite. |
-| `pnpm test` | Ejecutar primero Jest en backend y después Vitest en frontend. |
-| `pnpm run test:backend` | Ejecutar únicamente las pruebas del backend, en serie. |
-| `pnpm run test:frontend` | Ejecutar únicamente las pruebas del frontend. |
-| `pnpm run test:watch:backend` | Ejecutar Jest en modo watch. |
-| `pnpm run test:watch:frontend` | Ejecutar Vitest en modo watch. |
-| `pnpm run build` | Compilar backend y frontend; incluye la verificación de tipos de los tests del frontend. |
-| `pnpm run build:backend` | Compilar únicamente el backend. |
-| `pnpm run build:frontend` | Verificar tipos y compilar únicamente el frontend. |
-| `pnpm run lint` | Revisar el frontend con ESLint. |
+| `npm run install:all` | Instalar backend y frontend desde sus lockfiles. |
+| `npm run dev:backend` | Iniciar la API con recarga en desarrollo. |
+| `npm run dev:frontend` | Iniciar Vite. |
+| `npm test` | Ejecutar primero Jest en backend y después Vitest en frontend. |
+| `npm run test:backend` | Ejecutar únicamente las pruebas del backend, en serie. |
+| `npm run test:frontend` | Ejecutar únicamente las pruebas del frontend. |
+| `npm run test:watch:backend` | Ejecutar Jest en modo watch. |
+| `npm run test:watch:frontend` | Ejecutar Vitest en modo watch. |
+| `npm run build` | Compilar backend y frontend; incluye la verificación de tipos de los tests del frontend. |
+| `npm run build:backend` | Compilar únicamente el backend. |
+| `npm run build:frontend` | Verificar tipos y compilar únicamente el frontend. |
+| `npm run lint` | Revisar el frontend con ESLint. |
 
 Para ejecutar un test específico del frontend desde la raíz:
 
 ```bash
-pnpm run test:frontend -- src/test/components/App.test.tsx
+npm run test:frontend -- src/test/components/App.test.tsx
 ```
 
-Desde `frontend/` también se puede usar `pnpm test -- src/test/components/App.test.tsx`.
+Desde `frontend/` también se puede usar `npm test -- src/test/components/App.test.tsx`.
 
 Las pruebas normales no requieren servidores externos levantados. La prueba del proxy abre y cierra su propio servidor Vite temporal en un puerto libre y simula la API con MSW.
 
-`pnpm run test:e2e` todavía no está implementado. Se integrará con la configuración de Playwright de Federico.
+`npm run test:e2e` todavía no está implementado. Se integrará con la configuración de Playwright de Federico.
 
 ## Compilación y ejecución del resultado
 
 ```bash
-pnpm run build
+npm run build
 ```
 
 Para ejecutar el backend compilado desde la raíz:
 
 ```bash
-pnpm --dir backend start
+npm --prefix backend start
 ```
 
 Para inspeccionar la compilación del frontend:
 
 ```bash
-pnpm --dir frontend preview
+npm --prefix frontend run preview
 ```
 
 El comando de preview sirve el frontend compilado y, en esta versión de Vite, hereda el proxy local si no se configura otro para preview. Para consultar la API también necesita el backend en el puerto configurado. Esto no constituye una configuración de despliegue: el acceso a la API en producción deberá resolverse al prepararlo.
@@ -146,8 +146,6 @@ CafeteriaOrigen/
 ├── backend/             # API, configuraciones, dependencias y pruebas de Jest
 ├── frontend/            # Base React, configuraciones y pruebas de Vitest
 ├── package.json         # Comandos generales; sin dependencias propias
-├── pnpm-workspace.yaml  # Monorepo backend + frontend
-├── pnpm-lock.yaml       # Lockfile único del workspace
 ├── README.md            # Entrada y documentación del backend actual
 ├── FRONTEND.md          # Guía principal del frontend y sus pruebas
 ├── planificacion.md     # Reparto y estado del TP3

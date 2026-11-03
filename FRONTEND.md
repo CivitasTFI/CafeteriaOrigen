@@ -15,16 +15,16 @@ Los archivos vacíos de componentes, utilidades, estilos y E2E son reservas de l
 Desde la raíz:
 
 ```bash
-pnpm install
+npm run install:all
 ```
 
-Para instalar únicamente el frontend desde la raíz:
+Para instalar únicamente el frontend:
 
 ```bash
-pnpm --dir frontend install
+npm --prefix frontend ci
 ```
 
-El requisito de Node es `^20.19.0 || >=22.12.0`. Las dependencias del frontend tienen versiones exactas; el lockfile del monorepo es `pnpm-lock.yaml` en la raíz. La configuración `save-exact=true` de `frontend/.npmrc` mantiene ese criterio al agregar paquetes.
+El requisito de Node es `^20.19.0 || >=22.12.0`. Las dependencias del frontend tienen versiones exactas y su lockfile se versiona. La configuración `save-exact=true` de `frontend/.npmrc` mantiene ese criterio al agregar paquetes.
 
 Versiones de esta base:
 
@@ -43,7 +43,7 @@ Versiones de esta base:
 | Zod | 4.6.7 | Validación de contratos, a implementar en H2. |
 | ESLint | 9.39.5 | Revisión estática del código. |
 
-Las versiones vigentes y sus dependencias completas están en [frontend/package.json](frontend/package.json) y el [pnpm-lock.yaml](pnpm-lock.yaml) de la raíz. Bootstrap, SASS y Playwright todavía no están instalados; se incorporarán con sus tareas correspondientes.
+Las versiones vigentes y sus dependencias completas están en [frontend/package.json](frontend/package.json) y [frontend/package-lock.json](frontend/package-lock.json). Bootstrap, SASS y Playwright todavía no están instalados; se incorporarán con sus tareas correspondientes.
 
 ## 3. Comandos
 
@@ -51,23 +51,23 @@ Desde la raíz:
 
 | Comando | Resultado |
 | --- | --- |
-| `pnpm run dev:frontend` | Iniciar Vite; por defecto, `http://localhost:5173`. |
-| `pnpm run test:frontend` | Ejecutar todas las pruebas implementadas del frontend una vez. |
-| `pnpm run test:watch:frontend` | Mantener Vitest observando los cambios. |
-| `pnpm run build:frontend` | Comprobar tipos y generar `frontend/dist/`. |
-| `pnpm run lint` | Ejecutar ESLint sobre el frontend. |
-| `pnpm test` | Ejecutar backend y frontend, deteniéndose si una etapa falla. |
+| `npm run dev:frontend` | Iniciar Vite; por defecto, `http://localhost:5173`. |
+| `npm run test:frontend` | Ejecutar todas las pruebas implementadas del frontend una vez. |
+| `npm run test:watch:frontend` | Mantener Vitest observando los cambios. |
+| `npm run build:frontend` | Comprobar tipos y generar `frontend/dist/`. |
+| `npm run lint` | Ejecutar ESLint sobre el frontend. |
+| `npm test` | Ejecutar backend y frontend, deteniéndose si una etapa falla. |
 
 Para ejecutar un archivo concreto desde la raíz:
 
 ```bash
-pnpm run test:frontend -- src/test/components/App.test.tsx
+npm run test:frontend -- src/test/components/App.test.tsx
 ```
 
-Desde `frontend/`, los comandos propios son `pnpm dev`, `pnpm test`, `pnpm test:watch`, `pnpm build`, `pnpm lint` y `pnpm preview`. Por ejemplo:
+Desde `frontend/`, los comandos propios son `npm run dev`, `npm test`, `npm run test:watch`, `npm run build`, `npm run lint` y `npm run preview`. Por ejemplo:
 
 ```bash
-pnpm test -- src/test/integration/msw.test.ts
+npm test -- src/test/integration/msw.test.ts
 ```
 
 No hay un comando E2E disponible todavía. `frontend/playwright.config.ts` y `frontend/e2e/` están reservados para el trabajo de Federico.
