@@ -8,24 +8,24 @@ Objetivo: construir el menú de mesa sobre la API del Parcial I, con los cambios
 
 El proyecto tiene una API en Node.js, Express y TypeScript con `strict: true`, organizada en modelos, datos, servicios, controladores y rutas. Los productos y pedidos se almacenan en memoria.
 
-La API, sus configuraciones, dependencias y pruebas están en `backend/`. `frontend/` tiene una base de React, Vite y TypeScript estricto, con dependencias instaladas, ESLint, pruebas de infraestructura, contrato Zod de errores y una primera parte del cliente HTTP. El `package.json` raíz agrupa los comandos de instalación, desarrollo, pruebas, compilación y lint, manteniendo separados los paquetes de backend y frontend.
+La API, sus configuraciones, dependencias y pruebas están en `backend/`. `frontend/` tiene una base de React, Vite y TypeScript estricto, herramientas de pruebas, manejo de errores HTTP/JSON/red, validación genérica de respuestas exitosas con Zod y mocks compartidos de errores. Las pantallas del menú siguen pendientes. El `package.json` raíz agrupa los comandos de instalación, desarrollo, pruebas, compilación y lint, manteniendo separados los paquetes de backend y frontend.
 
 La documentación se centraliza en la raíz: [README.md](README.md) es la entrada general y describe la API actual; [FRONTEND.md](FRONTEND.md) explica la base del frontend, las pruebas y el flujo TDD. Esta planificación conserva las tareas y propuestas del TP3. Las propuestas de contratos no deben confundirse con funcionalidades ya implementadas.
 
 | Área | Qué existe | Qué falta para TP3 |
 | --- | --- | --- |
-| Productos | Catálogo de 20 productos y precios del dominio conservados. Los modelos incorporan `tipo`, `tipoCafe`, `tamaño` y `variedad` según corresponda; servicio interno `buscarProducto()` con filtros y tres tests. | Completar descripciones de origen y exponer los metadatos por HTTP; acordar el contrato final con el frontend. |
+| Productos | Catálogo de 20 productos y precios del dominio conservados. Los modelos incorporan `tipo`, `tipoCafe`, `tamaño` y `variedad` según corresponda; servicio interno `buscarProducto()` con filtros y tres tests. | Devolver tipo, tamaño, origen y su descripción en el JSON de los endpoints; acordar los campos finales con el frontend. |
 | Consulta de productos | `GET /productos` y `GET /productos/:id` ya devuelven `id`, `nombre` y `precio`, calculado con `calcularPrecio()`. | Ampliar ambas respuestas y actualizar sus tests, algunos de los cuales comparan el objeto completo. |
 | Pedidos | Alta y consulta por ID, validación de cantidades y productos, respuesta con ítems, estado y total. | Aceptar, validar, guardar y devolver `mesaId` opcional. Asignar `pendiente` cuando no se envía estado: hoy el servicio recibe el estado del cliente sin valor por defecto. |
-| Errores | JSON inválido responde 400 con `{ error }`; errores internos conservan 500. El frontend tiene `esquemaError`, tipo inferido `ErrorApi` y cliente que conserva mensajes de errores HTTP, probado para 400, 404 y 500. | Mensajes claros ante respuestas incompatibles, JSON no interpretable y fallos de red; validaciones restantes de pedidos y mesas. |
+| Errores | JSON inválido responde 400 con `{ error }`; errores internos conservan 500. El cliente conserva los mensajes válidos de la API y muestra mensajes claros ante errores de contrato, JSON no interpretable y fallos de conexión. | Conectar estos errores con las pantallas y completar las validaciones de pedidos y mesas de la API. |
 | Conexión desde el navegador | Vite redirige `/productos` y `/pedidos`, incluidas subrutas, a `http://localhost:3000`. `solicitarJson()` utiliza rutas del mismo origen y admite `RequestInit`. | Conectar las funciones específicas y las pantallas; definir la conexión de producción al preparar el despliegue. |
 | Preparación de E2E | Función interna `reiniciarPedidos()` que vacía pedidos y reinicia IDs. | Endpoints HTTP de reset y seed disponibles únicamente con `NODE_ENV=test`. |
-| Frontend | Aplicación mínima con encabezado; stack y herramientas de prueba preparados. Contrato de errores y primera parte de H2 implementados. | Completar esquemas de éxito, cliente HTTP, menú y funcionalidades. Bootstrap/SASS y Playwright corresponden a las tareas pendientes de sus responsables. |
-| Regresión | 42 tests de backend en 10 suites y 20 de frontend en 6 archivos. `npm test` raíz ejecuta ambos paquetes sin servidores externos levantados. | Mantener esa cobertura e incorporar las pruebas de funcionalidades restantes y los E2E reales. |
+| Frontend | Aplicación mínima con encabezado. `solicitarValidado()` valida con un esquema recibido y devuelve el tipo inferido; `erroresApi` y `crearHandlerError()` permiten simular errores GET/POST. | Completar los esquemas definitivos y funciones específicas de productos/pedidos, sus fixtures de éxito y las pantallas. Bootstrap/SASS y Playwright siguen pendientes. |
+| Regresión | 42 tests de backend en 10 suites y 35 de frontend en 8 archivos. `npm test` raíz ejecuta ambos paquetes sin servidores externos levantados. | Mantener esa cobertura e incorporar las pruebas de funcionalidades restantes y los E2E reales. |
 
-La base inicial tenía 38 tests de backend y 7 de infraestructura del frontend. Los avances posteriores agregaron un test de JSON inválido, tres del buscador interno de productos, diez del esquema de errores y tres de errores HTTP del cliente.
+La base inicial tenía 38 tests de backend y 7 de infraestructura del frontend. Ahora el backend agrega un test de JSON inválido y tres del buscador de productos. El frontend agrega diez del esquema de errores, diez del cliente HTTP, cuatro de validación de respuestas exitosas y cuatro de handlers compartidos.
 
-Verificación del **4 de noviembre de 2026**: pasaron desde la raíz `npm test` (**42 tests de backend y 20 de frontend**), `npm run build` y `npm run lint`. La compilación del frontend comprueba también los tipos de sus tests y de la configuración de Vitest. Quedan 12 archivos de pruebas vacíos con extensión `.pending`; cada responsable los activa al empezar su ciclo RED. No representan cobertura implementada.
+Verificación del **4 de noviembre de 2026**, con los avances integrados hasta el PR #12: pasaron desde la raíz `npm test` (**42 tests de backend y 35 de frontend**), `npm run build` y `npm run lint`. La compilación del frontend comprueba también los tipos de sus tests y de la configuración de Vitest. Quedan 12 archivos de pruebas vacíos con extensión `.pending`; cada responsable los activa al empezar su ciclo RED. No representan cobertura implementada.
 
 La base y los avances siguientes ya están integrados en `develop`. La comprobación de instalación limpia con `npm run install:all` y el arranque conjunto siguen pendientes de registro. También faltan el proveedor del carrito, los E2E, las ampliaciones HTTP de productos y pedidos y las funcionalidades del menú.
 
@@ -36,8 +36,15 @@ La base y los avances siguientes ya están integrados en `develop`. La comprobac
 | `feature/inicializacion` | #1 | Separación backend/frontend, herramientas, proxy, scripts y documentación inicial. |
 | `feature/api-json-invalido` | #3 | Middleware y prueba de JSON inválido: 400 con mensaje claro; errores internos conservan 500. |
 | `feature/contrato-errores-api` | #4 | Esquema Zod `{ error: string }`, tipo `ErrorApi` con `z.infer` y diez pruebas. |
-| `feature/buscador-productos` | #2 | Metadatos internos de productos, filtros de búsqueda y tres pruebas de backend. No amplía todavía las respuestas de los endpoints. |
+| `feature/buscador-productos` | #2 | Campos internos de productos, filtros de búsqueda y tres pruebas de backend. No amplía todavía las respuestas de los endpoints. |
 | `feature/cliente-http` | #5 | Base `solicitarJson()` y manejo de errores HTTP con validación Zod; tres pruebas MSW para 400, 404 y 500. |
+| `feature/errores-contrato-http` | #6 | Mensaje claro ante errores sin campo `error`, con mensaje numérico o con respuesta nula. Tres pruebas nuevas. |
+| `feature/respuestas-no-json` | #7 | Mensaje claro ante HTML, JSON incompleto y cuerpo vacío. Tres pruebas nuevas. |
+| `refactor/cliente-http` | #8 | Separación de la interpretación de errores y preparación común de handlers GET en las pruebas. |
+| `feature/fallos-red` | #9 | Mensaje claro ante fallos de conexión, una prueba nueva y extracción de la petición a una función interna. |
+| `docs/documentacion-general` | #10 | Primera actualización de avances y tareas completadas; esta misma rama se reutiliza para la actualización actual. |
+| `feature/validacion-respuestas` | #11 | Validación genérica de respuestas exitosas, tipo inferido y cuatro pruebas; refactor de la preparación de MSW de esas pruebas. |
+| `feature/mocks-errores-compartidos` | #12 | Fixtures de errores y handler reutilizable GET/POST; cuatro pruebas y refactor de las opciones de petición de esos casos. |
 
 H2 y H3 tienen avances parciales. El buscador del backend tampoco completa M1 ni reemplaza la función de selección que M2 necesita en el frontend.
 
@@ -52,7 +59,7 @@ Las decisiones de infraestructura de los puntos 1 y 7 y el contrato de errores d
 3. **Mesas:** acordar un conjunto explícito de mesas válidas que incluya la 4 del ejemplo. No hay una cantidad de mesas definida en el PDF. `mesaId` omitido significa retiro en barra; una mesa no existente enviada a la API produce 400 o 404. Un valor ausente o inválido de `?mesa` en la URL se interpreta como barra y no se envía como una mesa inválida.
 4. **Pedidos:** `POST /pedidos` acepta `{ mesaId?, items: [{ productoId, cantidad }] }` y asigna `pendiente` por defecto. Conservar la respuesta actual `{ mensaje, pedido }`; `pedido` debe incluir `id`, `items`, `estado`, `total` y `mesaId` cuando corresponda. Mantener `GET /pedidos/:id` como objeto directo del pedido con esa información.
 5. **Precios:** la API define los precios unitarios y el total confirmado. El carrito solo multiplica los precios recibidos por las cantidades y suma subtotales orientativos. La confirmación muestra exactamente el total devuelto por la API.
-6. **Red y validación:** ya existen `esquemaError`, `ErrorApi` y `solicitarJson()`. El cliente valida cuerpos de error y conserva su mensaje; las respuestas exitosas todavía se devuelven como `unknown`. Completar esquemas y tipos inferidos de éxito, mensajes claros de errores de contrato y red, y funciones de cada endpoint. Ningún componente hará `fetch` directo.
+6. **Red y validación:** `solicitarJson()` lee JSON y maneja errores HTTP/JSON/red; su resultado es `unknown`. `solicitarValidado(ruta, esquema, opciones?)` agrega validación de éxito y devuelve `z.infer<Esquema>`. Las futuras funciones de endpoints deben usar esta última. Faltan los esquemas definitivos de productos/pedidos y sus funciones específicas. Ningún componente hará `fetch` directo.
 7. **Conectividad:** el proxy de Vite hacia Express ya está configurado para `/productos` y `/pedidos`. README y FRONTEND documentan los puertos y las rutas de desarrollo; la preparación E2E se completará con Federico y Nicolas.
 8. **Seguimiento:** ofrecer un botón para consultar `GET /pedidos/:id` sin recargar la página. El PDF no exige implementar un endpoint nuevo para cambiar el estado.
 9. **Preparación de tests:** acordar respuestas de `POST /__test__/reset` y `POST /__test__/seed`, y datos iniciales deterministas. Ambas rutas quedan ausentes fuera de `NODE_ENV=test`.
@@ -82,7 +89,7 @@ Cada integrante escribe primero los tests de su funcionalidad y luego la impleme
 - [ ] Integrar `npm run test:e2e` con la configuración de Playwright de Federico.
 - [ ] Completar la verificación final de instalación limpia y arranque de ambas aplicaciones.
 
-La guía de la base está en [FRONTEND.md](FRONTEND.md). La infraestructura implementada incluye registro de jest-dom, limpieza del DOM, inicio/cierre y reinicio de handlers de MSW, verificación de tipos de los tests y pruebas del proxy. Los componentes y pruebas de funcionalidades permanecen reservados para sus responsables; `handlers.ts`, fixtures y esquemas se completan en H2.
+La guía de la base está en [FRONTEND.md](FRONTEND.md). La infraestructura implementada incluye registro de jest-dom, limpieza del DOM, inicio/cierre y reinicio de handlers de MSW, verificación de tipos de los tests y pruebas del proxy. H2 ya incorpora el esquema de errores, el cliente genérico y fixtures/handlers de errores; las pantallas y los contratos específicos de productos/pedidos siguen pendientes.
 
 ### H2. Implementar contratos y cliente HTTP
 
@@ -92,14 +99,18 @@ La guía de la base está en [FRONTEND.md](FRONTEND.md). La infraestructura impl
 - [x] Detectar respuestas HTTP fallidas, validar su cuerpo con `esquemaError` y lanzar un error que conserve el mensaje de la API.
 - [x] Cubrir el contrato de errores con diez pruebas unitarias y el cliente con tres pruebas MSW para 400, 404 y 500.
 - [ ] Crear los esquemas Zod de productos, creación de pedido y consulta de pedido según los contratos definitivos de la API.
-- [ ] Derivar los tipos de las respuestas exitosas con `z.infer` y validarlas antes de usarlas.
-- [ ] Informar con un mensaje claro cuando una respuesta de error no cumpla el contrato.
-- [ ] Informar de manera comprensible JSON no interpretable y fallos de red.
+- [x] Implementar `solicitarValidado()` para validar respuestas exitosas con el esquema recibido y devolver su tipo con `z.infer`.
+- [x] Informar con un mensaje claro cuando una respuesta de error no cumpla el contrato: campo ausente, mensaje no textual o respuesta nula.
+- [x] Informar de manera comprensible respuestas HTML, JSON incompleto y cuerpo vacío.
+- [x] Informar de manera comprensible un fallo de conexión con la API.
+- [x] Completar diez pruebas del cliente HTTP y cuatro de validación genérica de respuestas exitosas.
+- [x] Preparar fixtures `erroresApi` y `crearHandlerError()` con MSW 2, respetando rutas, métodos, códigos y mensajes del backend.
+- [x] Verificar los handlers compartidos con cuatro escenarios: ID de pedido inválido, producto inexistente, pedido sin ítems y error interno.
 - [ ] Entregar funciones de listar productos, crear pedido y consultar pedido por ID para que los demás componentes las consuman.
-- [ ] Preparar fixtures y handlers compartidos de MSW 2 con `http` y `HttpResponse`, usando rutas, códigos y envoltorios reales.
-- [ ] Completar las pruebas de respuestas exitosas, contratos incompatibles y fallos de red. Los errores HTTP con cuerpo válido ya tienen cobertura.
+- [ ] Preparar fixtures y handlers compartidos de respuestas exitosas cuando estén definidos los contratos de productos/pedidos.
+- [ ] Completar las pruebas específicas de esos esquemas y funciones, incluido el cuerpo real enviado a `POST /pedidos`.
 
-Los handlers de los tres tests actuales se registran localmente con `server.use(...)`; `mocks/handlers.ts` y los fixtures compartidos siguen vacíos. La validación Zod de un error incompatible hoy lanza su error técnico y una respuesta que no es JSON falla durante `respuesta.json()`; los mensajes para el usuario son el siguiente avance de H2.
+La parte genérica de validación y errores de H2 está implementada. `mocks/handlers.ts` exporta una fábrica reutilizable; las pruebas la registran explícitamente con `server.use(...)`, sin handlers iniciales en el servidor compartido. Los fixtures de productos y pedidos y sus esquemas de producción siguen vacíos. El esquema de producto de `respuestas.test.ts` es local a esa prueba y describe la respuesta actual de la API; no cierra el contrato ampliado de M1.
 
 ### H3. Cargar el menú y reforzar errores de API
 
@@ -160,13 +171,31 @@ Los handlers de los tres tests actuales se registran localmente con `server.use(
 - [x] Incorporar en los modelos los campos internos `tipo`, `tipoCafe`, `tamaño` y `variedad` según corresponda.
 - [x] Agregar el servicio interno `buscarProducto()` con filtros opcionales y tres pruebas de backend.
 - [x] Mantener los 20 productos, IDs y fórmulas actuales de `calcularPrecio()`.
-- [ ] Completar los metadatos públicos y las descripciones de acidez, cuerpo y notas de cada origen.
+- [ ] Hacer que la API devuelva el tipo de producto y, para los cafés, el tamaño, el origen y su descripción de acidez, cuerpo y notas.
 - [ ] Ampliar `GET /productos` y `GET /productos/:id` con una representación coherente de café y pastelería.
 - [ ] Evitar que el frontend deba extraer tipo, tamaño u origen del texto de `nombre`.
 - [ ] Actualizar tests de ambos endpoints y agregar cobertura de los nuevos campos y tipos; mantener la regresión de precios y el 404 de producto inexistente.
 - [ ] Entregar ejemplos reales del contrato a Homero para Zod y MSW.
 
 El avance del PR #2 permite filtrar objetos del catálogo dentro del backend. `GET /productos` y `GET /productos/:id` todavía serializan solamente `id`, `nombre` y `precio`; por eso M1 continúa pendiente de completar.
+
+**Qué datos deben salir de la API:** guardar los campos en los modelos es una parte; también deben incluirse en el JSON que recibe el frontend. El nombre se utiliza para mostrar el producto, y los campos separados permiten seleccionar bebida, tamaño y origen sin buscar palabras dentro de ese nombre. Ejemplo propuesto para un café, todavía pendiente de implementar en los endpoints:
+
+```json
+{
+  "id": 5,
+  "nombre": "Expreso Mediano Colombia",
+  "tipo": "expreso",
+  "tamanio": "mediano",
+  "variedad": {
+    "nombre": "Colombia",
+    "descripcion": "Acidez media, cuerpo equilibrado y notas cítricas y florales"
+  },
+  "precio": 7360
+}
+```
+
+Para pastelería, la respuesta propuesta incluye `id`, `nombre`, `tipo: "pasteleria"` y `precio`. Los campos de tamaño y origen corresponden a los cafés. Los nombres y la estructura final de estos campos se acuerdan antes de preparar los esquemas de producción del frontend.
 
 ### M2. Implementar el selector de café y la pastelería
 
@@ -239,7 +268,7 @@ Los nombres de archivos nuevos son orientativos. Para evitar conflictos, Homero 
 
 El flujo utilizado ya integra las ramas por funcionalidad en `develop` mediante PR; allí están la inicialización y los avances registrados en la sección 1. La entrega final en `main` sigue pendiente y es requisito de la consigna. Se deben conservar los commits que muestran RED, GREEN y REFACTOR.
 
-**Próximo paso de Homero:** después de integrar esta actualización documental, crear una rama desde `develop` actualizado y preparar el RED para una respuesta HTTP de error que no cumple `{ error: string }`. El cliente deberá informar un mensaje claro. La edición de ese código requiere autorización previa del usuario.
+**Próximo paso de Homero:** completar la verificación pendiente de H1: instalación limpia con `npm run install:all` y arranque conjunto de API y frontend siguiendo el README, y registrar los resultados. Para cerrar H2 después, se necesitan los contratos de productos de M1 y pedidos de N1 para sus esquemas, funciones y fixtures específicos. Cualquier edición de código requiere autorización previa del usuario.
 
 ## 9. Cobertura de las nueve funcionalidades del PDF
 
@@ -258,6 +287,7 @@ El flujo utilizado ya integra las ramas por funcionalidad en `develop` mediante 
 ## 10. TDD y pruebas obligatorias
 
 - **Ciclo por funcionalidad:** escribir y ejecutar un test que falle por la conducta faltante; guardar ese test en un commit; implementar y guardar el código que lo vuelve verde en un commit posterior; refactorizar conservando los tests verdes.
+- **Refactores de las siguientes tareas:** después de guardar el GREEN, revisar mejoras de organización o duplicación del código y las pruebas recién agregados. Registrar el REFACTOR por separado, con los tests en verde, sin reorganizar funciones terminadas de etapas anteriores.
 - **Formato de commits:** `RED test: descripción`, `GREEN tipo: descripción` y `REFACTOR tipo: descripción`. Un cambio administrativo, de documentación o dependencias usa su tipo (`chore`, `docs`, etc.) sin inventar una etapa TDD. Cada integrante realiza sus propios commits; el asistente no los crea.
 - **Reservas de pruebas:** quitar `.pending` del archivo correspondiente al comenzar la funcionalidad y escribir su primer test. La convención y los ejemplos están en FRONTEND; los archivos vacíos no se cuentan como pruebas implementadas.
 - **Historial y PR:** una rama por funcionalidad y un PR a `main`, con revisión cruzada. Preservar los commits que muestran rojo y verde; evitar un squash que elimine esa evidencia. Cada integrante aporta commits frecuentes de sus tareas durante el desarrollo.
@@ -278,12 +308,13 @@ El flujo utilizado ya integra las ramas por funcionalidad en `develop` mediante 
 - [x] Proxy de Vite o CORS resuelve la conexión desde el navegador.
 - [ ] Reset y seed funcionan por HTTP solo con `NODE_ENV=test` y se ejecutan antes de cada E2E.
 - [x] Versiones exigidas fijadas y configuración de TypeScript estricto sin `any` explícito en el frontend.
-- [ ] Todas las respuestas consumidas tienen esquemas Zod y tipos inferidos; actualmente solo está completo el contrato de errores.
+- [x] Mecanismo genérico de validación de respuestas exitosas con Zod y tipos inferidos, y manejo de errores HTTP/JSON/red.
+- [ ] Todas las respuestas de los endpoints consumidos tienen esquemas definitivos; faltan los de productos y pedidos.
 - [ ] Carga mediante unión discriminada, carrito en Context, cliente HTTP único y ausencia de `fetch` en componentes.
 - [ ] Precios y total confirmado salen de API; el subtotal del carrito está identificado como orientativo.
 - [ ] Bootstrap personalizado con variables SASS antes de su importación y controles etiquetados.
 - [ ] Interfaz funcional a 375 px sin scroll horizontal.
-- [x] Pruebas actualmente implementadas en verde: 42 de backend y 20 de frontend; compilación de ambos paquetes y lint correctos.
+- [x] Pruebas actualmente implementadas en verde: 42 de backend y 35 de frontend; compilación de ambos paquetes y lint correctos.
 - [ ] Completar y aprobar los niveles de pruebas exigidos para todas las funcionalidades, incluidos los E2E reales.
 - [ ] README explica instalación, API, frontend, contratos y todos los comandos de pruebas.
 - [ ] Ramas por funcionalidad integradas por PR a `main`, TDD visible en commits y participación de los cuatro integrantes.

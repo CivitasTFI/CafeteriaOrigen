@@ -9,7 +9,7 @@ Proyecto del Grupo 14 para Programación IV de la Tecnicatura Universitaria en P
 | Nicolás Espulef | 22901 |
 | Federico Heinrich | 21317 |
 
-La API del Parcial I está en `backend/`. En `frontend/` están la base de React y TypeScript para el TP3, el contrato Zod de errores y una primera parte del cliente HTTP. La pantalla inicial muestra el nombre de la cafetería; las funcionalidades del menú todavía están pendientes.
+La API del Parcial I está en `backend/`. En `frontend/` están la base de React y TypeScript para el TP3, el cliente HTTP con manejo de errores y validación genérica mediante Zod, y mocks compartidos de errores. La pantalla inicial muestra el nombre de la cafetería; las funcionalidades del menú todavía están pendientes.
 
 ## Documentación
 
@@ -107,6 +107,8 @@ npm --prefix backend test -- --runInBand tests/integration/app.test.ts
 npm --prefix backend test -- --runInBand tests/unit/buscar-producto.test.ts
 npm run test:frontend -- src/test/unit/esquemas.test.ts
 npm run test:frontend -- src/test/integration/cliente.test.ts
+npm run test:frontend -- src/test/integration/respuestas.test.ts
+npm run test:frontend -- src/test/integration/handlersErrores.test.ts
 ```
 
 Las pruebas normales no requieren servidores externos levantados. La prueba del proxy abre y cierra su propio servidor Vite temporal en un puerto libre y simula la API con MSW.
@@ -135,12 +137,12 @@ El comando de preview sirve el frontend compilado y, en esta versión de Vite, h
 
 ## Estado de la base
 
-La verificación del **4 de noviembre de 2026** registró:
+La verificación del **4 de noviembre de 2026**, con los avances integrados hasta el PR #12, registró:
 
 | Área | Resultado |
 | --- | --- |
 | Backend | 10 suites y 42 tests de Jest/Supertest. |
-| Frontend | 6 archivos y 20 tests con Vitest: 7 de infraestructura y 13 de contrato y cliente de errores. |
+| Frontend | 8 archivos y 35 tests con Vitest: 7 de infraestructura y 28 de contratos, cliente HTTP, validación y mocks de errores. |
 | Compilación | Backend y frontend compilados; tipos de tests y configuración de Vitest incluidos. |
 | Lint | Frontend sin errores de ESLint. |
 
@@ -150,9 +152,13 @@ Los avances integrados en `develop` incluyen:
 - [x] JSON malformado devuelve 400 con `{ error }`; errores internos conservan 500.
 - [x] Esquema Zod de errores `{ error: string }` y tipo `ErrorApi` derivado con `z.infer`.
 - [x] Base `solicitarJson()` que valida errores HTTP y conserva el mensaje de la API, probada con 400, 404 y 500.
+- [x] Mensajes claros ante errores de contrato, respuestas HTML, JSON incompleto, cuerpos vacíos y fallos de conexión.
+- [x] `solicitarValidado()` valida respuestas exitosas con el esquema recibido y devuelve su tipo inferido.
+- [x] Fixtures `erroresApi` y handler reutilizable `crearHandlerError()` para GET/POST, con cuatro escenarios probados.
+- [x] Refactores separados para interpretación de errores, petición HTTP y preparación de pruebas con MSW.
 - [x] Campos internos de clasificación de productos y servicio de búsqueda con tres tests de backend.
 
-El cliente todavía devuelve las respuestas exitosas como `unknown`. Faltan sus esquemas y funciones específicas, mensajes claros ante errores de contrato y red, fixtures compartidos y las pantallas del menú. También siguen pendientes el selector, el carrito, los pedidos desde la interfaz, los estilos y los E2E. Los ticks detallados por integrante están en [planificacion.md](planificacion.md).
+La parte genérica de validación está lista: `solicitarJson()` es la lectura de bajo nivel con resultado `unknown`, y `solicitarValidado()` aplica el esquema recibido. Las futuras funciones de productos y pedidos deben usar esta última. Faltan los esquemas definitivos, las funciones específicas y los fixtures/handlers de respuestas exitosas. También siguen pendientes el menú, el selector, el carrito, los pedidos desde la interfaz, los estilos y los E2E. Los ticks detallados por integrante están en [planificacion.md](planificacion.md).
 
 Los endpoints del backend conservan el contrato del Parcial I descrito debajo, con el manejo de JSON inválido ya corregido. Los campos internos nuevos de los productos todavía no se exponen por HTTP. Esa ampliación, `mesaId`, estado predeterminado y reset/seed siguen pendientes y se detallan en [la planificación](planificacion.md).
 
@@ -201,13 +207,15 @@ Por ejemplo, crear un pedido con el producto 1, cantidad 2 y estado `pendiente` 
 }
 ```
 
-El ID del ejemplo supone que es el primer pedido desde el inicio del servidor. `mesaId`, los metadatos ampliados en las respuestas HTTP de productos y las rutas HTTP de reset/seed todavía no están implementados. El ejemplo de la mesa 4 de la consigna pertenece al contrato objetivo de TP3, no al contrato disponible en esta base.
+El ID del ejemplo supone que es el primer pedido desde el inicio del servidor. `mesaId`, los campos de tipo, tamaño y origen en el JSON de productos y las rutas HTTP de reset/seed todavía no están implementados. El ejemplo de la mesa 4 de la consigna pertenece al contrato objetivo de TP3, no al contrato disponible en esta base.
 
 ### Búsqueda interna de productos
 
 Los modelos ya disponen de `tipo` (`cafe` o `pasteleria`) y, para cafés, `tipoCafe`, `tamaño` y `variedad`. `backend/src/services/buscar-producto.service.ts` permite filtrar el catálogo por esos parámetros opcionales; devuelve los productos encontrados o el texto `Producto no encontrado` si no hay coincidencias.
 
 Este servicio tiene tres pruebas unitarias, pero todavía no está conectado a rutas ni modifica las respuestas de `GET /productos` y `GET /productos/:id`. Las descripciones de acidez, cuerpo y notas de cada origen también siguen pendientes. La representación HTTP definitiva debe acordarse antes de completar los esquemas de productos del frontend.
+
+Los campos guardados en el modelo deben incluirse también en el JSON de ambos endpoints. Para un café, el frontend necesita identificar bebida, tamaño y origen por campos separados, además de recibir la descripción de ese origen y el precio. La propuesta con un ejemplo concreto está en M1 de [planificacion.md](planificacion.md).
 
 ### Productos
 

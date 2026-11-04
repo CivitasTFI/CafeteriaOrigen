@@ -6,7 +6,7 @@ Guía de la base preparada por Homero para el TP3. Este documento vive en la ra�
 
 La aplicación tiene una entrada HTML en español, montaje de React con `StrictMode` y una `App` mínima que muestra el encabezado “Cafetería Origen”. Vite, TypeScript estricto, ESLint y la infraestructura de pruebas están preparados.
 
-También están implementados el proxy de desarrollo hacia la API, la verificación de tipos de los tests y los comandos generales desde la raíz. H2 tiene dos avances integrados: el esquema Zod de errores con su tipo inferido y la base del cliente HTTP que interpreta errores 400, 404 y 500 conservando el mensaje de la API.
+También están implementados el proxy de desarrollo hacia la API, la verificación de tipos de los tests y los comandos generales desde la raíz. H2 ya cuenta con manejo de errores HTTP/JSON/red, validación genérica de respuestas exitosas mediante Zod, tipos inferidos y fixtures/handlers compartidos de errores. Los esquemas de producción y funciones específicas de productos/pedidos siguen pendientes.
 
 Los archivos vacíos de componentes, utilidades, estilos y E2E son reservas de la estructura. La base no implementa todavía la carga del menú, selección de café, pastelería, carrito, mesas, confirmación o seguimiento de pedidos. Las pruebas de montaje verifican la infraestructura sobre la `App` inicial; no representan cobertura de esas funcionalidades.
 
@@ -40,7 +40,7 @@ Versiones de esta base:
 | jest-dom | 6.9.1 | Matchers como `toBeInTheDocument()`. |
 | jsdom | 28.1.0 | Entorno de navegador simulado. |
 | MSW | 2.15.0 | Interceptación de peticiones en pruebas. |
-| Zod | 4.6.7 | Contrato de errores implementado; contratos de éxito pendientes de H2. |
+| Zod | 4.6.7 | Contrato de errores y validación genérica implementados; esquemas definitivos de productos/pedidos pendientes. |
 | ESLint | 9.39.5 | Revisión estática del código. |
 
 Las versiones vigentes y sus dependencias completas están en [frontend/package.json](frontend/package.json) y [frontend/package-lock.json](frontend/package-lock.json). Bootstrap, SASS y Playwright todavía no están instalados; se incorporarán con sus tareas correspondientes.
@@ -69,6 +69,8 @@ Para probar los avances de H2 y la corrección de JSON inválido:
 ```bash
 npm run test:frontend -- src/test/unit/esquemas.test.ts
 npm run test:frontend -- src/test/integration/cliente.test.ts
+npm run test:frontend -- src/test/integration/respuestas.test.ts
+npm run test:frontend -- src/test/integration/handlersErrores.test.ts
 npm --prefix backend test -- --runInBand tests/integration/app.test.ts
 ```
 
@@ -102,8 +104,8 @@ frontend/
     ├── main.tsx
     ├── vite-env.d.ts
     ├── api/
-    │   ├── cliente.ts               # Base HTTP y mensajes de errores HTTP
-    │   ├── errores.ts               # Reservado, vacío
+    │   ├── cliente.ts               # Petición, lectura de JSON y validación genérica
+    │   ├── errores.ts               # Interpretación de mensajes de error de la API
     │   └── esquemas/
     │       ├── errores.ts           # esquemaError y tipo ErrorApi
     │       ├── pedidos.ts           # Reservado, vacío
@@ -116,11 +118,11 @@ frontend/
     ├── utils/
     └── test/
         ├── components/              # App.test.tsx y reservas .pending
-        ├── fixtures/                # Datos compartidos pendientes
+        ├── fixtures/                # errores.ts implementado; productos/pedidos pendientes
         ├── integration/             # Cliente HTTP, MSW, proxy y reservas .pending
         ├── mocks/
         │   ├── server.ts
-        │   └── handlers.ts          # Reservado para handlers compartidos
+        │   └── handlers.ts          # crearHandlerError(), para GET y POST
         ├── unit/                    # Esquema de errores, TypeScript y reservas .pending
         ├── render.tsx               # Helper compartido reservado
         └── setup.ts
@@ -162,15 +164,38 @@ El proxy está configurado para el desarrollo. El preview local de esta versión
 
 `src/api/esquemas/errores.ts` exporta `esquemaError`, que valida un objeto con `error` de tipo texto, y `ErrorApi`, derivado mediante `z.infer<typeof esquemaError>`. Las pruebas verifican que el mensaje válido se conserve y que se rechacen respuestas ausentes, nulas, texto suelto, objetos sin `error` y valores de `error` que no sean texto.
 
-`src/api/cliente.ts` exporta:
+Funciones disponibles:
+
+| Función | Qué hace |
+| --- | --- |
+| `realizarPeticion()` | Función interna que ejecuta `fetch` y transforma un fallo de conexión en un mensaje claro. |
+| `solicitarJson()` | Lee el JSON y maneja errores HTTP y de lectura. Devuelve `unknown`; por sí sola no valida la estructura de una respuesta exitosa. |
+| `solicitarValidado()` | Recibe un esquema Zod, valida los datos y devuelve el tipo inferido del esquema. Es la entrada que deben usar las futuras funciones de endpoints. |
+| `obtenerMensajeError()` | En `src/api/errores.ts`, valida el cuerpo de error y devuelve el mensaje de la API o el mensaje de formato incompatible. |
+
+Firmas públicas de `src/api/cliente.ts`:
 
 ```ts
 solicitarJson(ruta: string, opciones?: RequestInit): Promise<unknown>
+
+solicitarValidado<Esquema extends z.ZodType>(
+  ruta: string,
+  esquema: Esquema,
+  opciones?: RequestInit,
+): Promise<z.infer<Esquema>>
 ```
 
-El cliente resuelve la ruta respecto de `window.location.origin`, utiliza `fetch` y lee el JSON. Si la respuesta HTTP no es exitosa, valida su cuerpo con `esquemaError` y lanza un `Error` cuyo mensaje es el de la API. Los tests con MSW cubren 400 en `/pedidos/abc`, 404 en `/productos/999` y 500 en `/productos`, sin levantar Express.
+El cliente resuelve la ruta respecto de `window.location.origin`. Las opciones `RequestInit` se transmiten a la petición, y los componentes no deben llamar a `fetch` directamente. Los escenarios de error se prueban con MSW, sin levantar Express.
 
-El alcance actual es parcial: las respuestas exitosas se devuelven como `unknown` y todavía no tienen esquemas ni validación. Tampoco existen las funciones específicas de productos y pedidos ni la conexión con componentes. Ante un error con cuerpo incompatible, Zod lanza su error técnico; si el cuerpo no es JSON o la red falla, se propaga el error de lectura o de `fetch`. Convertir esos casos en mensajes claros y agregar sus tests es trabajo pendiente de H2.
+| Situación | Mensaje que entrega el cliente |
+| --- | --- |
+| Error HTTP con `{ error: string }` válido | El mensaje recibido de la API, sin alterarlo. |
+| Error HTTP cuyo JSON no cumple el contrato de errores | `No se pudo interpretar la respuesta de error del servidor` |
+| Respuesta HTML, JSON incompleto o cuerpo vacío | `No se pudo interpretar la respuesta del servidor` |
+| Fallo de conexión | `No se pudo conectar con el servidor` |
+| Respuesta exitosa incompatible con el esquema recibido | `La respuesta del servidor no tiene el formato esperado` |
+
+La validación genérica ya está implementada, pero todavía no existen los esquemas definitivos de productos/pedidos, sus funciones específicas ni su conexión con componentes. El esquema de producto utilizado en `respuestas.test.ts` es local al test y refleja el JSON actual con `id`, `nombre` y `precio`. No implementa el contrato ampliado que requiere el selector de café.
 
 La API ya responde 400 a JSON malformado con `{ "error": "El cuerpo de la solicitud contiene JSON inválido" }`. El middleware mantiene 500 para errores internos y tiene cobertura en `backend/tests/integration/app.test.ts`.
 
@@ -187,9 +212,36 @@ El entorno predeterminado del frontend es jsdom. Las pruebas de configuración T
 3. Después de cada prueba, limpia el DOM y restablece los handlers iniciales de MSW.
 4. Cierra MSW al terminar.
 
-La instancia se exporta desde `src/test/mocks/server.ts`. Actualmente se crea sin handlers iniciales. Cada prueba que necesite simular una respuesta utiliza `server.use(...)`; los handlers compartidos y fixtures se agregarán con los contratos de H2. La configuración `onUnhandledRequest: "error"` hace fallar las solicitudes no previstas. Para una petición que debe llegar a un servidor real de la propia prueba, se utiliza `passthrough()` explícitamente, como en el test del proxy.
+La instancia se exporta desde `src/test/mocks/server.ts` y continúa sin handlers iniciales. Cada prueba registra el escenario que necesita con `server.use(...)`. Ya se pueden reutilizar `crearHandlerError()` y los fixtures `erroresApi`, además de handlers locales para casos específicos. La configuración `onUnhandledRequest: "error"` hace fallar las solicitudes no previstas. Para una petición que debe llegar a un servidor real de la propia prueba, se utiliza `passthrough()` explícitamente, como en el test del proxy.
 
 La API propia de Vitest está desactivada mediante `api: false`. Esto es independiente de la API Express del proyecto.
+
+### Fixtures y handlers compartidos de errores
+
+`src/test/fixtures/errores.ts` exporta `erroresApi`, cuyos datos cumplen el tipo `ErrorApi`:
+
+| Fixture | Mensaje de la API | Escenario probado |
+| --- | --- | --- |
+| `pedidoIdInvalido` | `El ID debe ser un número entero positivo` | GET `/pedidos/abc`, 400. |
+| `productoNoEncontrado` | `Producto no encontrado` | GET `/productos/999`, 404. |
+| `pedidoSinItems` | `El pedido debe contener al menos un producto` | POST `/pedidos` con ítems vacíos, 400. |
+| `errorInterno` | `Error interno del servidor` | Error 500 al consultar `/productos`. |
+
+`src/test/mocks/handlers.ts` exporta `crearHandlerError(ruta, respuesta, estado, metodo)`. Construye un handler de MSW 2 que devuelve el JSON y el código HTTP configurados. El método admite `get` o `post`; si se omite, usa `get`. Simula un escenario elegido por el test, sin ejecutar la lógica real de Express.
+
+Por ejemplo, desde una prueba de integración:
+
+```ts
+import { erroresApi } from "../fixtures/errores";
+import { crearHandlerError } from "../mocks/handlers";
+import { server } from "../mocks/server";
+
+server.use(
+  crearHandlerError("/productos/999", erroresApi.productoNoEncontrado, 404),
+);
+```
+
+Para simular el rechazo de un pedido sin ítems, registrar `crearHandlerError("/pedidos", erroresApi.pedidoSinItems, 400, "post")`. Los fixtures y handlers compartidos de respuestas exitosas de productos/pedidos siguen pendientes de los contratos definitivos.
 
 ### Pruebas implementadas
 
@@ -200,13 +252,15 @@ La API propia de Vitest está desactivada mediante `api: false`. Esto es indepen
 | [proxy.test.ts](frontend/src/test/integration/proxy.test.ts) | 2 | Una petición real a Vite llega a la API simulada, conservando `/productos` o `/pedidos`. |
 | [configuracionTypescript.test.ts](frontend/src/test/unit/configuracionTypescript.test.ts) | 1 | La solución de TypeScript incluye los tests, el setup y la configuración de Vitest. |
 | [esquemas.test.ts](frontend/src/test/unit/esquemas.test.ts) | 10 | Contrato `{ error: string }`: respuesta válida y nueve respuestas incompatibles. |
-| [cliente.test.ts](frontend/src/test/integration/cliente.test.ts) | 3 | Errores HTTP 400, 404 y 500 interpretados por el cliente, conservando el mensaje de la API. |
+| [cliente.test.ts](frontend/src/test/integration/cliente.test.ts) | 10 | Tres errores HTTP válidos; tres errores de contrato; HTML, JSON incompleto y cuerpo vacío; un fallo de conexión. |
+| [respuestas.test.ts](frontend/src/test/integration/respuestas.test.ts) | 4 | Acepta el producto válido y rechaza precio textual, nombre ausente y respuesta nula, aunque el estado HTTP sea 200. |
+| [handlersErrores.test.ts](frontend/src/test/integration/handlersErrores.test.ts) | 4 | Comprueba método, ruta, estado y cuerpo de los cuatro escenarios de errores compartidos. |
 
-Son **20 tests en 6 archivos**: 7 de infraestructura y 13 del contrato y cliente de errores. Las pruebas normales no necesitan Express levantado. El test del proxy inicia y cierra un servidor Vite temporal en `127.0.0.1`, con un puerto asignado por el sistema, y MSW simula la API. La compilación comprueba los tipos reales de la aplicación, las configuraciones y los tests.
+Son **35 tests en 8 archivos**: 7 de infraestructura y 28 del contrato de errores, cliente HTTP, validación de respuestas y mocks compartidos. Las pruebas normales no necesitan Express levantado. El test del proxy inicia y cierra un servidor Vite temporal en `127.0.0.1`, con un puerto asignado por el sistema, y MSW simula la API. La compilación comprueba los tipos reales de la aplicación, las configuraciones y los tests.
 
 ## 7. Archivos `.pending` y comienzo de una funcionalidad
 
-De los 14 archivos de tests vacíos originales, se activaron `unit/esquemas.test.ts` e `integration/cliente.test.ts`. Quedan **12 archivos `.pending`**. Conservan la estructura prevista, Vitest no los ejecuta y no cuentan como cobertura ni como tests omitidos implementados. No se agregaron `test.todo(...)` a las tareas de los demás integrantes.
+De los 14 archivos de tests vacíos originales, se activaron `unit/esquemas.test.ts` e `integration/cliente.test.ts`. Además se crearon `integration/respuestas.test.ts` e `integration/handlersErrores.test.ts`. Quedan **12 archivos `.pending`**. Conservan la estructura prevista, Vitest no los ejecuta y no cuentan como cobertura ni como tests omitidos implementados. No se agregaron `test.todo(...)` a las tareas de los demás integrantes.
 
 Para comenzar una funcionalidad:
 
@@ -222,7 +276,7 @@ Por ejemplo, `components/Carrito.test.tsx.pending` pasa a llamarse `components/C
 npm run test:frontend -- src/test/components/Carrito.test.tsx
 ```
 
-Los componentes, estilos, utilidades y contratos todavía reservados siguen vacíos y conservan sus extensiones originales. El cliente HTTP y el esquema de errores ya tienen implementación. Cada responsable completa los archivos pendientes junto con sus pruebas.
+Los componentes, estilos, utilidades y contratos todavía reservados siguen vacíos y conservan sus extensiones originales. Ya tienen implementación el cliente HTTP, la interpretación y esquema de errores, y sus fixtures y handlers compartidos. Cada responsable completa los archivos pendientes junto con sus pruebas.
 
 ## 8. Trabajo con TDD y commits
 
@@ -231,6 +285,8 @@ La unidad de avance es un comportamiento concreto. Puede requerir varios archivo
 - **RED:** el runner funciona y la prueba falla por la capacidad que falta. Un error de sintaxis o una importación equivocada se corrige antes de registrar la evidencia del RED.
 - **GREEN:** se implementa la solución mínima y se verifica la misma prueba, conservando la cobertura existente.
 - **REFACTOR:** se elimina duplicación o se mejora la organización manteniendo el comportamiento. Se hace cuando existe una mejora justificable.
+
+En las siguientes tareas se revisa un refactor después de guardar cada GREEN, enfocado en el código y las pruebas recién agregados. Se conserva en la misma rama y en un commit separado, sin reorganizar funciones terminadas de etapas anteriores. Los refactores ya integrados incluyen la separación de interpretación de errores, la extracción de la petición HTTP y helpers de preparación de MSW y de opciones GET/POST.
 
 Ejemplos del formato usado en esta base:
 
@@ -244,7 +300,7 @@ Los cambios de documentación, dependencias o mantenimiento que no constituyen u
 
 Cada integrante guarda sus propios commits. Durante el trabajo asistido, el asistente prepara cambios y verificaciones y se detiene entre etapas; no crea commits. Se conservan los commits RED, GREEN y REFACTOR en el historial y se evita un squash que borre esa evidencia. El flujo de integración y la revisión cruzada están en la planificación.
 
-El asistente solo edita código con autorización previa y explícita del usuario. Una consulta o un pedido de explicación no autoriza cambios. Cada cierre informa qué terminó, el comando para probarlo, qué commit corresponde y cuál es el siguiente paso. Al preparar un PR, también se entrega un título y una descripción breve. Una actualización documental usa un commit `docs:` y no requiere inventar etapas RED/GREEN.
+El asistente solo edita código con autorización previa y explícita del usuario. Una consulta o un pedido de explicación no autoriza cambios. Cada cierre informa qué terminó, explica brevemente cada prueba o funcionalidad nueva, incluye el comando para probarlo, el commit que corresponde y el siguiente paso. Al preparar un PR, también se entrega un título y una descripción breve. Una actualización documental usa un commit `docs:` y no requiere inventar etapas RED/GREEN.
 
 Las consultas de componentes se hacen por rol, etiqueta o texto. `getByTestId` se reserva para los casos sin una alternativa adecuada. Las futuras pruebas de interacción pueden crear una sesión con `userEvent.setup()`; la dependencia ya está instalada.
 
@@ -252,7 +308,7 @@ Las consultas de componentes se hacen por rol, etiqueta o texto. `getByTestId` s
 
 | Responsable | Trabajo que sigue pendiente |
 | --- | --- |
-| Homero | Completar H2: mensajes claros de errores de contrato, JSON y red; esquemas y tipos de éxito, funciones de endpoints, fixtures y handlers compartidos. Implementar la carga del menú de H3. El esquema de errores, los mensajes HTTP 400/404/500 y la corrección del JSON inválido en backend ya están terminados. |
+| Homero | Cerrar la verificación de instalación limpia y arranque de H1. Completar esquemas de productos/pedidos, funciones de endpoints y fixtures/handlers de éxito de H2. Implementar la carga del menú de H3. El manejo de errores HTTP/JSON/red, la validación genérica y los mocks de errores ya están terminados. |
 | Matias | Completar las respuestas HTTP de productos y las descripciones de origen; selector de café, pastelería y Bootstrap personalizado con SASS. Los modelos ya tienen campos internos y un buscador probado en el backend. |
 | Federico | Context, reducer, interfaz del carrito, formato de precios y Playwright. |
 | Nicolas | Mesas y pedidos en API, estado predeterminado, reset/seed, lectura de URL, confirmación y seguimiento. |
@@ -261,11 +317,11 @@ Homero integrará el proveedor del carrito cuando Federico lo entregue y coordin
 
 El cliente HTTP ya concentra el `fetch` de la aplicación, pero las funciones y pantallas que lo consumirán siguen pendientes. Los precios unitarios y el total confirmado vendrán de la API; los futuros subtotales del carrito serán orientativos. No se reproducirán las fórmulas del dominio en el frontend.
 
-Después de integrar la documentación, el próximo avance de Homero es un RED para respuestas HTTP de error que no cumplen el contrato. Ese cambio se prepara en otra rama desde `develop` actualizado y requiere autorización previa. Luego siguen JSON no interpretable y fallos de red, sin marcar H2 completo hasta cubrir también las respuestas exitosas.
+Después de integrar la documentación, el siguiente paso es completar la verificación pendiente de H1: instalar desde los lockfiles con `npm run install:all`, levantar API y frontend siguiendo el README y registrar los resultados. Para los esquemas y funciones que faltan de H2, primero deben estar definidos los campos HTTP de productos de M1 y pedidos de N1.
 
 ## 10. Estado de verificación y cierre de la base
 
-Verificación del **4 de noviembre de 2026** desde la raíz: `npm test` pasó con **42 tests de backend en 10 suites y 20 de frontend en 6 archivos**; `npm run build` compiló ambas aplicaciones y `npm run lint` pasó. También se verificó el arranque aislado de Vite al inicializar el frontend. Esto no certifica las funcionalidades del menú ni los E2E, todavía pendientes.
+Verificación del **4 de noviembre de 2026**, con los cambios hasta el PR #12: `npm test` pasó con **42 tests de backend en 10 suites y 35 de frontend en 8 archivos**; `npm run build` compiló ambas aplicaciones y `npm run lint` pasó. También se verificó el arranque aislado de Vite al inicializar el frontend. Esto no certifica las funcionalidades del menú ni los E2E, todavía pendientes.
 
 Queda pendiente registrar una instalación limpia con `npm run install:all` y comprobar el arranque conjunto de ambas aplicaciones siguiendo el README. La verificación de tests, compilación y lint de esta actualización no reemplaza esas comprobaciones.
 
