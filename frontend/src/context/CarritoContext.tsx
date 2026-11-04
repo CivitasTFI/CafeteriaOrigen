@@ -5,6 +5,7 @@ import type { Producto } from "../api/esquemas/productos";
 interface CarritoContextValue {
   items: ItemCarrito[];
   agregarProducto: (producto: Producto) => void;
+  restarProducto: (producto: Producto) => void;
 }
 
 interface CarritoProviderProps {
@@ -20,7 +21,10 @@ export function CarritoProvider( props: CarritoProviderProps ) {
     function agregarProducto(producto: Producto) {
         dispatch({type: "AGREGAR", producto});
     }
-    const value: CarritoContextValue = {items, agregarProducto};
+    function restarProducto(producto: Producto) {
+        dispatch({type: "RESTAR", producto});
+    }
+    const value: CarritoContextValue = {items, agregarProducto, restarProducto};
     return (
     <CarritoContext.Provider value={value}>
       {props.children}
