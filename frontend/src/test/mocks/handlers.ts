@@ -16,7 +16,5 @@ export function crearHandlerError(
 export function crearHandlerProductos(productos: ProductosBase): HttpHandler {
   const url = new URL("/productos", window.location.origin).href;
 
-  // Base provisional del RED: todavía no devuelve los productos recibidos.
-  void productos;
-  return http.get(url, () => HttpResponse.json([]));
+  return http.get(url, () => HttpResponse.json(productos));
 }
