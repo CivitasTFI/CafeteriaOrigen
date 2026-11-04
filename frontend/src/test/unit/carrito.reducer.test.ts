@@ -41,34 +41,57 @@ describe("carritoReducer", () => {
           cantidad: 1,
         },
         ]);
-  });
-  it("agrega un producto distinto al carrito que ya tiene otro", () => {
-    const estadoInicial = [
-      {
-        productoId: productoMock.id,
-        nombre: productoMock.nombre,
-        precio: productoMock.precio,
-        cantidad: 1,
-      },
-    ];
-
-    const resultado = carritoReducer(estadoInicial, {
-      type: "AGREGAR",
-      producto: productoMock2
     });
-    expect(resultado).toEqual([
-      {
-        productoId: productoMock.id,
-        nombre: productoMock.nombre,
-        precio: productoMock.precio,
-        cantidad: 1,
-      },
-      {
-        productoId: productoMock2.id,
-        nombre: productoMock2.nombre,
-        precio: productoMock2.precio,
-        cantidad: 1,
-      }
-    ]);
+    it("agrega un producto distinto al carrito que ya tiene otro", () => {
+      const estadoInicial = [
+        {
+          productoId: productoMock.id,
+          nombre: productoMock.nombre,
+          precio: productoMock.precio,
+          cantidad: 1,
+        },
+      ];
+
+      const resultado = carritoReducer(estadoInicial, {
+        type: "AGREGAR",
+        producto: productoMock2
+      });
+      expect(resultado).toEqual([
+        {
+          productoId: productoMock.id,
+          nombre: productoMock.nombre,
+          precio: productoMock.precio,
+          cantidad: 1,
+        },
+        {
+          productoId: productoMock2.id,
+          nombre: productoMock2.nombre,
+          precio: productoMock2.precio,
+          cantidad: 1,
+        }
+      ]);
+    });
+    // * Caso 3: Incrementar la cantidad al agregar un producto que ya existe en el carrito
+    it("Incrementa la cantidad de un producto que ya existe en el carrito", () => {
+      const estadoInicial = [
+        {
+          productoId: productoMock.id,
+          nombre: productoMock.nombre,
+          precio: productoMock.precio,
+          cantidad: 1,
+        },
+      ];
+      const resultado = carritoReducer(estadoInicial, {
+        type: "AGREGAR",
+        producto: productoMock
+      });
+      expect(resultado).toEqual([
+        {
+          productoId: productoMock.id,
+          nombre: productoMock.nombre,
+          precio: productoMock.precio,
+          cantidad: 2,
+        },
+      ]);
+    })
   });
-});
