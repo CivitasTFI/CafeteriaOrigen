@@ -37,22 +37,19 @@ describe("Contrato base de un producto de la API actual", () => {
 });
 
 describe("Contrato base de la lista de productos", () => {
-  test("acepta una lista de productos válidos", () => {
-    const productos = [
-      producto,
-      { id: 19, nombre: "Muffin de Chocolate", precio: 2500 },
-    ];
-
+  test.each([
+    {
+      caso: "una lista de productos válidos",
+      productos: [
+        producto,
+        { id: 19, nombre: "Muffin de Chocolate", precio: 2500 },
+      ],
+    },
+    { caso: "una lista vacía", productos: [] },
+  ])("acepta $caso", ({ productos }) => {
     expect(esquemaProductosBase.safeParse(productos)).toEqual({
       success: true,
       data: productos,
-    });
-  });
-
-  test("acepta una lista vacía", () => {
-    expect(esquemaProductosBase.safeParse([])).toEqual({
-      success: true,
-      data: [],
     });
   });
 
