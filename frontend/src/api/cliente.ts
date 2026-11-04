@@ -1,4 +1,4 @@
-import { esquemaError } from "./esquemas/errores";
+import { obtenerMensajeError } from "./errores";
 
 export async function solicitarJson(
   ruta: string,
@@ -14,13 +14,7 @@ export async function solicitarJson(
   }
 
   if (!respuesta.ok) {
-    const errorApi = esquemaError.safeParse(datos);
-
-    if (!errorApi.success) {
-      throw new Error("No se pudo interpretar la respuesta de error del servidor");
-    }
-
-    throw new Error(errorApi.data.error);
+    throw new Error(obtenerMensajeError(datos));
   }
 
   return datos;
