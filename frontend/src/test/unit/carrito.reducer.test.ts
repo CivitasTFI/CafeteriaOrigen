@@ -43,12 +43,16 @@ describe("carritoReducer", () => {
         ]);
   });
   it("agrega un producto distinto al carrito que ya tiene otro", () => {
-    const resultado = carritoReducer([{
-      productoId: productoMock.id,
-      nombre: productoMock.nombre,
-      precio: productoMock.precio,
-      cantidad: 1,
-    }],{
+    const estadoInicial = [
+      {
+        productoId: productoMock.id,
+        nombre: productoMock.nombre,
+        precio: productoMock.precio,
+        cantidad: 1,
+      },
+    ];
+
+    const resultado = carritoReducer(estadoInicial, {
       type: "AGREGAR",
       producto: productoMock2
     });
