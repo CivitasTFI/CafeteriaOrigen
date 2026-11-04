@@ -142,4 +142,32 @@ describe("carritoReducer", () => {
         });
         expect(resultado).toEqual([]);
     });
+    it("Elimina un producto del carrito", () => {
+      const estadoInicial = [
+        {
+          productoId: productoMock.id,
+          nombre: productoMock.nombre,
+          precio: productoMock.precio,
+          cantidad: 2,
+        },
+        {
+          productoId: productoMock2.id,
+          nombre: productoMock2.nombre,
+          precio: productoMock2.precio,
+          cantidad: 1,
+        }
+      ];
+      const resultado = carritoReducer(estadoInicial, {
+        type: "ELIMINAR",
+        producto: productoMock
+      });
+      expect(resultado).toEqual([
+        {
+          productoId: productoMock2.id,
+          nombre: productoMock2.nombre,
+          precio: productoMock2.precio,
+          cantidad: 1,
+        }
+      ]);
+    })
   });
