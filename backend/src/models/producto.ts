@@ -1,5 +1,6 @@
 export abstract class Producto {
-    protected abstract precioBase: number;
+    public abstract tipo: 'cafe' | 'pasteleria';
+    protected abstract readonly precioBase: number;
 
     constructor(public id: number, public nombre: string) {}
 

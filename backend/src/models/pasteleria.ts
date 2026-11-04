@@ -1,16 +1,17 @@
 import { Producto } from "./producto";
 
 export class Pasteleria extends Producto {
+    public readonly tipo: 'pasteleria' = 'pasteleria';
     protected readonly precioBase: number;
 
-    protected readonly variedadesG: { [key: string]: number } = {
+    private readonly variedadesPrecio: { [key: string]: number } = {
         'muffin de chocolate': 2500,
         'torta selva negra': 4200,
     };
 
-    constructor(id: number, nombre: string, variedad: string) {
+    constructor(id: number, nombre: string, public readonly variedad: string) {
         super(id, nombre);
-        this.precioBase = this.variedadesG[variedad];
+        this.precioBase = this.variedadesPrecio[this.variedad];
     }
 
     calcularPrecio(): number {
