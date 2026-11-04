@@ -19,11 +19,14 @@ const producto = {
 };
 const ruta = "/productos/5";
 
+function simularRespuesta(responder: () => Response): void {
+  const url = new URL(ruta, window.location.origin).href;
+  server.use(http.get(url, responder));
+}
+
 describe("Validación de respuestas exitosas", () => {
   test("devuelve los datos de un producto que cumple el esquema recibido", async () => {
-    const url = new URL(ruta, window.location.origin).href;
-
-    server.use(http.get(url, () => HttpResponse.json(producto)));
+    simularRespuesta(() => HttpResponse.json(producto));
 
     await expect(solicitarValidado(ruta, esquemaProducto)).resolves.toEqual(
       producto,
@@ -41,9 +44,7 @@ describe("Validación de respuestas exitosas", () => {
     },
     { caso: "la respuesta es nula", cuerpo: null },
   ])("rechaza la respuesta 200 si $caso", async ({ cuerpo }) => {
-    const url = new URL(ruta, window.location.origin).href;
-
-    server.use(http.get(url, () => HttpResponse.json(cuerpo)));
+    simularRespuesta(() => HttpResponse.json(cuerpo));
 
     await expect(solicitarValidado(ruta, esquemaProducto)).rejects.toThrow(
       new Error("La respuesta del servidor no tiene el formato esperado"),
