@@ -55,5 +55,9 @@ export function carritoReducer(estadoCarrito: ItemCarrito[], accion: AccionCarri
             ? { ...item, cantidad: item.cantidad - 1 }
             : item);
     }
+
+    if (accion.type === "ELIMINAR") {
+        return [];
+    }
     return estadoCarrito;
 }
