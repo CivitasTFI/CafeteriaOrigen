@@ -1,10 +1,10 @@
-import { InterfazProducto } from "../data/interfaz-producto";
+import { InterfazBusquedaProducto } from "../data/interfaz-busqueda-producto";
 import { catalogoProductos } from "../data/catalogo";
 import { Producto } from "../models/producto";
 import { Pasteleria } from "../models/pasteleria";
 import { Cafe } from "../models/cafe";
 
-export function buscarProducto(interfaz: InterfazProducto) {
+export function buscarProducto(interfaz: InterfazBusquedaProducto) {
     // Filtro con parámetros opcionales
     const respuesta: Producto[] | undefined = catalogoProductos.filter(
         (p: Producto) => 
