@@ -4,8 +4,9 @@
  * Caso 2: Agregar un producto distinto a un carrito que ya tiene otro
  * Caso 3: Incrementar la cantidad al agregar un producto que ya existe en el carrito
  * Caso 4: Restar cantidad del producto que ya existe en el carrito
- * Caso 5: Eliminar un producto del carrito
- * Caso 6: Calcular subtotal del carrito
+ * Caso 5: Eliminar el producto cuando se resta y la cantidad del producto es 1
+ * Caso 6: Eliminar un producto del carrito
+ * Caso 7: Calcular subtotal del carrito
  * 
 */
 
@@ -92,6 +93,40 @@ describe("carritoReducer", () => {
           precio: productoMock.precio,
           cantidad: 2,
         },
+      ]);
+    })
+    it("Restar la cantidad del producto que ya existe en el carrito", () => {
+      const estadoInicial = [
+        {
+          productoId: productoMock.id,
+          nombre: productoMock.nombre,
+          precio: productoMock.precio,
+          cantidad: 3,
+        },
+        {
+          productoId: productoMock2.id,
+          nombre: productoMock2.nombre,
+          precio: productoMock2.precio,
+          cantidad: 1,
+        }
+      ];
+      const resultado = carritoReducer( estadoInicial, {
+        type: "RESTAR",
+        producto: productoMock
+      });
+      expect(resultado).toEqual([
+        {
+          productoId: productoMock.id,
+          nombre: productoMock.nombre,
+          precio: productoMock.precio,
+          cantidad: 2,
+        },
+        {
+          productoId: productoMock2.id,
+          nombre: productoMock2.nombre,
+          precio: productoMock2.precio,
+          cantidad: 1,
+        }
       ]);
     })
   });
