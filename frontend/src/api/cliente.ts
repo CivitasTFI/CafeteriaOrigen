@@ -32,11 +32,17 @@ export async function solicitarJson(
   return datos;
 }
 
-export async function solicitarValidado(
+export async function solicitarValidado<Esquema extends z.ZodType>(
   ruta: string,
-  _esquema: z.ZodType,
+  esquema: Esquema,
   opciones?: RequestInit,
-): Promise<unknown> {
-  // Base provisional del RED: todavía no valida las respuestas exitosas.
-  return solicitarJson(ruta, opciones);
+): Promise<z.infer<Esquema>> {
+  const datos = await solicitarJson(ruta, opciones);
+  const resultado = esquema.safeParse(datos);
+
+  if (!resultado.success) {
+    throw new Error("La respuesta del servidor no tiene el formato esperado");
+  }
+
+  return resultado.data;
 }
