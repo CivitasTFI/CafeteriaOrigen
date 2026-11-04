@@ -1,6 +1,6 @@
 import { Producto } from "../api/esquemas/productos";
 
-type AccionCarrito = { type: "AGREGAR"; producto: Producto };
+type AccionCarrito = { type: "AGREGAR"; producto: Producto } | { type: "RESTAR"; producto: Producto };
 
 type ItemCarrito = {
     productoId: number;
@@ -33,6 +33,14 @@ export function carritoReducer(estadoCarrito: ItemCarrito[], accion: AccionCarri
                 : item);
         }
         return [...estadoCarrito, nuevoItem];
+    }
+    else if (accion.type === "RESTAR") {
+        const itemExistente = estadoCarrito.find((item) => item.productoId === accion.producto.id);
+        if (itemExistente) {
+            if (itemExistente.cantidad > 1) {
+                return estadoCarrito.map((item) => item.productoId === accion.producto.id ? {...item, cantidad: item.cantidad - 1} : item);
+            }
+        }
     }
     return estadoCarrito;
 }
