@@ -5,6 +5,48 @@ import { server } from "../mocks/server";
 
 describe("Cliente HTTP de la API", () => {
   test.each([
+    {
+      caso: "una página HTML de error",
+      cuerpo: "<html><body>Error del servidor</body></html>",
+      tipoContenido: "text/html",
+      estado: 500,
+    },
+    {
+      caso: "un JSON incompleto",
+      cuerpo: '{"error":',
+      tipoContenido: "application/json",
+      estado: 502,
+    },
+    {
+      caso: "un cuerpo vacío",
+      cuerpo: "",
+      tipoContenido: "application/json",
+      estado: 500,
+    },
+  ])(
+    "informa un mensaje claro si el servidor devuelve $caso",
+    async ({ cuerpo, tipoContenido, estado }) => {
+      const ruta = "/productos";
+      const url = new URL(ruta, window.location.origin).href;
+
+      server.use(
+        http.get(
+          url,
+          () =>
+            new HttpResponse(cuerpo, {
+              status: estado,
+              headers: { "Content-Type": tipoContenido },
+            }),
+        ),
+      );
+
+      await expect(solicitarJson(ruta)).rejects.toThrow(
+        new Error("No se pudo interpretar la respuesta del servidor"),
+      );
+    },
+  );
+
+  test.each([
     { caso: "un objeto sin error", cuerpo: {} },
     { caso: "un mensaje que no es texto", cuerpo: { error: 500 } },
     { caso: "una respuesta nula", cuerpo: null },
