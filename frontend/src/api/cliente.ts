@@ -1,4 +1,5 @@
 import { obtenerMensajeError } from "./errores";
+import type { z } from "zod";
 
 async function realizarPeticion(
   ruta: string,
@@ -29,4 +30,13 @@ export async function solicitarJson(
   }
 
   return datos;
+}
+
+export async function solicitarValidado(
+  ruta: string,
+  _esquema: z.ZodType,
+  opciones?: RequestInit,
+): Promise<unknown> {
+  // Base provisional del RED: todavía no valida las respuestas exitosas.
+  return solicitarJson(ruta, opciones);
 }
