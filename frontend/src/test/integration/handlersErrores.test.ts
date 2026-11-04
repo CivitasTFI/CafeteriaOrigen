@@ -3,6 +3,18 @@ import { erroresApi } from "../fixtures/errores";
 import { crearHandlerError } from "../mocks/handlers";
 import { server } from "../mocks/server";
 
+function crearOpcionesPeticion(metodo: "get" | "post"): RequestInit | undefined {
+  if (metodo === "get") {
+    return undefined;
+  }
+
+  return {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ items: [], estado: "pendiente" }),
+  };
+}
+
 describe("Handlers compartidos de errores", () => {
   test.each([
     {
@@ -38,17 +50,9 @@ describe("Handlers compartidos de errores", () => {
     async ({ metodo, ruta, estado, respuesta }) => {
       server.use(crearHandlerError(ruta, respuesta, estado, metodo));
 
-      const opciones =
-        metodo === "post"
-          ? {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ items: [], estado: "pendiente" }),
-            }
-          : undefined;
       const response = await fetch(
         new URL(ruta, window.location.origin),
-        opciones,
+        crearOpcionesPeticion(metodo),
       );
 
       expect(response.status).toBe(estado);
