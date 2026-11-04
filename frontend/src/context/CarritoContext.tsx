@@ -19,10 +19,10 @@ export function CarritoProvider( props: CarritoProviderProps ) {
     const [items, dispatch] = useReducer(carritoReducer, []);
 
     function agregarProducto(producto: Producto) {
-        dispatch({type: "AGREGAR", producto});
+        dispatch({ type: "AGREGAR", producto });
     }
     function restarProducto(producto: Producto) {
-        dispatch({type: "RESTAR", producto});
+        dispatch({ type: "RESTAR", producto });
     }
     const value: CarritoContextValue = {items, agregarProducto, restarProducto};
     return (
