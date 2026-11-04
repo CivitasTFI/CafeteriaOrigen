@@ -6,7 +6,6 @@
  * Caso 4: Restar cantidad del producto que ya existe en el carrito
  * Caso 5: Eliminar el producto cuando se resta y la cantidad del producto es 1
  * Caso 6: Eliminar un producto del carrito
- * Caso 7: Calcular subtotal del carrito
  * 
 */
 
