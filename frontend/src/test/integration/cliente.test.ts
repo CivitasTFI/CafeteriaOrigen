@@ -3,6 +3,11 @@ import { describe, expect, test } from "vitest";
 import { solicitarJson } from "../../api/cliente";
 import { server } from "../mocks/server";
 
+function simularGet(ruta: string, responder: () => Response): void {
+  const url = new URL(ruta, window.location.origin).href;
+  server.use(http.get(url, responder));
+}
+
 describe("Cliente HTTP de la API", () => {
   test.each([
     {
@@ -27,17 +32,12 @@ describe("Cliente HTTP de la API", () => {
     "informa un mensaje claro si el servidor devuelve $caso",
     async ({ cuerpo, tipoContenido, estado }) => {
       const ruta = "/productos";
-      const url = new URL(ruta, window.location.origin).href;
 
-      server.use(
-        http.get(
-          url,
-          () =>
-            new HttpResponse(cuerpo, {
-              status: estado,
-              headers: { "Content-Type": tipoContenido },
-            }),
-        ),
+      simularGet(ruta, () =>
+        new HttpResponse(cuerpo, {
+          status: estado,
+          headers: { "Content-Type": tipoContenido },
+        }),
       );
 
       await expect(solicitarJson(ruta)).rejects.toThrow(
@@ -54,11 +54,8 @@ describe("Cliente HTTP de la API", () => {
     "informa un mensaje claro si el error de la API contiene $caso",
     async ({ cuerpo }) => {
       const ruta = "/productos";
-      const url = new URL(ruta, window.location.origin).href;
 
-      server.use(
-        http.get(url, () => HttpResponse.json(cuerpo, { status: 500 })),
-      );
+      simularGet(ruta, () => HttpResponse.json(cuerpo, { status: 500 }));
 
       await expect(solicitarJson(ruta)).rejects.toThrow(
         new Error("No se pudo interpretar la respuesta de error del servidor"),
@@ -85,12 +82,8 @@ describe("Cliente HTTP de la API", () => {
   ])(
     "rechaza una respuesta $estado conservando el mensaje de la API",
     async ({ estado, ruta, mensaje }) => {
-      const url = new URL(ruta, window.location.origin).href;
-
-      server.use(
-        http.get(url, () =>
-          HttpResponse.json({ error: mensaje }, { status: estado }),
-        ),
+      simularGet(ruta, () =>
+        HttpResponse.json({ error: mensaje }, { status: estado }),
       );
 
       await expect(solicitarJson(ruta)).rejects.toThrow(new Error(mensaje));
