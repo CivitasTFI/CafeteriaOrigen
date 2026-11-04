@@ -28,7 +28,7 @@ export function CarritoProvider( props: CarritoProviderProps ) {
     function eliminarProducto(producto: Producto) {
         dispatch({ type: "ELIMINAR", producto });
     }
-    const value: CarritoContextValue = {items, agregarProducto, restarProducto, eliminarProducto};
+    const value: CarritoContextValue = { items, agregarProducto, restarProducto, eliminarProducto };
     return (
     <CarritoContext.Provider value={value}>
       {props.children}
