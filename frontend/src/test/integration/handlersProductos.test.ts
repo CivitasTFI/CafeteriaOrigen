@@ -5,23 +5,20 @@ import { crearHandlerProductos } from "../mocks/handlers";
 import { server } from "../mocks/server";
 
 describe("Handler compartido del listado de productos", () => {
-  test("responde 200 con los productos configurados y sus precios de la API", async () => {
-    server.use(crearHandlerProductos(productosApi));
+  test.each([
+    {
+      caso: "los productos configurados y sus precios de la API",
+      productos: productosApi,
+    },
+    { caso: "una lista vacía cuando no hay productos configurados", productos: [] },
+  ])("responde 200 con $caso", async ({ productos }) => {
+    server.use(crearHandlerProductos(productos));
 
     const response = await fetch(new URL("/productos", window.location.origin));
 
     expect(response.status).toBe(200);
     const datos: unknown = await response.json();
     expect(esquemaProductosBase.safeParse(datos).success).toBe(true);
-    expect(datos).toEqual(productosApi);
-  });
-
-  test("responde 200 con una lista vacía cuando no hay productos configurados", async () => {
-    server.use(crearHandlerProductos([]));
-
-    const response = await fetch(new URL("/productos", window.location.origin));
-
-    expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toEqual([]);
+    expect(datos).toEqual(productos);
   });
 });
