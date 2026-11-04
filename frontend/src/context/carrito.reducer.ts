@@ -25,7 +25,7 @@ export function carritoReducer(estadoCarrito: ItemCarrito[], accion: AccionCarri
             precio: accion.producto.precio,
             cantidad: 1,
         };
-        return [nuevoItem];
+        return [...estadoCarrito, nuevoItem];
     }
     return estadoCarrito;
 }
