@@ -16,13 +16,13 @@ export const CarritoContext = createContext<CarritoContextValue | null>(null);
 export function CarritoProvider( props: CarritoProviderProps ) {
 
     const [items, dispatch] = useReducer(carritoReducer, []);
-    
+
     function agregarProducto(producto: Producto) {
         dispatch({type: "AGREGAR", producto});
     }
+    const value: CarritoContextValue = {items, agregarProducto};
     return (
-
-    <CarritoContext.Provider value={{ items, agregarProducto }}>
+    <CarritoContext.Provider value={value}>
       {props.children}
     </CarritoContext.Provider>
   );
