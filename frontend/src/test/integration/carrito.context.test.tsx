@@ -13,11 +13,14 @@ const productoMock: Producto = {
 };
 
 function CarritoProbe() {
-  const { items, agregarProducto } = useCarrito();
+  const { items, agregarProducto, restarProducto } = useCarrito();
   return (
     <>
       <button onClick={() => agregarProducto(productoMock)}>
         Agregar producto
+      </button>
+      <button onClick={() => restarProducto(productoMock)}>
+        Restar producto
       </button>
 
       <span>Cantidad del ítem: {items[0]?.cantidad ?? 0}</span>
@@ -51,4 +54,20 @@ describe("CarritoContext", () => {
     expect(screen.getByText("Cantidad del ítem: 1"))
       .toBeInTheDocument();
   });
+  it("resta un producto al carrito", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <CarritoProvider>
+        <CarritoProbe />
+      </CarritoProvider>
+    );
+    await user.click(screen.getByRole("button", { name: "Agregar producto" }));
+    await user.click(screen.getByRole("button", { name: "Agregar producto" }));
+    await user.click(screen.getByRole("button", { name: "Restar producto" }));
+
+    expect(screen.getByText("Cantidad del ítem: 1")).toBeInTheDocument();
+  })
 });
+
+// npm.cmd run test:frontend -- src/test/integration/carrito.context.test.tsx
