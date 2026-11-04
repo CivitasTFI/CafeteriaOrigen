@@ -4,7 +4,14 @@ export async function solicitarJson(
   ruta: string,
   opciones?: RequestInit,
 ): Promise<unknown> {
-  const respuesta = await fetch(new URL(ruta, window.location.origin), opciones);
+  let respuesta: Response;
+
+  try {
+    respuesta = await fetch(new URL(ruta, window.location.origin), opciones);
+  } catch {
+    throw new Error("No se pudo conectar con el servidor");
+  }
+
   let datos: unknown;
 
   try {
