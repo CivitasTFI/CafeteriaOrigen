@@ -8,8 +8,13 @@ export async function solicitarJson(
   const datos: unknown = await respuesta.json();
 
   if (!respuesta.ok) {
-    const errorApi = esquemaError.parse(datos);
-    throw new Error(errorApi.error);
+    const errorApi = esquemaError.safeParse(datos);
+
+    if (!errorApi.success) {
+      throw new Error("No se pudo interpretar la respuesta de error del servidor");
+    }
+
+    throw new Error(errorApi.data.error);
   }
 
   return datos;
