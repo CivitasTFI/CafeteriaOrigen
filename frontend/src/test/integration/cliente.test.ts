@@ -9,6 +9,16 @@ function simularGet(ruta: string, responder: () => Response): void {
 }
 
 describe("Cliente HTTP de la API", () => {
+  test("informa un mensaje claro cuando no puede conectarse con la API", async () => {
+    const ruta = "/productos";
+
+    simularGet(ruta, () => HttpResponse.error());
+
+    await expect(solicitarJson(ruta)).rejects.toThrow(
+      new Error("No se pudo conectar con el servidor"),
+    );
+  });
+
   test.each([
     {
       caso: "una página HTML de error",
