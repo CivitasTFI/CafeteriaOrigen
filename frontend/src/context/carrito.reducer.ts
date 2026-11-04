@@ -25,6 +25,10 @@ export function carritoReducer(estadoCarrito: ItemCarrito[], accion: AccionCarri
             precio: accion.producto.precio,
             cantidad: 1,
         };
+        const itemExistente = estadoCarrito.find( (item) => item.productoId === nuevoItem.productoId);
+        if (itemExistente) {
+            return estadoCarrito.map((item) => item.productoId === nuevoItem.productoId ? {...item, cantidad: item.cantidad + 1} : item);
+        }
         return [...estadoCarrito, nuevoItem];
     }
     return estadoCarrito;
