@@ -1,4 +1,5 @@
 import { obtenerMensajeError } from "./errores";
+import type { z } from "zod";
 
 async function realizarPeticion(
   ruta: string,
@@ -29,4 +30,19 @@ export async function solicitarJson(
   }
 
   return datos;
+}
+
+export async function solicitarValidado<Esquema extends z.ZodType>(
+  ruta: string,
+  esquema: Esquema,
+  opciones?: RequestInit,
+): Promise<z.infer<Esquema>> {
+  const datos = await solicitarJson(ruta, opciones);
+  const resultado = esquema.safeParse(datos);
+
+  if (!resultado.success) {
+    throw new Error("La respuesta del servidor no tiene el formato esperado");
+  }
+
+  return resultado.data;
 }
