@@ -5,6 +5,26 @@ import { server } from "../mocks/server";
 
 describe("Cliente HTTP de la API", () => {
   test.each([
+    { caso: "un objeto sin error", cuerpo: {} },
+    { caso: "un mensaje que no es texto", cuerpo: { error: 500 } },
+    { caso: "una respuesta nula", cuerpo: null },
+  ])(
+    "informa un mensaje claro si el error de la API contiene $caso",
+    async ({ cuerpo }) => {
+      const ruta = "/productos";
+      const url = new URL(ruta, window.location.origin).href;
+
+      server.use(
+        http.get(url, () => HttpResponse.json(cuerpo, { status: 500 })),
+      );
+
+      await expect(solicitarJson(ruta)).rejects.toThrow(
+        new Error("No se pudo interpretar la respuesta de error del servidor"),
+      );
+    },
+  );
+
+  test.each([
     {
       estado: 400,
       ruta: "/pedidos/abc",
