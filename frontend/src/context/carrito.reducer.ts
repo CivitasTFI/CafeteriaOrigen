@@ -35,12 +35,16 @@ export function carritoReducer(estadoCarrito: ItemCarrito[], accion: AccionCarri
         return [...estadoCarrito, nuevoItem];
     }
     else if (accion.type === "RESTAR") {
-        const itemExistente = estadoCarrito.find((item) => item.productoId === accion.producto.id);
-        if (itemExistente) {
-            if (itemExistente.cantidad > 1) {
-                return estadoCarrito.map((item) => item.productoId === accion.producto.id ? {...item, cantidad: item.cantidad - 1} : item);
-            }
+        const productoId = accion.producto.id;
+        const itemExistente = estadoCarrito.find((item) => item.productoId === productoId);
+
+        if (!itemExistente || itemExistente.cantidad <= 1) {
+            return estadoCarrito;
         }
+
+        return estadoCarrito.map((item) => item.productoId === productoId
+            ? { ...item, cantidad: item.cantidad - 1 }
+            : item);
     }
     return estadoCarrito;
 }
