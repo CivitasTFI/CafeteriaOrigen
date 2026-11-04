@@ -5,7 +5,13 @@ export async function solicitarJson(
   opciones?: RequestInit,
 ): Promise<unknown> {
   const respuesta = await fetch(new URL(ruta, window.location.origin), opciones);
-  const datos: unknown = await respuesta.json();
+  let datos: unknown;
+
+  try {
+    datos = await respuesta.json();
+  } catch {
+    throw new Error("No se pudo interpretar la respuesta del servidor");
+  }
 
   if (!respuesta.ok) {
     const errorApi = esquemaError.safeParse(datos);
