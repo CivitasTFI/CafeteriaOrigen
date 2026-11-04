@@ -72,7 +72,6 @@ describe("carritoReducer", () => {
         }
       ]);
     });
-    // * Caso 3: Incrementar la cantidad al agregar un producto que ya existe en el carrito
     it("Incrementa la cantidad de un producto que ya existe en el carrito", () => {
       const estadoInicial = [
         {
@@ -129,4 +128,18 @@ describe("carritoReducer", () => {
         }
       ]);
     })
+    it("Elimina el producto cuando se resta y la cantidad del producto es 1", () => {
+      const estadoInicial = [
+        {
+          productoId: productoMock.id,
+          nombre: productoMock.nombre,
+          precio: productoMock.precio,
+          cantidad: 1,
+        }];
+        const resultado = carritoReducer(estadoInicial, {
+          type: "RESTAR",
+          producto: productoMock
+        });
+        expect(resultado).toEqual([]);
+    });
   });
