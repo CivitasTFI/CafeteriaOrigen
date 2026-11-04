@@ -1,6 +1,8 @@
 import { Producto } from "../api/esquemas/productos";
 
-type AccionCarrito = { type: "AGREGAR"; producto: Producto } | { type: "RESTAR"; producto: Producto };
+type AccionCarrito = | { type: "AGREGAR"; producto: Producto } 
+                     | { type: "RESTAR"; producto: Producto }
+                     | { type: "ELIMINAR"; producto: Producto }
 
 type ItemCarrito = {
     productoId: number;
@@ -38,8 +40,14 @@ export function carritoReducer(estadoCarrito: ItemCarrito[], accion: AccionCarri
         const productoId = accion.producto.id;
         const itemExistente = estadoCarrito.find((item) => item.productoId === productoId);
 
-        if (!itemExistente || itemExistente.cantidad <= 1) {
+        if (!itemExistente) {
             return estadoCarrito;
+            }
+        
+        if (itemExistente.cantidad === 1) {
+            return estadoCarrito.filter(
+                (item) => item.productoId !== productoId
+            );
         }
 
         return estadoCarrito.map((item) => item.productoId === productoId
