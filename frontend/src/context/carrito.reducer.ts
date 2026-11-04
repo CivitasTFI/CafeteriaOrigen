@@ -19,15 +19,18 @@ type ItemCarrito = {
  */
 export function carritoReducer(estadoCarrito: ItemCarrito[], accion: AccionCarrito): ItemCarrito[] {
     if (accion.type === "AGREGAR") {
+        const productoId = accion.producto.id;
         const nuevoItem: ItemCarrito = {
-            productoId: accion.producto.id,
+            productoId,
             nombre: accion.producto.nombre,
             precio: accion.producto.precio,
             cantidad: 1,
         };
-        const itemExistente = estadoCarrito.find( (item) => item.productoId === nuevoItem.productoId);
+        const itemExistente = estadoCarrito.find((item) => item.productoId === productoId);
         if (itemExistente) {
-            return estadoCarrito.map((item) => item.productoId === nuevoItem.productoId ? {...item, cantidad: item.cantidad + 1} : item);
+            return estadoCarrito.map((item) => item.productoId === productoId
+                ? { ...item, cantidad: item.cantidad + 1 }
+                : item);
         }
         return [...estadoCarrito, nuevoItem];
     }
