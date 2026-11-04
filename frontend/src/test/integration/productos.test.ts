@@ -19,22 +19,18 @@ describe("Consulta del listado de productos", () => {
     await expect(listarProductos()).resolves.toEqual([]);
   });
 
-  test("rechaza una respuesta 200 que contiene un objeto en lugar de una lista", async () => {
+  test.each([
+    {
+      caso: "contiene un objeto en lugar de una lista",
+      cuerpo: productosApi[0],
+    },
+    {
+      caso: "un producto tiene el precio como texto",
+      cuerpo: [productosApi[0], { ...productosApi[1], precio: "2500" }],
+    },
+  ])("rechaza una respuesta 200 si $caso", async ({ cuerpo }) => {
     const url = new URL("/productos", window.location.origin).href;
-    server.use(http.get(url, () => HttpResponse.json(productosApi[0])));
-
-    await expect(listarProductos()).rejects.toThrow(
-      new Error("La respuesta del servidor no tiene el formato esperado"),
-    );
-  });
-
-  test("rechaza una respuesta 200 si un producto tiene el precio como texto", async () => {
-    const url = new URL("/productos", window.location.origin).href;
-    const productosInvalidos = [
-      productosApi[0],
-      { ...productosApi[1], precio: "2500" },
-    ];
-    server.use(http.get(url, () => HttpResponse.json(productosInvalidos)));
+    server.use(http.get(url, () => HttpResponse.json(cuerpo)));
 
     await expect(listarProductos()).rejects.toThrow(
       new Error("La respuesta del servidor no tiene el formato esperado"),
