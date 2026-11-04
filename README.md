@@ -9,7 +9,7 @@ Proyecto del Grupo 14 para Programación IV de la Tecnicatura Universitaria en P
 | Nicolás Espulef | 22901 |
 | Federico Heinrich | 21317 |
 
-La API del Parcial I está en `backend/`. En `frontend/` está la base de React y TypeScript para el TP3. La pantalla inicial muestra el nombre de la cafetería; las funcionalidades del menú todavía están pendientes.
+La API del Parcial I está en `backend/`. En `frontend/` están la base de React y TypeScript para el TP3, el contrato Zod de errores y una primera parte del cliente HTTP. La pantalla inicial muestra el nombre de la cafetería; las funcionalidades del menú todavía están pendientes.
 
 ## Documentación
 
@@ -100,6 +100,15 @@ npm run test:frontend -- src/test/components/App.test.tsx
 
 Desde `frontend/` también se puede usar `npm test -- src/test/components/App.test.tsx`.
 
+Para verificar los últimos avances desde la raíz:
+
+```bash
+npm --prefix backend test -- --runInBand tests/integration/app.test.ts
+npm --prefix backend test -- --runInBand tests/unit/buscar-producto.test.ts
+npm run test:frontend -- src/test/unit/esquemas.test.ts
+npm run test:frontend -- src/test/integration/cliente.test.ts
+```
+
 Las pruebas normales no requieren servidores externos levantados. La prueba del proxy abre y cierra su propio servidor Vite temporal en un puerto libre y simula la API con MSW.
 
 `npm run test:e2e` todavía no está implementado. Se integrará con la configuración de Playwright de Federico.
@@ -126,18 +135,26 @@ El comando de preview sirve el frontend compilado y, en esta versión de Vite, h
 
 ## Estado de la base
 
-La última verificación de la infraestructura registró:
+La verificación del **4 de noviembre de 2026** registró:
 
 | Área | Resultado |
 | --- | --- |
-| Backend | 9 suites y 38 tests de Jest/Supertest. |
-| Frontend | 4 archivos y 7 tests de infraestructura con Vitest. |
+| Backend | 10 suites y 42 tests de Jest/Supertest. |
+| Frontend | 6 archivos y 20 tests con Vitest: 7 de infraestructura y 13 de contrato y cliente de errores. |
 | Compilación | Backend y frontend compilados; tipos de tests y configuración de Vitest incluidos. |
 | Lint | Frontend sin errores de ESLint. |
 
-Estas pruebas verifican la base técnica. La carga del menú, el cliente HTTP con Zod, el selector, el carrito, los pedidos desde la interfaz, los estilos compartidos y los E2E todavía deben implementarse.
+Los avances integrados en `develop` incluyen:
 
-El backend conserva el contrato del Parcial I descrito debajo. Las ampliaciones propuestas para TP3, como `tipo`, `mesaId`, estado predeterminado y reset/seed, están pendientes y se detallan en [la planificación](planificacion.md).
+- [x] Base de frontend, infraestructura de pruebas, proxy y comandos raíz.
+- [x] JSON malformado devuelve 400 con `{ error }`; errores internos conservan 500.
+- [x] Esquema Zod de errores `{ error: string }` y tipo `ErrorApi` derivado con `z.infer`.
+- [x] Base `solicitarJson()` que valida errores HTTP y conserva el mensaje de la API, probada con 400, 404 y 500.
+- [x] Campos internos de clasificación de productos y servicio de búsqueda con tres tests de backend.
+
+El cliente todavía devuelve las respuestas exitosas como `unknown`. Faltan sus esquemas y funciones específicas, mensajes claros ante errores de contrato y red, fixtures compartidos y las pantallas del menú. También siguen pendientes el selector, el carrito, los pedidos desde la interfaz, los estilos y los E2E. Los ticks detallados por integrante están en [planificacion.md](planificacion.md).
+
+Los endpoints del backend conservan el contrato del Parcial I descrito debajo, con el manejo de JSON inválido ya corregido. Los campos internos nuevos de los productos todavía no se exponen por HTTP. Esa ampliación, `mesaId`, estado predeterminado y reset/seed siguen pendientes y se detallan en [la planificación](planificacion.md).
 
 ## Estructura general
 
@@ -168,7 +185,7 @@ La API permite consultar productos, crear y consultar pedidos y obtener reportes
 - Una creación válida responde 201 con `{ mensaje, pedido }`. `pedido` incluye `id`, `items`, `estado` y `total` calculado por la API.
 - `GET /pedidos` devuelve un arreglo de pedidos y `GET /pedidos/:id` un pedido directo, sin el envoltorio de creación.
 - Los pedidos se almacenan en memoria y se pierden al reiniciar el servidor.
-- Los errores previstos usan `{ "error": "mensaje" }`. El manejo de JSON malformado todavía debe corregirse para responder 400 en lugar de 500.
+- Los errores previstos usan `{ "error": "mensaje" }`. Un cuerpo JSON malformado responde 400 con `{ "error": "El cuerpo de la solicitud contiene JSON inválido" }`. Los errores internos responden 500 con `{ "error": "Error interno del servidor" }`.
 
 Por ejemplo, crear un pedido con el producto 1, cantidad 2 y estado `pendiente` devuelve actualmente un total de `10040`:
 
@@ -184,7 +201,13 @@ Por ejemplo, crear un pedido con el producto 1, cantidad 2 y estado `pendiente` 
 }
 ```
 
-El ID del ejemplo supone que es el primer pedido desde el inicio del servidor. `mesaId`, los metadatos ampliados de productos y las rutas HTTP de reset/seed todavía no están implementados. El ejemplo de la mesa 4 de la consigna pertenece al contrato objetivo de TP3, no al contrato disponible en esta base.
+El ID del ejemplo supone que es el primer pedido desde el inicio del servidor. `mesaId`, los metadatos ampliados en las respuestas HTTP de productos y las rutas HTTP de reset/seed todavía no están implementados. El ejemplo de la mesa 4 de la consigna pertenece al contrato objetivo de TP3, no al contrato disponible en esta base.
+
+### Búsqueda interna de productos
+
+Los modelos ya disponen de `tipo` (`cafe` o `pasteleria`) y, para cafés, `tipoCafe`, `tamaño` y `variedad`. `backend/src/services/buscar-producto.service.ts` permite filtrar el catálogo por esos parámetros opcionales; devuelve los productos encontrados o el texto `Producto no encontrado` si no hay coincidencias.
+
+Este servicio tiene tres pruebas unitarias, pero todavía no está conectado a rutas ni modifica las respuestas de `GET /productos` y `GET /productos/:id`. Las descripciones de acidez, cuerpo y notas de cada origen también siguen pendientes. La representación HTTP definitiva debe acordarse antes de completar los esquemas de productos del frontend.
 
 ### Productos
 

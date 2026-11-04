@@ -6,7 +6,7 @@ Guía de la base preparada por Homero para el TP3. Este documento vive en la ra�
 
 La aplicación tiene una entrada HTML en español, montaje de React con `StrictMode` y una `App` mínima que muestra el encabezado “Cafetería Origen”. Vite, TypeScript estricto, ESLint y la infraestructura de pruebas están preparados.
 
-También están implementados el proxy de desarrollo hacia la API, la verificación de tipos de los tests y los comandos generales desde la raíz. Zod 4 está instalado como dependencia de ejecución; sus esquemas y el cliente HTTP todavía están pendientes de H2.
+También están implementados el proxy de desarrollo hacia la API, la verificación de tipos de los tests y los comandos generales desde la raíz. H2 tiene dos avances integrados: el esquema Zod de errores con su tipo inferido y la base del cliente HTTP que interpreta errores 400, 404 y 500 conservando el mensaje de la API.
 
 Los archivos vacíos de componentes, utilidades, estilos y E2E son reservas de la estructura. La base no implementa todavía la carga del menú, selección de café, pastelería, carrito, mesas, confirmación o seguimiento de pedidos. Las pruebas de montaje verifican la infraestructura sobre la `App` inicial; no representan cobertura de esas funcionalidades.
 
@@ -40,7 +40,7 @@ Versiones de esta base:
 | jest-dom | 6.9.1 | Matchers como `toBeInTheDocument()`. |
 | jsdom | 28.1.0 | Entorno de navegador simulado. |
 | MSW | 2.15.0 | Interceptación de peticiones en pruebas. |
-| Zod | 4.6.7 | Validación de contratos, a implementar en H2. |
+| Zod | 4.6.7 | Contrato de errores implementado; contratos de éxito pendientes de H2. |
 | ESLint | 9.39.5 | Revisión estática del código. |
 
 Las versiones vigentes y sus dependencias completas están en [frontend/package.json](frontend/package.json) y [frontend/package-lock.json](frontend/package-lock.json). Bootstrap, SASS y Playwright todavía no están instalados; se incorporarán con sus tareas correspondientes.
@@ -62,6 +62,14 @@ Para ejecutar un archivo concreto desde la raíz:
 
 ```bash
 npm run test:frontend -- src/test/components/App.test.tsx
+```
+
+Para probar los avances de H2 y la corrección de JSON inválido:
+
+```bash
+npm run test:frontend -- src/test/unit/esquemas.test.ts
+npm run test:frontend -- src/test/integration/cliente.test.ts
+npm --prefix backend test -- --runInBand tests/integration/app.test.ts
 ```
 
 Desde `frontend/`, los comandos propios son `npm run dev`, `npm test`, `npm run test:watch`, `npm run build`, `npm run lint` y `npm run preview`. Por ejemplo:
@@ -93,7 +101,13 @@ frontend/
     ├── App.tsx
     ├── main.tsx
     ├── vite-env.d.ts
-    ├── api/                         # Cliente y esquemas pendientes
+    ├── api/
+    │   ├── cliente.ts               # Base HTTP y mensajes de errores HTTP
+    │   ├── errores.ts               # Reservado, vacío
+    │   └── esquemas/
+    │       ├── errores.ts           # esquemaError y tipo ErrorApi
+    │       ├── pedidos.ts           # Reservado, vacío
+    │       └── productos.ts         # Reservado, vacío
     ├── components/                  # Componentes de funcionalidades pendientes
     ├── config/
     ├── context/                     # Carrito de Federico, pendiente
@@ -103,11 +117,11 @@ frontend/
     └── test/
         ├── components/              # App.test.tsx y reservas .pending
         ├── fixtures/                # Datos compartidos pendientes
-        ├── integration/             # MSW, proxy y reservas .pending
+        ├── integration/             # Cliente HTTP, MSW, proxy y reservas .pending
         ├── mocks/
         │   ├── server.ts
         │   └── handlers.ts          # Reservado para handlers compartidos
-        ├── unit/                    # Configuración TypeScript y reservas .pending
+        ├── unit/                    # Esquema de errores, TypeScript y reservas .pending
         ├── render.tsx               # Helper compartido reservado
         └── setup.ts
 ```
@@ -144,6 +158,22 @@ La prueba de integración cubre GET para ambos prefijos. No está implementado t
 
 El proxy está configurado para el desarrollo. El preview local de esta versión de Vite también hereda esas opciones si no se configura un proxy propio para preview. La URL de la API en un despliegue y la infraestructura que la atienda deberán definirse al preparar producción. Si cambia el puerto del backend, ajustar el destino en `vite.config.ts`.
 
+### Contrato de errores y cliente HTTP disponibles
+
+`src/api/esquemas/errores.ts` exporta `esquemaError`, que valida un objeto con `error` de tipo texto, y `ErrorApi`, derivado mediante `z.infer<typeof esquemaError>`. Las pruebas verifican que el mensaje válido se conserve y que se rechacen respuestas ausentes, nulas, texto suelto, objetos sin `error` y valores de `error` que no sean texto.
+
+`src/api/cliente.ts` exporta:
+
+```ts
+solicitarJson(ruta: string, opciones?: RequestInit): Promise<unknown>
+```
+
+El cliente resuelve la ruta respecto de `window.location.origin`, utiliza `fetch` y lee el JSON. Si la respuesta HTTP no es exitosa, valida su cuerpo con `esquemaError` y lanza un `Error` cuyo mensaje es el de la API. Los tests con MSW cubren 400 en `/pedidos/abc`, 404 en `/productos/999` y 500 en `/productos`, sin levantar Express.
+
+El alcance actual es parcial: las respuestas exitosas se devuelven como `unknown` y todavía no tienen esquemas ni validación. Tampoco existen las funciones específicas de productos y pedidos ni la conexión con componentes. Ante un error con cuerpo incompatible, Zod lanza su error técnico; si el cuerpo no es JSON o la red falla, se propaga el error de lectura o de `fetch`. Convertir esos casos en mensajes claros y agregar sus tests es trabajo pendiente de H2.
+
+La API ya responde 400 a JSON malformado con `{ "error": "El cuerpo de la solicitud contiene JSON inválido" }`. El middleware mantiene 500 para errores internos y tiene cobertura en `backend/tests/integration/app.test.ts`.
+
 ## 6. Infraestructura de pruebas
 
 Vitest descubre automáticamente archivos `.test.ts`, `.test.tsx`, `.spec.ts` y `.spec.tsx` dentro de `frontend/src/test/`. `frontend/e2e/` no forma parte de ese descubrimiento. Jest se ejecuta desde el paquete backend y conserva sus pruebas en `backend/tests/`.
@@ -169,12 +199,14 @@ La API propia de Vitest está desactivada mediante `api: false`. Esto es indepen
 | [msw.test.ts](frontend/src/test/integration/msw.test.ts) | 2 | Interceptación de una consulta de productos y reinicio de handlers entre pruebas. |
 | [proxy.test.ts](frontend/src/test/integration/proxy.test.ts) | 2 | Una petición real a Vite llega a la API simulada, conservando `/productos` o `/pedidos`. |
 | [configuracionTypescript.test.ts](frontend/src/test/unit/configuracionTypescript.test.ts) | 1 | La solución de TypeScript incluye los tests, el setup y la configuración de Vitest. |
+| [esquemas.test.ts](frontend/src/test/unit/esquemas.test.ts) | 10 | Contrato `{ error: string }`: respuesta válida y nueve respuestas incompatibles. |
+| [cliente.test.ts](frontend/src/test/integration/cliente.test.ts) | 3 | Errores HTTP 400, 404 y 500 interpretados por el cliente, conservando el mensaje de la API. |
 
-Son **7 tests de infraestructura en 4 archivos**. Las pruebas normales no necesitan Express levantado. El test del proxy inicia y cierra un servidor Vite temporal en `127.0.0.1`, con un puerto asignado por el sistema, y MSW simula la API. La compilación comprueba los tipos reales de la aplicación, las configuraciones y los tests.
+Son **20 tests en 6 archivos**: 7 de infraestructura y 13 del contrato y cliente de errores. Las pruebas normales no necesitan Express levantado. El test del proxy inicia y cierra un servidor Vite temporal en `127.0.0.1`, con un puerto asignado por el sistema, y MSW simula la API. La compilación comprueba los tipos reales de la aplicación, las configuraciones y los tests.
 
 ## 7. Archivos `.pending` y comienzo de una funcionalidad
 
-Los 14 archivos de tests vacíos de la plantilla tienen el sufijo `.pending`. Conservan la estructura prevista, Vitest no los ejecuta y no cuentan como cobertura ni como tests omitidos implementados. No se agregaron `test.todo(...)` a las tareas de los demás integrantes.
+De los 14 archivos de tests vacíos originales, se activaron `unit/esquemas.test.ts` e `integration/cliente.test.ts`. Quedan **12 archivos `.pending`**. Conservan la estructura prevista, Vitest no los ejecuta y no cuentan como cobertura ni como tests omitidos implementados. No se agregaron `test.todo(...)` a las tareas de los demás integrantes.
 
 Para comenzar una funcionalidad:
 
@@ -190,7 +222,7 @@ Por ejemplo, `components/Carrito.test.tsx.pending` pasa a llamarse `components/C
 npm run test:frontend -- src/test/components/Carrito.test.tsx
 ```
 
-Los placeholders de componentes, estilos, utilidades y contratos fuera de los tests siguen con sus extensiones originales y no tienen implementación. Cada responsable los completa junto con sus pruebas.
+Los componentes, estilos, utilidades y contratos todavía reservados siguen vacíos y conservan sus extensiones originales. El cliente HTTP y el esquema de errores ya tienen implementación. Cada responsable completa los archivos pendientes junto con sus pruebas.
 
 ## 8. Trabajo con TDD y commits
 
@@ -212,31 +244,35 @@ Los cambios de documentación, dependencias o mantenimiento que no constituyen u
 
 Cada integrante guarda sus propios commits. Durante el trabajo asistido, el asistente prepara cambios y verificaciones y se detiene entre etapas; no crea commits. Se conservan los commits RED, GREEN y REFACTOR en el historial y se evita un squash que borre esa evidencia. El flujo de integración y la revisión cruzada están en la planificación.
 
+El asistente solo edita código con autorización previa y explícita del usuario. Una consulta o un pedido de explicación no autoriza cambios. Cada cierre informa qué terminó, el comando para probarlo, qué commit corresponde y cuál es el siguiente paso. Al preparar un PR, también se entrega un título y una descripción breve. Una actualización documental usa un commit `docs:` y no requiere inventar etapas RED/GREEN.
+
 Las consultas de componentes se hacen por rol, etiqueta o texto. `getByTestId` se reserva para los casos sin una alternativa adecuada. Las futuras pruebas de interacción pueden crear una sesión con `userEvent.setup()`; la dependencia ya está instalada.
 
 ## 9. Qué falta y quién lo integra
 
 | Responsable | Trabajo que sigue pendiente |
 | --- | --- |
-| Homero | Cliente HTTP único, esquemas Zod y tipos inferidos, fixtures y handlers de contratos, carga del menú y errores de H2/H3. Corrección del JSON inválido en el backend. |
-| Matias | Ampliación de productos en API, selector de café, pastelería y Bootstrap personalizado con SASS. |
+| Homero | Completar H2: mensajes claros de errores de contrato, JSON y red; esquemas y tipos de éxito, funciones de endpoints, fixtures y handlers compartidos. Implementar la carga del menú de H3. El esquema de errores, los mensajes HTTP 400/404/500 y la corrección del JSON inválido en backend ya están terminados. |
+| Matias | Completar las respuestas HTTP de productos y las descripciones de origen; selector de café, pastelería y Bootstrap personalizado con SASS. Los modelos ya tienen campos internos y un buscador probado en el backend. |
 | Federico | Context, reducer, interfaz del carrito, formato de precios y Playwright. |
 | Nicolas | Mesas y pedidos en API, estado predeterminado, reset/seed, lectura de URL, confirmación y seguimiento. |
 
 Homero integrará el proveedor del carrito cuando Federico lo entregue y coordinará el comando `test:e2e` con su configuración de Playwright. Los contratos de productos, pedidos, mesas y seed se acuerdan con el equipo antes de cerrar los esquemas; las propuestas de la planificación todavía no son respuestas implementadas de la API.
 
-El cliente HTTP será el único módulo que hará llamadas de la aplicación a la API. Los precios unitarios y el total confirmado vendrán de la API; los futuros subtotales del carrito serán orientativos. No se reproducirán las fórmulas del dominio en el frontend.
+El cliente HTTP ya concentra el `fetch` de la aplicación, pero las funciones y pantallas que lo consumirán siguen pendientes. Los precios unitarios y el total confirmado vendrán de la API; los futuros subtotales del carrito serán orientativos. No se reproducirán las fórmulas del dominio en el frontend.
+
+Después de integrar la documentación, el próximo avance de Homero es un RED para respuestas HTTP de error que no cumplen el contrato. Ese cambio se prepara en otra rama desde `develop` actualizado y requiere autorización previa. Luego siguen JSON no interpretable y fallos de red, sin marcar H2 completo hasta cubrir también las respuestas exitosas.
 
 ## 10. Estado de verificación y cierre de la base
 
-Durante la preparación se verificaron `npm test`, `npm run build` y `npm run lint` desde la raíz: 38 tests de backend y 7 de frontend, compilación de ambas aplicaciones y lint correcto. También se verificó el arranque aislado de Vite al inicializar el frontend. Esto no certifica las funcionalidades del TP3 ni los E2E, todavía pendientes.
+Verificación del **4 de noviembre de 2026** desde la raíz: `npm test` pasó con **42 tests de backend en 10 suites y 20 de frontend en 6 archivos**; `npm run build` compiló ambas aplicaciones y `npm run lint` pasó. También se verificó el arranque aislado de Vite al inicializar el frontend. Esto no certifica las funcionalidades del menú ni los E2E, todavía pendientes.
 
-El cierre previo a compartir la base incluye ejecutar `npm run install:all` para comprobar una instalación limpia con los lockfiles y verificar el arranque de ambas aplicaciones siguiendo el README. Esa comprobación final queda pendiente al momento de esta actualización documental.
+Queda pendiente registrar una instalación limpia con `npm run install:all` y comprobar el arranque conjunto de ambas aplicaciones siguiendo el README. La verificación de tests, compilación y lint de esta actualización no reemplaza esas comprobaciones.
 
-La auditoría de dependencias del frontend reporta actualmente tres paquetes afectados en la cadena de Vitest 3: `@vitest/mocker` (moderado), `tinypool` y `vitest` (críticos). Para consultar el detalle desde la raíz:
+La auditoría registrada durante la inicialización reportó tres paquetes afectados en la cadena de Vitest 3: `@vitest/mocker` (moderado), `tinypool` y `vitest` (críticos). Esa auditoría no se volvió a ejecutar en esta actualización documental. Para consultar el estado vigente desde la raíz:
 
 ```bash
 npm --prefix frontend audit
 ```
 
-La versión mayor 3 de Vitest está fijada por la consigna; npm propone una actualización mayor para resolver estos avisos. El cambio de versión debe coordinarse con ese requisito. La instalación de Zod no modificó las versiones de Vitest ni resolvió estos avisos.
+La versión mayor 3 de Vitest está fijada por la consigna. En aquella auditoría, npm proponía una actualización mayor para resolver los avisos; cualquier cambio debe coordinarse con ese requisito. Esta rama de documentación no modifica dependencias.
