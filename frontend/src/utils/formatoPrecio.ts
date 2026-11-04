@@ -1,3 +1,4 @@
+const formatoArgentino = new Intl.NumberFormat("es-AR");
 export function formatoPrecio(precio: number): string {
-    return `$${precio.toLocaleString('es-AR')}`;
+    return `$${formatoArgentino.format(precio)}`;
 }
