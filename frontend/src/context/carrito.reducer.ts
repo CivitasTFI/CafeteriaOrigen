@@ -1,10 +1,10 @@
 import { Producto } from "../api/esquemas/productos";
 
-type AccionCarrito = | { type: "AGREGAR"; producto: Producto } 
+export type AccionCarrito = | { type: "AGREGAR"; producto: Producto } 
                      | { type: "RESTAR"; producto: Producto }
                      | { type: "ELIMINAR"; producto: Producto }
 
-type ItemCarrito = {
+export type ItemCarrito = {
     productoId: number;
     nombre: string;
     precio: number;
