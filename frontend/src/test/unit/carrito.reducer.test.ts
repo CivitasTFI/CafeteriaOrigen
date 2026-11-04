@@ -13,16 +13,18 @@ import { describe, expect, it } from "vitest";
 import { carritoReducer } from "../../context/carrito.reducer";
 import type { Producto } from "../../api/esquemas/productos";
 
-// Esto se implementa en el archivo carrito.reducer.ts
-// type AccionCarrito =
-//   | { type: "AGREGAR"; producto: Producto }
-//   | { type: "QUITAR"; productoId: number };
-
 const productoMock: Producto = {
   id: 5,
   tipo: "expreso",
   nombre: "Expreso Mediano",
   precio: 7360,
+};
+
+const productoMock2: Producto = {
+  id: 6,
+  tipo: "expreso",
+  nombre: "Expreso Grande",
+  precio: 8360,
 };
 
 describe("carritoReducer", () => {
@@ -39,5 +41,30 @@ describe("carritoReducer", () => {
           cantidad: 1,
         },
         ]);
+  });
+  it("agrega un producto distinto al carrito que ya tiene otro", () => {
+    const resultado = carritoReducer([{
+      productoId: productoMock.id,
+      nombre: productoMock.nombre,
+      precio: productoMock.precio,
+      cantidad: 1,
+    }],{
+      type: "AGREGAR",
+      producto: productoMock2
+    });
+    expect(resultado).toEqual([
+      {
+        productoId: productoMock.id,
+        nombre: productoMock.nombre,
+        precio: productoMock.precio,
+        cantidad: 1,
+      },
+      {
+        productoId: productoMock2.id,
+        nombre: productoMock2.nombre,
+        precio: productoMock2.precio,
+        cantidad: 1,
+      }
+    ]);
   });
 });
