@@ -76,6 +76,13 @@ export function crearPedido(
     items: { productoId: number; cantidad: number }[],
     estado: string
 ) {
+    if (
+        estado !== undefined &&
+        (typeof estado !== "string" || estado.trim().length === 0)
+    ) {
+        throw new Error("El estado del pedido debe ser un texto no vacío");
+    }
+
     validarPedido(items);
 
     const pedido = guardarPedidos(items, estado);
