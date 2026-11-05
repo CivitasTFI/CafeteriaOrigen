@@ -1,4 +1,5 @@
 import IndicadorCarga from "../components/comunes/IndicadorCarga";
+import MensajeError from "../components/comunes/MensajeError";
 import { useMenu } from "../hooks/useMenu";
 
 export default function MenuPage() {
@@ -9,7 +10,7 @@ export default function MenuPage() {
   }
 
   if (estado.estado === "error") {
-    return <p role="alert">{estado.mensaje}</p>;
+    return <MensajeError mensaje={estado.mensaje} />;
   }
 
   return (
