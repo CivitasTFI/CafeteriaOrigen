@@ -13,11 +13,22 @@ const productoMock: Producto = {
     precio: 7360,
 };
 
-function AgregarProductoDePrueba() {
+const productoMock2: Producto = {
+    id: 6,
+    tipo: "expreso",
+    nombre: "Expreso Grande",
+    precio: 7360,
+};
+
+type AgregarProductoDePruebaProps = {
+    producto: Producto;
+};
+
+function AgregarProductoDePrueba({ producto }: AgregarProductoDePruebaProps) {
     const { agregarProducto } = useCarrito();
-        return (
-        <button onClick={() => agregarProducto(productoMock)}>
-            Agregar producto de prueba
+    return (
+        <button onClick={() => agregarProducto(producto)}>
+            Agregar {producto.nombre}
         </button>
     );
 }
@@ -36,14 +47,14 @@ describe("Carrito componente", () => {
 
         render(
             <CarritoProvider>
-                <AgregarProductoDePrueba />
+                <AgregarProductoDePrueba producto={productoMock} />
                 <Carrito />
             </CarritoProvider>,
         );
 
         await user.click(
             screen.getByRole("button", {
-                name: "Agregar producto de prueba",
+                name: "Agregar Expreso Mediano",
             }),
         );
 
@@ -51,4 +62,35 @@ describe("Carrito componente", () => {
             screen.getByText("Expreso Mediano"),
         ).toBeInTheDocument();
     });
+    it("muestra los nombres de dos productos distintos", async () => {
+    const user = userEvent.setup();
+
+    render(
+        <CarritoProvider>
+            <AgregarProductoDePrueba producto={productoMock} />
+            <AgregarProductoDePrueba producto={productoMock2} />
+            <Carrito />
+        </CarritoProvider>,
+    );
+
+    await user.click(
+        screen.getByRole("button", {
+            name: "Agregar Expreso Mediano",
+        }),
+    );
+
+    await user.click(
+        screen.getByRole("button", {
+            name: "Agregar Expreso Grande",
+        }),
+    );
+
+    expect(
+        screen.getByText("Expreso Mediano"),
+    ).toBeInTheDocument();
+
+    expect(
+        screen.getByText("Expreso Grande"),
+    ).toBeInTheDocument();
+});
 })
