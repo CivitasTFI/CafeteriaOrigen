@@ -13,6 +13,15 @@ function validarImporteSeguro(importe: number, mensajeError: string): void {
     }
 }
 
+function validarEstadoPedido(estado: unknown): void {
+    if (
+        estado !== undefined &&
+        (typeof estado !== "string" || estado.trim().length === 0)
+    ) {
+        throw new Error("El estado del pedido debe ser un texto no vacío");
+    }
+}
+
 // Valida los datos del pedido
 export function validarPedido(
     pedido: { productoId: number; cantidad: number }[]
@@ -76,13 +85,7 @@ export function crearPedido(
     items: { productoId: number; cantidad: number }[],
     estado: string
 ) {
-    if (
-        estado !== undefined &&
-        (typeof estado !== "string" || estado.trim().length === 0)
-    ) {
-        throw new Error("El estado del pedido debe ser un texto no vacío");
-    }
-
+    validarEstadoPedido(estado);
     validarPedido(items);
 
     const pedido = guardarPedidos(items, estado);
