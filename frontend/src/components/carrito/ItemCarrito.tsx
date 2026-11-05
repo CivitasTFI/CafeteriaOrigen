@@ -5,5 +5,10 @@ type ItemCarritoProps = {
 };
 
 export function ItemCarrito({ item }: ItemCarritoProps) {
-    return <p>{item.nombre}</p>;
+    return (
+        <>
+            <p>{item.nombre}</p>
+            <p>Cantidad: {item.cantidad}</p>
+        </>
+    );
 }
