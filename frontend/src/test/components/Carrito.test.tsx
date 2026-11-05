@@ -102,7 +102,7 @@ describe("Carrito componente", () => {
                 <Carrito />
             </CarritoProvider>,
         );
-        const botonAgregar = screen.getByRole("button", { name: "Agregar Expeso Mediano" });
+        const botonAgregar = screen.getByRole("button", { name: "Agregar Expreso Mediano" });
 
         await user.click(botonAgregar);
         await user.click(botonAgregar);
