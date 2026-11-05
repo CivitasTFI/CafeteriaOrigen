@@ -82,3 +82,33 @@ test("informa el fallo de conexión y permite recuperar el menú al reintentar",
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   expect(screen.queryByRole("status")).not.toBeInTheDocument();
 });
+
+test("rechaza productos con un precio textual y permite recuperar el menú al reintentar", async () => {
+  const usuario = userEvent.setup();
+  const url = new URL("/productos", window.location.origin).href;
+  const productosInvalidos = [
+    productosApi[0],
+    { ...productosApi[1], precio: "2500" },
+  ];
+  server.use(http.get(url, () => HttpResponse.json(productosInvalidos)));
+
+  render(<MenuPage />);
+
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "La respuesta del servidor no tiene el formato esperado",
+  );
+  expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("list", { name: "Productos del menú" }),
+  ).not.toBeInTheDocument();
+
+  server.use(crearHandlerProductos(productosApi));
+  await usuario.click(screen.getByRole("button", { name: "Reintentar" }));
+
+  for (const producto of productosApi) {
+    expect(await screen.findByText(producto.nombre)).toBeInTheDocument();
+  }
+
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  expect(screen.queryByRole("status")).not.toBeInTheDocument();
+});
