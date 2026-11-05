@@ -1,11 +1,14 @@
+import { CarritoProvider } from "./context/CarritoContext";
 import MenuPage from "./pages/MenuPage";
 
 function App() {
   return (
-    <main>
-      <h1>Cafetería Origen</h1>
-      <MenuPage />
-    </main>
+    <CarritoProvider>
+      <main>
+        <h1>Cafetería Origen</h1>
+        <MenuPage />
+      </main>
+    </CarritoProvider>
   );
 }
 
