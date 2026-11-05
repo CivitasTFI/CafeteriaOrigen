@@ -11,12 +11,7 @@ export default function MenuPage() {
 
   if (estado.estado === "error") {
     return (
-      <>
-        <MensajeError mensaje={estado.mensaje} />
-        <button type="button" onClick={reintentar}>
-          Reintentar
-        </button>
-      </>
+      <MensajeError mensaje={estado.mensaje} onReintentar={reintentar} />
     );
   }
 
