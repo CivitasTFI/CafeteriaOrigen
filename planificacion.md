@@ -135,12 +135,12 @@ La parte genérica de validación y errores de H2 está implementada. `mocks/han
 
 ### F1. Desarrollar el carrito con Context y reducer puro
 
-- [ ] Crear el Context y un reducer puro para agregar, incrementar, decrementar y quitar productos.
-- [ ] Acumular cantidades al agregar el mismo producto; acordar que decrementar desde 1 quite el ítem y nunca genere cantidades negativas.
-- [ ] Mantener por ítem el identificador, nombre, precio recibido de API y cantidad, utilizando los tipos derivados del contrato.
-- [ ] Calcular subtotales orientativos por ítem y subtotal general, sin reproducir las fórmulas de precios del dominio.
-- [ ] Implementar y probar una función común de formato de precio para que Matias y Nicolas la reutilicen.
-- [ ] Escribir tests unitarios de cada acción, productos repetidos, eliminación, carrito vacío y subtotales.
+- [x] Crear el Context y un reducer puro para agregar, incrementar, decrementar y quitar productos.
+- [x] Acumular cantidades al agregar el mismo producto; acordar que decrementar desde 1 quite el ítem y nunca genere cantidades negativas.
+- [x] Mantener por ítem el identificador, nombre, precio recibido de API y cantidad, utilizando los tipos derivados del contrato.
+- [x] Calcular subtotales orientativos por ítem y subtotal general, sin reproducir las fórmulas de precios del dominio.
+- [x] Implementar y probar una función común de formato de precio para que Matias y Nicolas la reutilicen.
+- [x] Escribir tests unitarios de cada acción, productos repetidos, eliminación, carrito vacío y subtotales.
 
 ### F2. Construir la interfaz del carrito
 
