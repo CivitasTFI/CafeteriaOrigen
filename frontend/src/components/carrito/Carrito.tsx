@@ -12,5 +12,11 @@ export default function Carrito() {
         return <CarritoVacio />;
     }
 
-    return <ItemCarrito item={items[0]} />;
+    return (
+    <>
+        {items.map((item) => (
+            <ItemCarrito key={item.productoId} item={item} />
+        ))}
+    </>
+    );
 }
