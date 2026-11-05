@@ -1,4 +1,4 @@
-export interface InterfazProducto {
+export interface InterfazBusquedaProducto {
     tipo?: 'cafe' | 'pasteleria'
     tipoCafe?: 'expreso' | 'filtrado'
     variedad?: 'brasil' | 'colombia' | 'etiopia' | 'muffin de chocolate' | 'torta selva negra'

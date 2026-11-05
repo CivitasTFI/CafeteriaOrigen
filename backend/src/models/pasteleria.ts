@@ -9,7 +9,7 @@ export class Pasteleria extends Producto {
         'torta selva negra': 4200,
     };
 
-    constructor(id: number, nombre: string, public readonly variedad: string) {
+    constructor(id: number, nombre: string, public readonly variedad: 'muffin de chocolate' | 'torta selva negra') {
         super(id, nombre);
         this.precioBase = this.variedadesPrecio[this.variedad];
     }
