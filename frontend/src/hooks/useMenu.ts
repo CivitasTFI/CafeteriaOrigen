@@ -7,8 +7,9 @@ type EstadoMenu =
   | { estado: "listo"; productos: ProductosBase }
   | { estado: "error"; mensaje: string };
 
-export function useMenu(): EstadoMenu {
+export function useMenu() {
   const [estado, setEstado] = useState<EstadoMenu>({ estado: "cargando" });
+  const [intento, setIntento] = useState(0);
 
   useEffect(() => {
     let activo = true;
@@ -32,7 +33,12 @@ export function useMenu(): EstadoMenu {
     return () => {
       activo = false;
     };
-  }, []);
+  }, [intento]);
 
-  return estado;
+  function reintentar() {
+    setEstado({ estado: "cargando" });
+    setIntento((intentoActual) => intentoActual + 1);
+  }
+
+  return { estado, reintentar };
 }

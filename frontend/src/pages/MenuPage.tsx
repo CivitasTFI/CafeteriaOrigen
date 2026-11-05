@@ -3,14 +3,21 @@ import MensajeError from "../components/comunes/MensajeError";
 import { useMenu } from "../hooks/useMenu";
 
 export default function MenuPage() {
-  const estado = useMenu();
+  const { estado, reintentar } = useMenu();
 
   if (estado.estado === "cargando") {
     return <IndicadorCarga mensaje="Cargando menú..." />;
   }
 
   if (estado.estado === "error") {
-    return <MensajeError mensaje={estado.mensaje} />;
+    return (
+      <>
+        <MensajeError mensaje={estado.mensaje} />
+        <button type="button" onClick={reintentar}>
+          Reintentar
+        </button>
+      </>
+    );
   }
 
   return (
