@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import type { ProductosBase } from "../api/esquemas/productos";
+import type { Productos } from "../api/esquemas/productos";
 import { listarProductos } from "../api/productos";
 
 type EstadoMenu =
   | { estado: "cargando" }
-  | { estado: "listo"; productos: ProductosBase }
+  | { estado: "listo"; productos: Productos }
   | { estado: "error"; mensaje: string };
 
 export function useMenu() {

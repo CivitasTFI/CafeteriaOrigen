@@ -1,6 +1,6 @@
 import { solicitarValidado } from "./cliente";
-import { esquemaProductosBase, type ProductosBase } from "./esquemas/productos";
+import { esquemaProductos, type Productos } from "./esquemas/productos";
 
-export async function listarProductos(): Promise<ProductosBase> {
-  return solicitarValidado("/productos", esquemaProductosBase);
+export async function listarProductos(): Promise<Productos> {
+  return solicitarValidado("/productos", esquemaProductos);
 }
