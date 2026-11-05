@@ -83,7 +83,7 @@ function formatearPedido(pedido: Pedido) {
 // Crea un pedido y devuelve sus datos con el total calculado
 export function crearPedido(
     items: { productoId: number; cantidad: number }[],
-    estado: string
+    estado: string = "pendiente"
 ) {
     validarEstadoPedido(estado);
     validarPedido(items);

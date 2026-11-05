@@ -70,4 +70,26 @@ describe("Validación del estado de los pedidos", () => {
             consultado: pedidoEsperado
         });
     });
+
+    it("POST /pedidos conserva un estado válido enviado explícitamente", async () => {
+        const creacion = await request(app)
+            .post("/pedidos")
+            .send({
+                items: [{ productoId: 1, cantidad: 1 }],
+                estado: "completado"
+            })
+            .expect(201);
+
+        const consulta = await request(app)
+            .get(`/pedidos/${creacion.body.pedido.id}`)
+            .expect(200);
+
+        expect({
+            creado: creacion.body.pedido.estado,
+            consultado: consulta.body.estado
+        }).toEqual({
+            creado: "completado",
+            consultado: "completado"
+        });
+    });
 });
