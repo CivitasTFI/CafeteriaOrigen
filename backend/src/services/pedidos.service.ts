@@ -1,5 +1,6 @@
 import { obtenerProducto } from "../data/catalogo";
 import { Pedido } from "../models/pedido";
+import { validarObjeto } from "../utils/validar-objeto";
 import {
     guardarPedidos,
     obtenerPedidos,
@@ -29,13 +30,7 @@ export function validarPedido(
     let total = 0;
 
     for (const item of pedido) {
-        if (
-            typeof item !== "object" ||
-            item === null ||
-            Array.isArray(item)
-        ) {
-            throw new Error("Cada ítem del pedido debe ser un objeto");
-        }
+        validarObjeto(item, "Cada ítem del pedido debe ser un objeto");
 
         // Validar que la cantidad sea un entero positivo seguro
         if (!Number.isSafeInteger(item.cantidad) || item.cantidad <= 0) {

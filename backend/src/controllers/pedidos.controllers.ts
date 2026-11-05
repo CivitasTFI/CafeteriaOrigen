@@ -1,16 +1,11 @@
 import { Request, Response } from "express";
 import { crearPedido, listarPedidos, buscarPedidoPorId } from "../services/pedidos.service";
+import { validarObjeto } from "../utils/validar-objeto";
 
 // POST pedidos
 export const postPedidos = (req: Request, res: Response) => {
     try {
-        if (
-            typeof req.body !== "object" ||
-            req.body === null ||
-            Array.isArray(req.body)
-        ) {
-            throw new Error("El cuerpo del pedido debe ser un objeto");
-        }
+        validarObjeto(req.body, "El cuerpo del pedido debe ser un objeto");
 
         const { items, estado } = req.body;
 
