@@ -1,12 +1,9 @@
 import { Request, Response } from "express";
 import { catalogoProductos, obtenerProducto } from "../data/catalogo";
+import { formarRespuestaArray, formarRespuestaObjeto, normalizarInput } from "../services/formar-respuesta.service";
 
 export const getProductos = (req: Request, res: Response) => {
-    const productos = catalogoProductos.map((producto) => ({
-        id: producto.id,
-        nombre: producto.nombre,
-        precio: producto.calcularPrecio(),
-    }));
+    const productos = formarRespuestaArray(catalogoProductos.map((producto) => normalizarInput(producto)));
 
     res.status(200).json(productos);
 }
@@ -18,9 +15,5 @@ export const getProducto = (req: Request, res: Response) => {
         return res.status(404).json({ error: "Producto no encontrado" });
     }
 
-    res.status(200).json({
-        id: producto.id,
-        nombre: producto.nombre,
-        precio: producto.calcularPrecio(),
-    });
+    res.status(200).json(formarRespuestaObjeto(normalizarInput(producto)));
 }
