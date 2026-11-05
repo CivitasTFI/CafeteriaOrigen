@@ -12,3 +12,7 @@ export const esquemaProductosBase = z.array(esquemaProductoBase);
 
 export type ProductoBase = z.infer<typeof esquemaProductoBase>;
 export type ProductosBase = z.infer<typeof esquemaProductosBase>;
+
+// Esquemas provisionales para comprobar el RED del contrato ampliado.
+export const esquemaProducto = esquemaProductoBase;
+export const esquemaProductos = esquemaProductosBase;
