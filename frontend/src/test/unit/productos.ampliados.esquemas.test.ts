@@ -97,19 +97,16 @@ describe("Contrato ampliado de productos de la API", () => {
 });
 
 describe("Contrato ampliado del listado de productos", () => {
-  test("conserva los datos de una lista con cafés y pastelería", () => {
-    const productos = [expreso, filtrado, pasteleria];
-
+  test.each([
+    {
+      caso: "una lista con cafés y pastelería",
+      productos: [expreso, filtrado, pasteleria],
+    },
+    { caso: "una lista vacía", productos: [] },
+  ])("acepta $caso y conserva sus datos", ({ productos }) => {
     expect(esquemaProductos.safeParse(productos)).toEqual({
       success: true,
       data: productos,
-    });
-  });
-
-  test("acepta una lista vacía", () => {
-    expect(esquemaProductos.safeParse([])).toEqual({
-      success: true,
-      data: [],
     });
   });
 
