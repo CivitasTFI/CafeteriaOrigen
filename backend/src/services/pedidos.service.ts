@@ -16,10 +16,12 @@ export function validarPedido(
         throw new Error("El pedido debe contener al menos un producto");
     }
 
+    let total = 0;
+
     for (const item of pedido) {
 
-        // Validar que la cantidad sea un entero positivo
-        if (!Number.isInteger(item.cantidad) || item.cantidad <= 0) {
+        // Validar que la cantidad sea un entero positivo seguro
+        if (!Number.isSafeInteger(item.cantidad) || item.cantidad <= 0) {
             throw new Error(
                 `La cantidad del producto ${item.productoId} debe ser un entero positivo`
             );
@@ -32,6 +34,20 @@ export function validarPedido(
             throw new Error(
                 `No existe el producto ${item.productoId}`
             );
+        }
+
+        const subtotal = producto.calcularPrecio() * item.cantidad;
+
+        if (!Number.isSafeInteger(subtotal)) {
+            throw new Error(
+                `El subtotal del producto ${item.productoId} supera el rango de enteros seguros`
+            );
+        }
+
+        total += subtotal;
+
+        if (!Number.isSafeInteger(total)) {
+            throw new Error("El total del pedido supera el rango de enteros seguros");
         }
     }
 }
