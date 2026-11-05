@@ -8,26 +8,26 @@ Objetivo: construir el menú de mesa sobre la API del Parcial I, con los cambios
 
 El proyecto tiene una API en Node.js, Express y TypeScript con `strict: true`, organizada en modelos, datos, servicios, controladores y rutas. Los productos y pedidos se almacenan en memoria.
 
-La API, sus configuraciones, dependencias y pruebas están en `backend/`. `frontend/` ya incluye cliente HTTP, Zod, mocks de errores y productos, y `MenuPage` integrada en `App` con carga, errores y reintento. Federico agregó Context, reducer, subtotales y formato de precios, todavía sin montar el proveedor en la aplicación ni implementar la interfaz del carrito. El `package.json` raíz agrupa los comandos de ambos paquetes.
+La API, sus configuraciones, dependencias y pruebas están en `backend/`. Ambos GET de productos ya exponen el contrato ampliado de Matias. El frontend lo consume con Zod y muestra el menú con carga, errores y reintento. `App` monta `CarritoProvider`; reducer, Context, subtotales y formato de precios están implementados, con tipos y exportaciones corregidos. La interfaz del carrito sigue pendiente. El `package.json` raíz agrupa los comandos de ambos paquetes.
 
 La documentación se centraliza en la raíz: [README.md](README.md) es la entrada general y describe la API actual; [FRONTEND.md](FRONTEND.md) explica la base del frontend, las pruebas y el flujo TDD. Esta planificación conserva las tareas y propuestas del TP3. Las propuestas de contratos no deben confundirse con funcionalidades ya implementadas.
 
 | Área | Qué existe | Qué falta para TP3 |
 | --- | --- | --- |
-| Productos | 20 productos, IDs y precios conservados; campos internos y buscador con tres tests. Matias agrega normalización, armado de respuestas y descripciones de tres orígenes, con dos tests nuevos. | Conectar la representación ampliada a ambos endpoints y probar los campos nuevos y la pastelería. |
-| Consulta de productos | Los endpoints devuelven `id`, `nombre` y `precio`. Homero implementó esquemas base, fixture, handler y `listarProductos()` validado con Zod. | Acordar el contrato ampliado y actualizar endpoints, Zod, fixtures y tests en conjunto. |
+| Productos | Ambos GET devuelven los campos ampliados, origen y descripción; precio del dominio y 404 conservados. Buscador y normalización internos implementados. | Ampliar tests HTTP a filtrados/pastelería y restaurar la aserción de longitud 20 del listado. |
+| Consulta de productos | `esquemaProducto` distingue café/pastelería; `listarProductos()` y `useMenu` conservan el contrato completo. Tipos y fixtures derivados del esquema. | Funciones, contratos y mocks de pedidos; conectar los componentes de selección cuando estén listos. |
 | Pedidos | Alta y consulta por ID, validación de cantidades y productos, respuesta con ítems, estado y total. | Aceptar, validar, guardar y devolver `mesaId` opcional. Asignar `pendiente` cuando no se envía estado: hoy el servicio recibe el estado del cliente sin valor por defecto. |
 | Errores | JSON inválido responde 400 con `{ error }`. El menú muestra errores HTTP, de conexión y de contrato, y permite recuperarse al reintentar. | Completar validaciones de pedidos/mesas y errores de confirmación que conserven el carrito. |
 | Conexión desde el navegador | Proxy Vite para `/productos` y `/pedidos`. `App` monta `MenuPage`, que consulta a través del cliente HTTP único. | Funciones y pantallas de pedidos; conexión de producción al preparar el despliegue. |
 | Preparación de E2E | Función interna `reiniciarPedidos()` que vacía pedidos y reinicia IDs. | Endpoints HTTP de reset y seed disponibles únicamente con `NODE_ENV=test`. |
-| Frontend | Menú con listado de nombres, indicador accesible, error y reintento. Lógica de carrito, Context y utilidades implementados con tests. | Corregir integración del carrito, montar proveedor, selector, pastelería, carrito visual y pedidos. Bootstrap/SASS y Playwright pendientes. |
-| Regresión | 44 tests de backend en 11 suites y 73 de frontend en 16 archivos aprobados sin servidores externos. Backend compila. | Corregir TS2305 por `Producto` no exportado y lint de `CarritoContext.tsx`; completar pruebas restantes y E2E. |
+| Frontend | Menú con nombres, carga, error y reintento. Proveedor del carrito montado en App y probado con dos consumidores; utilidades de carrito disponibles. | Selector, pastelería, carrito visual, pedidos, Bootstrap/SASS y Playwright. Registrar instalación limpia y arranque conjunto. |
+| Regresión | 44 tests de backend en 11 suites y 93 de frontend en 18 archivos aprobados; ambos paquetes compilan y lint pasa. | Completar cobertura restante, E2E y comprobaciones de instalación y arranque. |
 
-Desde la documentación anterior (PR #12), el backend suma dos tests de Matias. El frontend suma 18 casos del contrato base y consulta de productos de Homero, 13 del carrito y utilidades de Federico y siete del menú y su integración en `App` de Homero: pasa de 35 a 73 tests.
+Desde la actualización documental del PR #19 (estado hasta #17), Matias conectó el servicio a los endpoints en #18, sin aumentar la cantidad de tests. Homero agregó 19 tests en #20 (16 del esquema ampliado y tres rechazos de la consulta) y uno en #21 para el proveedor compartido: el frontend pasó de 73 a 93 casos.
 
-Verificación del **5 de noviembre de 2026**, hasta el PR #17 (`b99c703`): `npm test` pasó con **44 tests de backend y 73 de frontend**. `npm run build` compila backend, pero falla en frontend: reducer, Context y dos tests importan `Producto`, que no está exportado por el esquema actual. `npm run lint` falla por `react-refresh/only-export-components` en `CarritoContext.tsx`. Pasar Vitest no comprueba estos tipos. Quedan **8 archivos `.pending`**, que no representan cobertura implementada.
+Verificación del **5 de noviembre de 2026**, hasta el PR #21 (`abbae9d`): `npm test` pasó con **44 tests de backend y 93 de frontend**; `npm run build` y `npm run lint` también pasaron. El PR #20 resolvió los errores de tipos y exportaciones del carrito registrados anteriormente. Quedan **8 archivos `.pending`**, que no representan cobertura implementada.
 
-Los avances siguientes están integrados en `develop`. El proveedor del carrito existe, pero aún no está montado en `App`/`main.tsx`. La instalación limpia y el arranque conjunto siguen pendientes de registro. También faltan las ampliaciones HTTP de productos/pedidos, las funciones restantes del menú y los E2E.
+Los avances siguientes están integrados en `develop`. El proveedor del carrito ya envuelve el contenido de `App`. La instalación limpia y el arranque conjunto siguen pendientes de registro. También faltan las ampliaciones de pedidos/mesas, las funciones restantes del menú y los E2E.
 
 ### Avances integrados en `develop`
 
@@ -45,26 +45,30 @@ Los avances siguientes están integrados en `develop`. El proveedor del carrito 
 | `docs/documentacion-general` | #10 | Primera actualización de avances y tareas completadas. |
 | `feature/validacion-respuestas` | #11 | Validación genérica de respuestas exitosas, tipo inferido y cuatro pruebas; refactor de la preparación de MSW de esas pruebas. |
 | `feature/mocks-errores-compartidos` | #12 | Fixtures de errores y handler reutilizable GET/POST; cuatro pruebas y refactor de las opciones de petición de esos casos. |
-| `docs/documentacion-general` | #13 | Segunda actualización documental; se reutiliza la misma rama para registrar los PR #14 a #17. |
+| `docs/documentacion-general` | #13 | Segunda actualización documental. |
 | `feature/consulta-productos` | #14 | Homero: esquemas base, tipos inferidos, fixture, handler y consulta validada; 18 tests y refactores de escenarios. |
-| `feature/respuestas-productos` | #15 | Matias: interfaz discriminada, normalización, respuestas ampliadas internas, descripciones y dos tests de café. Endpoints aún sin conectar. |
-| `feature/f1-carrito` | #16 | Federico: reducer, Context, hook, subtotales y formato; 13 tests y ticks de F1. Pendientes de integración de tipos y lint. |
+| `feature/respuestas-productos` | #15 | Matias: interfaz discriminada, normalización, servicio de respuestas, descripciones y dos tests de café; conectado a HTTP después en #18. |
+| `feature/f1-carrito` | #16 | Federico: reducer, Context, hook, subtotales y formato; 13 tests y ticks de F1. Integración de tipos/lint corregida después en #20. |
 | `feature/carga-menu` | #17 | Homero: `MenuPage` integrada en `App`, `useMenu`, indicador/error accesibles y reintento; seis tests del menú y uno nuevo de App. |
+| `docs/documentacion-general` | #19 | Actualización hasta #17 y registro de los problemas de integración, ya corregidos. Se reutiliza esta rama para el estado hasta #21. |
+| `feature/actualizar-get-productos` | #18 | Matias: conecta normalización y respuestas ampliadas a ambos GET, actualiza tests y conserva el 404. |
+| `fix/integracion-carrito` | #20 | Homero: contrato ampliado Zod y tipos inferidos, consulta/mocks actualizados, fixtures compartidos, corrección de import/mocks del carrito y separación Context/proveedor. 19 tests nuevos. |
+| `feature/proveedor-carrito` | #21 | Homero: monta `CarritoProvider` en `App` y prueba el estado compartido entre botón y resumen independientes. Ciclo RED/GREEN/REFACTOR. |
 
-H2 conserva pendiente el contrato ampliado y los pedidos. La carga base de H3 está implementada; falta conectar selector y pastelería. M1 sigue parcial porque el servicio no se usa en los controladores. F1 tiene lógica y tests, con problemas de integración por corregir; F2 y F3 siguen pendientes.
+H2 ya consume el contrato ampliado de productos y conserva pendientes los pedidos. H3 espera selector y pastelería para completar su composición. M1 ya funciona por HTTP, con cobertura adicional aún pendiente. F1 y el montaje del proveedor están integrados; F2 y F3 siguen pendientes.
 
 El reparto anterior del Parcial I sirve como referencia de experiencia. Para equilibrar TP3, cada integrante tendrá implementación y pruebas propias; Federico pasa a ocuparse del carrito y los E2E, porque los reportes ya están implementados.
 
 ## 2. Acuerdos iniciales y contrato compartido
 
-Están implementadas la infraestructura, el contrato de errores, la carga base de productos y las operaciones del carrito. Falta cerrar los contratos ampliados de productos/pedidos, mesas y seed, y resolver la compatibilidad de tipos entre el carrito y Zod.
+Están implementadas infraestructura, contrato ampliado de productos, errores, carga del menú y operaciones del carrito compartido. Faltan los contratos de pedidos/mesas y seed y las pantallas restantes.
 
 1. **Ubicación y herramientas:** `frontend/` ya utiliza Vite + React + TypeScript estricto y una regla de ESLint que rechaza `any` explícito. Vite 7, Vitest 3, MSW 2 y Zod 4 están instalados con versiones exactas y lockfile. El requisito de Node es `^20.19.0 || >=22.12.0`. La API mantiene Jest y Supertest en su propio paquete.
-2. **Productos:** conservar IDs y precios. HTTP todavía devuelve solo `id`, `nombre` y `precio`. La propuesta anterior usaba `tipo: "expreso" | "filtrado" | "pasteleria"` y `tamanio`. El servicio nuevo de Matias usa `tipo: "cafe"`, `tipoCafe`, `tamaño` y `variedad: { nombre, descripcion }` para café; para pastelería, `tipo: "pasteleria"` y `variedad` textual. Acordar y documentar la estructura definitiva antes de conectarla a HTTP y Zod/MSW. El PDF permite variar los nombres conservando la información. `gramosCafe` es opcional como campo de respuesta; el frontend no calcula precios de dominio.
+2. **Productos, contrato vigente:** ambos GET conservan `id`, `nombre` y `precio`. Para café: `tipo: "cafe"`, `tipoCafe: "expreso" | "filtrado"`, `tamaño` y `variedad: { nombre, descripcion }`. Para pastelería: `tipo: "pasteleria"` y variedad textual. Zod y MSW ya usan esta estructura. Reemplaza la propuesta anterior con `tipo: "expreso"` y `tamanio`; el PDF permite variar nombres conservando la información. `gramosCafe` no se expone ni se necesita para calcular precios en el frontend.
 3. **Mesas:** acordar un conjunto explícito de mesas válidas que incluya la 4 del ejemplo. No hay una cantidad de mesas definida en el PDF. `mesaId` omitido significa retiro en barra; una mesa no existente enviada a la API produce 400 o 404. Un valor ausente o inválido de `?mesa` en la URL se interpreta como barra y no se envía como una mesa inválida.
 4. **Pedidos:** `POST /pedidos` acepta `{ mesaId?, items: [{ productoId, cantidad }] }` y asigna `pendiente` por defecto. Conservar la respuesta actual `{ mensaje, pedido }`; `pedido` debe incluir `id`, `items`, `estado`, `total` y `mesaId` cuando corresponda. Mantener `GET /pedidos/:id` como objeto directo del pedido con esa información.
 5. **Precios:** la API define los precios unitarios y el total confirmado. El carrito solo multiplica los precios recibidos por las cantidades y suma subtotales orientativos. La confirmación muestra exactamente el total devuelto por la API.
-6. **Red y validación:** `solicitarJson()` devuelve `unknown` y maneja HTTP/JSON/red. `solicitarValidado()` aplica Zod y devuelve el tipo inferido. `listarProductos()` ya la usa con `esquemaProductosBase`; `MenuPage` consume `useMenu` sin `fetch` directo. Faltan el contrato ampliado de productos y los esquemas y funciones de pedidos.
+6. **Red y validación:** `solicitarJson()` devuelve `unknown` y maneja HTTP/JSON/red. `solicitarValidado()` aplica Zod y devuelve el tipo inferido. `listarProductos(): Promise<Productos>` usa `esquemaProductos`, una lista de la unión discriminada de café/pastelería. `useMenu` conserva esos datos; los componentes no hacen `fetch` directo. Quedan pendientes los esquemas y funciones de pedidos.
 7. **Conectividad:** el proxy de Vite hacia Express ya está configurado para `/productos` y `/pedidos`. README y FRONTEND documentan los puertos y las rutas de desarrollo; la preparación E2E se completará con Federico y Nicolas.
 8. **Seguimiento:** ofrecer un botón para consultar `GET /pedidos/:id` sin recargar la página. El PDF no exige implementar un endpoint nuevo para cambiar el estado.
 9. **Preparación de tests:** acordar respuestas de `POST /__test__/reset` y `POST /__test__/seed`, y datos iniciales deterministas. Ambas rutas quedan ausentes fuera de `NODE_ENV=test`.
@@ -90,11 +94,12 @@ Cada integrante escribe primero los tests de su funcionalidad y luego la impleme
 - [x] Configurar el proxy de Vite y scripts para desarrollo, compilación y pruebas.
 - [x] Preparar la estructura de módulos y el montaje inicial de `App`.
 - [x] Integrar comandos raíz para que `npm test` ejecute las pruebas de API y frontend sin necesitar un servidor API levantado.
-- [ ] Alinear con Federico los tipos del carrito y resolver lint; montar el `CarritoProvider` ya implementado en la aplicación.
+- [x] Alinear los tipos del carrito con Zod y resolver lint separando Context/proveedor (PR #20).
+- [x] Montar `CarritoProvider` en `App` y probar la actualización compartida entre dos consumidores (PR #21).
 - [ ] Integrar `npm run test:e2e` con la configuración de Playwright de Federico.
 - [ ] Completar la verificación final de instalación limpia y arranque de ambas aplicaciones.
 
-La guía está en [FRONTEND.md](FRONTEND.md). Además de la infraestructura, ya están implementados el cliente, contrato base de productos, mocks de éxito y error y la carga del menú. La compilación sigue comprobando los tipos de los tests, aunque actualmente falla por los imports del carrito.
+La guía está en [FRONTEND.md](FRONTEND.md). Están implementados el cliente, contrato ampliado de productos, mocks de éxito/error, carga del menú y proveedor montado. La compilación de la aplicación y sus tests y lint vuelven a pasar. La instalación limpia, arranque conjunto y comando E2E siguen pendientes.
 
 ### H2. Implementar contratos y cliente HTTP
 
@@ -103,8 +108,8 @@ La guía está en [FRONTEND.md](FRONTEND.md). Además de la infraestructura, ya 
 - [x] Preparar `solicitarJson(ruta, opciones?)` como base del módulo HTTP, con rutas del mismo origen y opciones `RequestInit`.
 - [x] Detectar respuestas HTTP fallidas, validar su cuerpo con `esquemaError` y lanzar un error que conserve el mensaje de la API.
 - [x] Cubrir el contrato de errores con diez pruebas unitarias y el cliente con tres pruebas MSW para 400, 404 y 500.
-- [x] Crear `esquemaProductoBase`, `esquemaProductosBase`, `ProductoBase` y `ProductosBase` para el contrato HTTP actual.
-- [ ] Ampliar los esquemas de productos cuando M1 exponga el contrato definitivo.
+- [x] Conservar esquemas y tipos base de los campos comunes de productos.
+- [x] Implementar `esquemaProducto` y `esquemaProductos` para el contrato ampliado y derivar `Producto` y `Productos` con `z.infer`.
 - [ ] Crear los esquemas de creación y consulta de pedido según el contrato de N1.
 - [x] Implementar `solicitarValidado()` para validar respuestas exitosas con el esquema recibido y devolver su tipo con `z.infer`.
 - [x] Informar con un mensaje claro cuando una respuesta de error no cumpla el contrato: campo ausente, mensaje no textual o respuesta nula.
@@ -115,11 +120,12 @@ La guía está en [FRONTEND.md](FRONTEND.md). Además de la infraestructura, ya 
 - [x] Verificar los handlers compartidos con cuatro escenarios: ID de pedido inválido, producto inexistente, pedido sin ítems y error interno.
 - [x] Entregar `listarProductos()` mediante el cliente HTTP con validación de la lista.
 - [x] Preparar `productosApi` y `crearHandlerProductos()` para respuestas exitosas del contrato actual, incluidas listas vacías.
-- [x] Cubrir productos con 11 tests de esquemas, dos del handler y cinco de la consulta.
+- [x] Cubrir productos con 11 tests base, 16 del esquema ampliado, dos del handler y ocho de la consulta.
+- [x] Actualizar `listarProductos()`, `useMenu`, handler y fixtures al contrato ampliado; reutilizar `cafeApi` y `pasteleriaApi` en los tests del contrato y carrito.
 - [ ] Entregar las funciones de crear pedido y consultar pedido por ID, con fixtures y handlers de éxito.
-- [ ] Adaptar fixtures y pruebas al contrato ampliado y cubrir el cuerpo real enviado a `POST /pedidos`.
+- [ ] Cubrir el cuerpo real enviado a `POST /pedidos` cuando se implemente su función.
 
-H2 ya dispone de contratos de errores y productos base, cliente, consulta y mocks reutilizables. `productosApi` contiene dos ejemplos reales (IDs 5 y 19), no el catálogo completo. Los módulos de pedidos siguen vacíos. Los casos de API caída y respuesta inválida del menú pasaron con el código existente y se registraron como cobertura de integración, sin inventar ciclos RED/GREEN.
+H2 ya dispone de contratos de errores y productos ampliados, cliente, consulta y mocks reutilizables. `productosApi` reúne `cafeApi` y `pasteleriaApi` (IDs 5 y 19) con todos sus campos; no es el catálogo completo. Los módulos de pedidos siguen vacíos. Los casos de API caída y respuesta inválida del menú se registraron como cobertura existente, sin inventar ciclos RED/GREEN.
 
 ### H3. Cargar el menú y reforzar errores de API
 
@@ -134,8 +140,8 @@ H2 ya dispone de contratos de errores y productos base, cliente, consulta y mock
 ### H4. Documentar y coordinar la integración
 
 - [x] Centralizar en README y FRONTEND la instalación, ejecución, configuraciones, comandos y pruebas disponibles de la base, junto con el contrato actual de la API.
-- [x] Actualizar README, FRONTEND y planificación con los PR #14 a #17, avances de Homero/Matias/Federico y los fallos actuales de compilación/lint.
-- [x] Documentar el contrato HTTP base consumido por el menú y distinguirlo del servicio ampliado interno de Matias.
+- [x] Actualizar README, FRONTEND y planificación hasta el PR #21, registrando la integración HTTP, las correcciones y el proveedor montado.
+- [x] Documentar el contrato público ampliado de productos, con ejemplos de café/pastelería y sus esquemas Zod.
 - [ ] Completar los contratos HTTP definitivos y los comandos E2E cuando se implementen.
 - [ ] Documentar las decisiones de mesas, el ejemplo de pedido del PDF y los comandos de reset/seed para E2E.
 - [ ] Coordinar la comprobación final de scripts, compilación y ausencia de conflictos entre configuraciones.
@@ -155,10 +161,10 @@ H2 ya dispone de contratos de errores y productos base, cliente, consulta y mock
 - [x] Implementar y probar una función común de formato de precio para que Matias y Nicolas la reutilicen.
 - [x] Escribir tests unitarios de cada acción, productos repetidos, eliminación, carrito vacío y subtotales.
 - [x] Agregar `CarritoProvider`, `useCarrito` y cuatro pruebas de interacción con un componente de prueba.
-- [ ] Corregir con Homero los imports de `Producto` inexistente y alinear el carrito con los tipos inferidos del contrato disponible.
-- [ ] Resolver `react-refresh/only-export-components` separando el Context y el proveedor antes de integrar el carrito en `App`.
+- [x] Alinear los imports y mocks del carrito con el tipo `Producto` inferido del contrato ampliado; corrección de Homero en PR #20.
+- [x] Resolver `react-refresh/only-export-components` separando `carrito.context.ts` de `CarritoContext.tsx`; corrección de Homero en PR #20.
 
-El PR #16 ya marcaba los seis ticks originales de F1. Se conserva el avance y se aclara su alcance: seis tests del reducer, cuatro del Context, dos de subtotales y uno de formato, **13 en total**. Las operaciones son `AGREGAR`, `RESTAR` y `ELIMINAR`; repetir un producto acumula cantidad y restar desde 1 lo quita. `formatoPrecio(1000)` devuelve `$1.000`. La interfaz F2 y los E2E F3 no están implementados. El componente de prueba del Context no es la interfaz final del carrito, y sus mocks no prueban el contrato HTTP.
+F1 conserva los 13 tests de Federico: seis del reducer, cuatro del Context, dos de subtotales y uno de formato. Las operaciones son `AGREGAR`, `RESTAR` y `ELIMINAR`; repetir un producto acumula cantidad y restar desde 1 lo quita. `formatoPrecio(1000)` devuelve `$1.000`. Homero corrigió su integración en #20 y montó el proveedor con un test adicional de App en #21. La interfaz F2 y los E2E F3 siguen pendientes; los componentes de prueba no son la interfaz final del carrito.
 
 ### F2. Construir la interfaz del carrito
 
@@ -193,31 +199,33 @@ El PR #16 ya marcaba los seis ticks originales de F1. Se conserva el avance y se
 - [x] Incorporar descripciones de Brasil, Colombia y Etiopía en `formar-respuesta.service.ts`.
 - [x] Implementar `normalizarInput()`, `formarRespuestaObjeto()` y `formarRespuestaArray()`.
 - [x] Agregar dos tests unitarios del armado de respuestas: un café y una lista de dos cafés.
-- [ ] Hacer que la API devuelva el tipo de producto y, para los cafés, el tamaño, el origen y su descripción de acidez, cuerpo y notas.
-- [ ] Ampliar `GET /productos` y `GET /productos/:id` con una representación coherente de café y pastelería.
-- [ ] Evitar que el frontend deba extraer tipo, tamaño u origen del texto de `nombre`.
-- [ ] Actualizar tests de ambos endpoints y agregar cobertura de los nuevos campos y tipos; mantener la regresión de precios y el 404 de producto inexistente.
-- [ ] Entregar ejemplos reales del contrato a Homero para Zod y MSW.
+- [x] Devolver tipo, bebida, tamaño, origen y descripción en el JSON de cafés (PR #18).
+- [x] Ampliar ambos GET con las representaciones de café y pastelería del servicio de respuestas (PR #18).
+- [x] Exponer campos separados para seleccionar sin extraer palabras de `nombre`.
+- [x] Actualizar tests de ambos GET para el primer expreso y conservar el 404.
+- [x] Disponer de ejemplos públicos de café/pastelería ya documentados y usados por Zod/MSW en #20.
+- [ ] Completar cobertura HTTP de filtrados y pastelería, restaurar la longitud esperada de 20 productos y reforzar la regresión de precios/campos.
 
-El PR #2 agrega búsqueda interna y el PR #15 prepara la representación ampliada. Los controladores todavía serializan solo `id`, `nombre` y `precio`; no llaman al servicio nuevo. Por eso M1 continúa parcial. Sus dos tests nuevos no cubren pastelería ni ambos endpoints ampliados. Los textos actuales de los tres orígenes y un ejemplo exacto del servicio están en [README.md](README.md#respuestas-ampliadas-preparadas-por-matias-todavía-internas).
+El PR #2 agrega búsqueda interna, #15 prepara las respuestas y #18 las conecta a ambos GET. M1 ya entrega la información al frontend; queda pendiente ampliar su cobertura. Los tests HTTP comprueban el primer expreso y el 404; los dos tests del servicio también usan cafés. El PR #18 eliminó la aserción de longitud 20. Los textos y ejemplos del contrato público están en [README.md](README.md#contrato-público-de-productos).
 
-**Qué datos deben salir de la API:** el servicio ya puede armar los campos separados, pero falta devolverlos por HTTP. La propuesta anterior era la siguiente; **no es el JSON actual del endpoint ni coincide en todos sus nombres con el servicio del PR #15**:
+**Ejemplo vigente:** `GET /productos/5` devuelve el contrato ya consumido por el frontend:
 
 ```json
 {
   "id": 5,
   "nombre": "Expreso Mediano Colombia",
-  "tipo": "expreso",
-  "tamanio": "mediano",
+  "tipo": "cafe",
+  "tipoCafe": "expreso",
+  "tamaño": "mediano",
   "variedad": {
-    "nombre": "Colombia",
-    "descripcion": "Acidez media, cuerpo equilibrado y notas cítricas y florales"
+    "nombre": "colombia",
+    "descripcion": "Acidez muy viva, cuerpo ligero y notas frutales"
   },
   "precio": 7360
 }
 ```
 
-El servicio del PR #15 usa `tipo: "cafe"`, `tipoCafe: "expreso" | "filtrado"`, `tamaño` con ñ y nombres de origen en minúsculas dentro de `variedad`. Para pastelería incluye `tipo: "pasteleria"` y `variedad` textual. Esta diferencia debe resolverse como contrato compartido antes de modificar endpoints, Zod y MSW; no se debe deducir tipo, tamaño u origen desde `nombre`.
+Este contrato usa `tipo: "cafe"`, bebida en `tipoCafe`, `tamaño` con ñ y orígenes en minúsculas dentro de `variedad`. La pastelería usa `tipo: "pasteleria"` y variedad textual. La propuesta anterior con `tipo: "expreso"` y `tamanio` quedó reemplazada; el PDF permite variar nombres conservando la información. Zod, consulta, menú y fixtures ya están alineados.
 
 ### M2. Implementar el selector de café y la pastelería
 
@@ -290,7 +298,7 @@ Los nombres de archivos nuevos son orientativos. Para evitar conflictos, Homero 
 
 El flujo utilizado ya integra las ramas por funcionalidad en `develop` mediante PR; allí están la inicialización y los avances registrados en la sección 1. La entrega final en `main` sigue pendiente y es requisito de la consigna. Se deben conservar los commits que muestran RED, GREEN y REFACTOR.
 
-**Próximo paso de Homero:** integrar esta documentación mediante PR y abrir una rama de corrección con Federico para alinear el tipo de producto del carrito y las exportaciones del Context. Cuando compilación y lint vuelvan a pasar, montar `CarritoProvider` con su test. Después completar la instalación limpia y arranque conjunto pendientes de H1. Los contratos ampliados de M1/N1 siguen siendo dependencias para cerrar H2 y conectar las demás pantallas. Cualquier edición de código requiere autorización previa del usuario.
+**Próximo paso de Homero:** integrar esta documentación y verificar la instalación limpia con `npm run install:all`, iniciar backend y frontend con los comandos del README y registrar que el menú consulta la API real. Las correcciones del carrito, proveedor y contrato ampliado ya están resueltas. H2 conserva pendientes los contratos/funciones de pedidos de N1 y H3 la conexión con selector/pastelería de M2. Cualquier edición de código requiere autorización previa del usuario.
 
 ## 9. Cobertura de las nueve funcionalidades del PDF
 
@@ -326,21 +334,23 @@ El flujo utilizado ya integra las ramas por funcionalidad en `develop` mediante 
 
 - [x] API original y `frontend/` conviven en el mismo repositorio.
 - [ ] Los nueve comportamientos del menú están implementados contra la API del grupo.
-- [ ] Ambos endpoints de productos incluyen precio de dominio y tipo, más la información necesaria para la selección.
+- [x] Ambos endpoints de productos incluyen precio de dominio y clasificación, tamaño/origen y descripción según el tipo.
+- [ ] Completar la cobertura HTTP de todos los tipos y de los 20 productos.
 - [ ] Pedidos admiten mesa opcional, validan sus datos y devuelven estado, ítems y total; errores previstos responden 400/404 con `{ error }`.
 - [x] Proxy de Vite o CORS resuelve la conexión desde el navegador.
 - [ ] Reset y seed funcionan por HTTP solo con `NODE_ENV=test` y se ejecutan antes de cada E2E.
 - [x] Versiones exigidas fijadas y configuración de TypeScript estricto sin `any` explícito en el frontend.
 - [x] Mecanismo genérico de validación de respuestas exitosas con Zod y tipos inferidos, y manejo de errores HTTP/JSON/red.
-- [ ] Cerrar los esquemas definitivos de todas las respuestas: ampliar el contrato base de productos y crear los contratos de pedidos.
+- [x] Contrato público de productos validado con Zod y tipos inferidos, conservando los campos ampliados.
+- [ ] Crear los esquemas y funciones de las respuestas de pedidos.
 - [x] Carga del menú mediante unión discriminada, cliente HTTP único y ausencia de `fetch` en componentes.
 - [x] Reducer y Context del carrito implementados y probados.
-- [ ] Resolver los tipos del carrito y montar su proveedor en la aplicación.
+- [x] Tipos y fixtures del carrito alineados; Context separado del proveedor, montado en App y probado.
 - [ ] Precios y total confirmado salen de API; el subtotal del carrito está identificado como orientativo.
 - [ ] Bootstrap personalizado con variables SASS antes de su importación y controles etiquetados.
 - [ ] Interfaz funcional a 375 px sin scroll horizontal.
-- [x] Pruebas implementadas en verde: 44 de backend y 73 de frontend, verificadas el 5 de noviembre de 2026.
-- [ ] Recuperar compilación del frontend y lint: tipo `Producto` no exportado y exportaciones de `CarritoContext.tsx`.
+- [x] Pruebas implementadas en verde: 44 de backend y 93 de frontend, verificadas el 5 de noviembre de 2026.
+- [x] Compilación de backend/frontend y lint correctos, incluidos tipos de los tests.
 - [ ] Completar y aprobar los niveles de pruebas exigidos para todas las funcionalidades, incluidos los E2E reales.
 - [ ] README explica instalación, API, frontend, contratos y todos los comandos de pruebas.
 - [ ] Ramas por funcionalidad integradas por PR a `main`, TDD visible en commits y participación de los cuatro integrantes.
