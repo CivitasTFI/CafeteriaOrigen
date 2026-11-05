@@ -7,7 +7,7 @@ import { crearHandlerError, crearHandlerProductos } from "../mocks/handlers";
 import { server } from "../mocks/server";
 
 describe("Consulta del listado de productos", () => {
-  test("devuelve los productos de GET /productos con sus precios", async () => {
+  test("devuelve los productos de GET /productos con sus precios y todos los campos ampliados", async () => {
     server.use(crearHandlerProductos(productosApi));
 
     await expect(listarProductos()).resolves.toEqual(productosApi);
@@ -27,6 +27,20 @@ describe("Consulta del listado de productos", () => {
     {
       caso: "un producto tiene el precio como texto",
       cuerpo: [productosApi[0], { ...productosApi[1], precio: "2500" }],
+    },
+    {
+      caso: "un producto no incluye tipo",
+      cuerpo: [
+        { id: 5, nombre: "Expreso Mediano Colombia", precio: 7360 },
+      ],
+    },
+    {
+      caso: "un café tiene una bebida desconocida",
+      cuerpo: [{ ...productosApi[0], tipoCafe: "latte" }],
+    },
+    {
+      caso: "el origen de un café no incluye descripción",
+      cuerpo: [{ ...productosApi[0], variedad: { nombre: "colombia" } }],
     },
   ])("rechaza una respuesta 200 si $caso", async ({ cuerpo }) => {
     const url = new URL("/productos", window.location.origin).href;
