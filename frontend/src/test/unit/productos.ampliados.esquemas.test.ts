@@ -3,19 +3,10 @@ import {
   esquemaProducto,
   esquemaProductos,
 } from "../../api/esquemas/productos";
-
-const expreso = {
-  id: 5,
-  nombre: "Expreso Mediano Colombia",
-  precio: 7360,
-  tipo: "cafe",
-  tipoCafe: "expreso",
-  tamaño: "mediano",
-  variedad: {
-    nombre: "colombia",
-    descripcion: "Acidez muy viva, cuerpo ligero y notas frutales",
-  },
-};
+import {
+  cafeApi as expreso,
+  pasteleriaApi as pasteleria,
+} from "../fixtures/productos";
 
 const filtrado = {
   id: 10,
@@ -28,14 +19,6 @@ const filtrado = {
     nombre: "brasil",
     descripcion: "Acidez media, cuerpo equilibrado, notas citricas y florales",
   },
-};
-
-const pasteleria = {
-  id: 19,
-  nombre: "Muffin de Chocolate",
-  precio: 2500,
-  tipo: "pasteleria",
-  variedad: "muffin de chocolate",
 };
 
 describe("Contrato ampliado de productos de la API", () => {
