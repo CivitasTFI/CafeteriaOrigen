@@ -1,4 +1,4 @@
-import { Producto } from "../api/esquemas/productos";
+import type { Producto } from "../api/esquemas/productos";
 
 export type AccionCarrito = | { type: "AGREGAR"; producto: Producto } 
                      | { type: "RESTAR"; producto: Producto }
