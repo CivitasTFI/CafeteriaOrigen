@@ -6,6 +6,12 @@ import {
     obtenerPedido
 } from "../data/pedidos";
 
+function validarImporteSeguro(importe: number, mensajeError: string): void {
+    if (!Number.isSafeInteger(importe)) {
+        throw new Error(mensajeError);
+    }
+}
+
 // Valida los datos del pedido
 export function validarPedido(
     pedido: { productoId: number; cantidad: number }[]
@@ -38,17 +44,14 @@ export function validarPedido(
 
         const subtotal = producto.calcularPrecio() * item.cantidad;
 
-        if (!Number.isSafeInteger(subtotal)) {
-            throw new Error(
-                `El subtotal del producto ${item.productoId} supera el rango de enteros seguros`
-            );
-        }
+        validarImporteSeguro(
+            subtotal,
+            `El subtotal del producto ${item.productoId} supera el rango de enteros seguros`
+        );
 
         total += subtotal;
 
-        if (!Number.isSafeInteger(total)) {
-            throw new Error("El total del pedido supera el rango de enteros seguros");
-        }
+        validarImporteSeguro(total, "El total del pedido supera el rango de enteros seguros");
     }
 }
 
