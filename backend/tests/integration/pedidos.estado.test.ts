@@ -42,4 +42,32 @@ describe("Validación del estado de los pedidos", () => {
             facturacion: { facturacion: 5020 }
         });
     });
+
+    it("POST /pedidos asigna pendiente al omitir estado y lo conserva en GET /pedidos/:id", async () => {
+        const items = [{ productoId: 1, cantidad: 2 }];
+
+        const creacion = await request(app)
+            .post("/pedidos")
+            .send({ items })
+            .expect(201);
+
+        const consulta = await request(app)
+            .get(`/pedidos/${creacion.body.pedido.id}`)
+            .expect(200);
+
+        const pedidoEsperado = {
+            id: 1,
+            items,
+            estado: "pendiente",
+            total: 10040
+        };
+
+        expect({
+            creado: creacion.body.pedido,
+            consultado: consulta.body
+        }).toEqual({
+            creado: pedidoEsperado,
+            consultado: pedidoEsperado
+        });
+    });
 });
