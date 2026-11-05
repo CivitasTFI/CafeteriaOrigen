@@ -5,10 +5,11 @@ type ItemCarritoProps = {
 };
 
 export function ItemCarrito({ item }: ItemCarritoProps) {
+    const { nombre, cantidad } = item;
     return (
         <>
-            <p>{item.nombre}</p>
-            <p>Cantidad: {item.cantidad}</p>
+            <p>{nombre}</p>
+            <p>Cantidad: {cantidad}</p>
         </>
     );
 }
