@@ -9,8 +9,7 @@ export default function MenuPage() {
   }
 
   if (estado.estado === "error") {
-    // El mensaje visible y el reintento se incorporan en el siguiente ciclo TDD.
-    return null;
+    return <p role="alert">{estado.mensaje}</p>;
   }
 
   return (
