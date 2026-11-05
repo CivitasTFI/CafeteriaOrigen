@@ -93,4 +93,20 @@ describe("Carrito componente", () => {
         screen.getByText("Expreso Grande"),
     ).toBeInTheDocument();
 });
+    it("Muestra la cantidad acumulada del mismo producto", async () => {
+        const user = userEvent.setup();
+
+        render(
+            <CarritoProvider>
+                <AgregarProductoDePrueba producto={productoMock} />
+                <Carrito />
+            </CarritoProvider>,
+        );
+        const botonAgregar = screen.getByRole("button", { name: "Agregar Expeso Mediano " });
+
+        await user.click(botonAgregar);
+        await user.click(botonAgregar);
+
+        expect(screen.getByText("Cantidad: 2")).toBeInTheDocument();
+    })
 })
