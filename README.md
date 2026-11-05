@@ -9,7 +9,9 @@ Proyecto del Grupo 14 para Programación IV de la Tecnicatura Universitaria en P
 | Nicolás Espulef | 22901 |
 | Federico Heinrich | 21317 |
 
-La API del Parcial I está en `backend/`. En `frontend/` están la base de React y TypeScript para el TP3, el cliente HTTP con manejo de errores y validación genérica mediante Zod, y mocks compartidos de errores. La pantalla inicial muestra el nombre de la cafetería; las funcionalidades del menú todavía están pendientes.
+La API del Parcial I está en `backend/`. El frontend de React y TypeScript ya carga los productos de la API, valida la respuesta con Zod y muestra sus nombres, un indicador de carga o un error con reintento. También están implementados el Context y reducer del carrito, los subtotales orientativos y el formato de precios, todavía sin integrar en la pantalla. La selección de café, pastelería, interfaz del carrito y pedidos siguen pendientes.
+
+Estado verificado el **5 de noviembre de 2026**, hasta el PR #17: **44 tests de backend y 73 de frontend aprobados**. La compilación del frontend y lint tienen problemas de integración del carrito, detallados en [Estado de la base](#estado-de-la-base).
 
 ## Documentación
 
@@ -109,6 +111,15 @@ npm run test:frontend -- src/test/unit/esquemas.test.ts
 npm run test:frontend -- src/test/integration/cliente.test.ts
 npm run test:frontend -- src/test/integration/respuestas.test.ts
 npm run test:frontend -- src/test/integration/handlersErrores.test.ts
+npm --prefix backend test -- --runInBand tests/unit/formar-respuesta.test.ts
+npm run test:frontend -- src/test/unit/productos.esquemas.test.ts
+npm run test:frontend -- src/test/integration/handlersProductos.test.ts
+npm run test:frontend -- src/test/integration/productos.test.ts
+npm run test:frontend -- src/test/integration/menu.test.tsx
+npm run test:frontend -- src/test/unit/carrito.reducer.test.ts
+npm run test:frontend -- src/test/integration/carrito.context.test.tsx
+npm run test:frontend -- src/test/unit/subtotalCarrito.test.ts
+npm run test:frontend -- src/test/unit/formatoPrecio.test.ts
 ```
 
 Las pruebas normales no requieren servidores externos levantados. La prueba del proxy abre y cierra su propio servidor Vite temporal en un puerto libre y simula la API con MSW.
@@ -137,14 +148,16 @@ El comando de preview sirve el frontend compilado y, en esta versión de Vite, h
 
 ## Estado de la base
 
-La verificación del **4 de noviembre de 2026**, con los avances integrados hasta el PR #12, registró:
+La verificación del **5 de noviembre de 2026**, con los avances integrados hasta el PR #17 (`b99c703`), registró:
 
 | Área | Resultado |
 | --- | --- |
-| Backend | 10 suites y 42 tests de Jest/Supertest. |
-| Frontend | 8 archivos y 35 tests con Vitest: 7 de infraestructura y 28 de contratos, cliente HTTP, validación y mocks de errores. |
-| Compilación | Backend y frontend compilados; tipos de tests y configuración de Vitest incluidos. |
-| Lint | Frontend sin errores de ESLint. |
+| Backend | 11 suites y 44 tests de Jest/Supertest aprobados. Compilación correcta. |
+| Frontend | 16 archivos y 73 tests de Vitest aprobados. Incluyen productos, menú y lógica del carrito. |
+| Compilación del frontend | Falla con TS2305: el carrito importa `Producto`, pero el módulo de esquemas exporta `ProductoBase` y `ProductosBase`. |
+| Lint | Falla `react-refresh/only-export-components` en `CarritoContext.tsx`, por exportar el Context y el proveedor desde el mismo archivo. |
+
+`npm test` pasa porque ejecuta Jest y Vitest; no sustituye la comprobación estática de `npm run build`. El tipo faltante afecta al reducer, al Context y a dos archivos de pruebas. Homero y Federico deben alinear el contrato del carrito con el esquema disponible y separar las exportaciones del Context y el proveedor. Estos problemas se registran aquí; esta actualización documental no modifica código.
 
 Los avances integrados en `develop` incluyen:
 
@@ -157,17 +170,21 @@ Los avances integrados en `develop` incluyen:
 - [x] Fixtures `erroresApi` y handler reutilizable `crearHandlerError()` para GET/POST, con cuatro escenarios probados.
 - [x] Refactores separados para interpretación de errores, petición HTTP y preparación de pruebas con MSW.
 - [x] Campos internos de clasificación de productos y servicio de búsqueda con tres tests de backend.
+- [x] Homero, PR #14: esquemas Zod del producto y listado actuales, `listarProductos()`, fixture y handler compartidos de productos; 18 tests nuevos.
+- [x] Matias, PR #15: normalización y armado interno de respuestas de café/pastelería, descripciones de los tres orígenes y dos tests unitarios de respuestas de café.
+- [x] Federico, PR #16: reducer, `CarritoProvider`, `useCarrito`, subtotales y formato de precios; 13 tests nuevos. Los ticks de F1 ya estaban incorporados en ese merge.
+- [x] Homero, PR #17: `MenuPage` integrada en `App`, hook `useMenu`, mensajes accesibles y reintento; seis tests del menú y uno nuevo de integración en `App`.
 
-La parte genérica de validación está lista: `solicitarJson()` es la lectura de bajo nivel con resultado `unknown`, y `solicitarValidado()` aplica el esquema recibido. Las futuras funciones de productos y pedidos deben usar esta última. Faltan los esquemas definitivos, las funciones específicas y los fixtures/handlers de respuestas exitosas. También siguen pendientes el menú, el selector, el carrito, los pedidos desde la interfaz, los estilos y los E2E. Los ticks detallados por integrante están en [planificacion.md](planificacion.md).
+`listarProductos()` usa `solicitarValidado()` con `esquemaProductosBase`: valida `id` entero positivo, `nombre` textual y `precio` numérico no negativo. La pantalla muestra los nombres recibidos; no implementa todavía el selector ni los botones de agregar. El contrato ampliado de productos, los esquemas y funciones de pedidos, la integración visual del carrito, Bootstrap/SASS y los E2E siguen pendientes. Los ticks detallados por integrante están en [planificacion.md](planificacion.md).
 
-Los endpoints del backend conservan el contrato del Parcial I descrito debajo, con el manejo de JSON inválido ya corregido. Los campos internos nuevos de los productos todavía no se exponen por HTTP. Esa ampliación, `mesaId`, estado predeterminado y reset/seed siguen pendientes y se detallan en [la planificación](planificacion.md).
+Los endpoints del backend conservan el contrato del Parcial I descrito debajo. El servicio de respuestas de Matias todavía no está conectado a los controladores: los campos nuevos y las descripciones no se exponen por HTTP. También faltan `mesaId`, estado predeterminado y reset/seed. La instalación limpia y el arranque conjunto siguen pendientes de registro.
 
 ## Estructura general
 
 ```text
 CafeteriaOrigen/
 ├── backend/             # API, configuraciones, dependencias y pruebas de Jest
-├── frontend/            # Base React, configuraciones y pruebas de Vitest
+├── frontend/            # React, carga del menú, lógica del carrito y pruebas
 ├── package.json         # Comandos generales; sin dependencias propias
 ├── README.md            # Entrada y documentación del backend actual
 ├── FRONTEND.md          # Guía principal del frontend y sus pruebas
@@ -213,9 +230,42 @@ El ID del ejemplo supone que es el primer pedido desde el inicio del servidor. `
 
 Los modelos ya disponen de `tipo` (`cafe` o `pasteleria`) y, para cafés, `tipoCafe`, `tamaño` y `variedad`. `backend/src/services/buscar-producto.service.ts` permite filtrar el catálogo por esos parámetros opcionales; devuelve los productos encontrados o el texto `Producto no encontrado` si no hay coincidencias.
 
-Este servicio tiene tres pruebas unitarias, pero todavía no está conectado a rutas ni modifica las respuestas de `GET /productos` y `GET /productos/:id`. Las descripciones de acidez, cuerpo y notas de cada origen también siguen pendientes. La representación HTTP definitiva debe acordarse antes de completar los esquemas de productos del frontend.
+Este buscador tiene tres pruebas unitarias y no está conectado a rutas. El PR #15 agrega además `backend/src/services/formar-respuesta.service.ts`, con descripciones y funciones para preparar respuestas. Ninguno de estos servicios modifica aún el JSON de `GET /productos` o `GET /productos/:id`.
 
-Los campos guardados en el modelo deben incluirse también en el JSON de ambos endpoints. Para un café, el frontend necesita identificar bebida, tamaño y origen por campos separados, además de recibir la descripción de ese origen y el precio. La propuesta con un ejemplo concreto está en M1 de [planificacion.md](planificacion.md).
+### Respuestas ampliadas preparadas por Matias (todavía internas)
+
+| Función | Responsabilidad |
+| --- | --- |
+| `normalizarInput(producto)` | Lee los campos del modelo, calcula el precio del dominio y agrega la descripción del origen para los cafés. |
+| `formarRespuestaObjeto(productoNormalizado)` | Construye la representación de un producto normalizado. |
+| `formarRespuestaArray(productosNormalizados)` | Construye las representaciones de una lista normalizada. |
+
+Por ejemplo, para el producto 1, las funciones internas generan este objeto; **no es todavía la respuesta del endpoint**:
+
+```json
+{
+  "id": 1,
+  "nombre": "Expreso Pocillo Brasil",
+  "tipo": "cafe",
+  "tipoCafe": "expreso",
+  "tamaño": "pocillo",
+  "variedad": {
+    "nombre": "brasil",
+    "descripcion": "Acidez media, cuerpo equilibrado, notas citricas y florales"
+  },
+  "precio": 5020
+}
+```
+
+Para pastelería, el servicio conserva `tipo: "pasteleria"` y `variedad` como texto; por ejemplo, `"muffin de chocolate"`. La descripción del café queda en `variedad.descripcion` y el origen en `variedad.nombre`. Los textos actuales están en el diccionario `variedadesDescripcion` del servicio:
+
+| Origen | Descripción actual |
+| --- | --- |
+| `brasil` | Acidez media, cuerpo equilibrado, notas citricas y florales |
+| `colombia` | Acidez muy viva, cuerpo ligero y notas frutales |
+| `etiopia` | Acidez baja, cuerpo denso y notas de avellana |
+
+La implementación usa `tipo: "cafe"` más `tipoCafe`, y el campo `tamaño` con ñ. Es diferente de la propuesta anterior `tipo: "expreso"` y `tamanio`; hay que acordar la representación HTTP y adaptar Zod/MSW antes de consumirla. El PDF permite variar los nombres de campos conservando la información. M1 todavía requiere conectar ambos endpoints y probar cafés y pastelería, los campos nuevos, los precios y el 404. Las dos pruebas nuevas cubren un café y un arreglo de dos cafés; no certifican la integración HTTP ni la rama de pastelería.
 
 ### Productos
 
