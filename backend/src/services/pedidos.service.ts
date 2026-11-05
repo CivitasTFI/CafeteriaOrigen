@@ -17,14 +17,25 @@ export function validarPedido(
     pedido: { productoId: number; cantidad: number }[]
 ): void {
 
-    // Validar que haya items
-    if (!pedido || pedido.length === 0) {
+    // Validar que los items sean un arreglo no vacío
+    if (!Array.isArray(pedido)) {
+        throw new Error("Los items del pedido deben ser un arreglo");
+    }
+
+    if (pedido.length === 0) {
         throw new Error("El pedido debe contener al menos un producto");
     }
 
     let total = 0;
 
     for (const item of pedido) {
+        if (
+            typeof item !== "object" ||
+            item === null ||
+            Array.isArray(item)
+        ) {
+            throw new Error("Cada ítem del pedido debe ser un objeto");
+        }
 
         // Validar que la cantidad sea un entero positivo seguro
         if (!Number.isSafeInteger(item.cantidad) || item.cantidad <= 0) {

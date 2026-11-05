@@ -4,6 +4,14 @@ import { crearPedido, listarPedidos, buscarPedidoPorId } from "../services/pedid
 // POST pedidos
 export const postPedidos = (req: Request, res: Response) => {
     try {
+        if (
+            typeof req.body !== "object" ||
+            req.body === null ||
+            Array.isArray(req.body)
+        ) {
+            throw new Error("El cuerpo del pedido debe ser un objeto");
+        }
+
         const { items, estado } = req.body;
 
         const pedido = crearPedido(items, estado);
