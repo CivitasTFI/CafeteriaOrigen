@@ -1,3 +1,5 @@
+import IndicadorCarga from "../components/comunes/IndicadorCarga";
+
 export default function MenuPage() {
-  return <p role="status">Cargando menú...</p>;
+  return <IndicadorCarga mensaje="Cargando menú..." />;
 }
