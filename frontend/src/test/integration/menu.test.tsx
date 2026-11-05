@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { expect, test } from "vitest";
 import MenuPage from "../../pages/MenuPage";
 import { erroresApi } from "../fixtures/errores";
@@ -34,5 +35,26 @@ test("muestra el error de la API y deja de mostrar la carga ante un 500", async 
   expect(await screen.findByRole("alert")).toHaveTextContent(
     erroresApi.errorInterno.error,
   );
+  expect(screen.queryByRole("status")).not.toBeInTheDocument();
+});
+
+test("permite reintentar después de un error 500 y muestra los productos al recuperarse la API", async () => {
+  const usuario = userEvent.setup();
+  server.use(crearHandlerError("/productos", erroresApi.errorInterno, 500));
+
+  render(<MenuPage />);
+
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    erroresApi.errorInterno.error,
+  );
+
+  server.use(crearHandlerProductos(productosApi));
+  await usuario.click(screen.getByRole("button", { name: "Reintentar" }));
+
+  for (const producto of productosApi) {
+    expect(await screen.findByText(producto.nombre)).toBeInTheDocument();
+  }
+
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   expect(screen.queryByRole("status")).not.toBeInTheDocument();
 });
