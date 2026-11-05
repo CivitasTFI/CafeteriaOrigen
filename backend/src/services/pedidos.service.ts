@@ -1,6 +1,7 @@
 import { obtenerProducto } from "../data/catalogo";
 import { Pedido } from "../models/pedido";
 import { validarObjeto } from "../utils/validar-objeto";
+import { ErrorValidacion } from "../errors/error-validacion";
 import {
     guardarPedidos,
     obtenerPedidos,
@@ -9,13 +10,13 @@ import {
 
 function validarImporteSeguro(importe: number, mensajeError: string): void {
     if (!Number.isSafeInteger(importe)) {
-        throw new Error(mensajeError);
+        throw new ErrorValidacion(mensajeError);
     }
 }
 
 function validarEstadoPedido(estado: unknown): void {
     if (typeof estado !== "string" || estado.trim().length === 0) {
-        throw new Error("El estado del pedido debe ser un texto no vacío");
+        throw new ErrorValidacion("El estado del pedido debe ser un texto no vacío");
     }
 }
 
@@ -26,11 +27,11 @@ export function validarPedido(
 
     // Validar que los items sean un arreglo no vacío
     if (!Array.isArray(pedido)) {
-        throw new Error("Los items del pedido deben ser un arreglo");
+        throw new ErrorValidacion("Los items del pedido deben ser un arreglo");
     }
 
     if (pedido.length === 0) {
-        throw new Error("El pedido debe contener al menos un producto");
+        throw new ErrorValidacion("El pedido debe contener al menos un producto");
     }
 
     let total = 0;
@@ -40,7 +41,7 @@ export function validarPedido(
 
         // Validar que la cantidad sea un entero positivo seguro
         if (!Number.isSafeInteger(item.cantidad) || item.cantidad <= 0) {
-            throw new Error(
+            throw new ErrorValidacion(
                 `La cantidad del producto ${item.productoId} debe ser un entero positivo`
             );
         }
@@ -49,7 +50,7 @@ export function validarPedido(
         const producto = obtenerProducto(item.productoId);
 
         if (!producto) {
-            throw new Error(
+            throw new ErrorValidacion(
                 `No existe el producto ${item.productoId}`
             );
         }

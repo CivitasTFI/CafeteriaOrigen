@@ -1,9 +1,10 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { crearPedido, listarPedidos, buscarPedidoPorId } from "../services/pedidos.service";
 import { validarObjeto } from "../utils/validar-objeto";
+import { ErrorValidacion } from "../errors/error-validacion";
 
 // POST pedidos
-export const postPedidos = (req: Request, res: Response) => {
+export const postPedidos = (req: Request, res: Response, next: NextFunction) => {
     try {
         validarObjeto(req.body, "El cuerpo del pedido debe ser un objeto");
 
@@ -16,11 +17,11 @@ export const postPedidos = (req: Request, res: Response) => {
             pedido
         });
     } catch (error) {
-        return res.status(400).json({
-            error: error instanceof Error
-                ? error.message
-                : "No se pudo guardar el pedido"
-        });
+        if (error instanceof ErrorValidacion) {
+            return res.status(400).json({ error: error.message });
+        }
+
+        return next(error);
     }
 }
 

@@ -17,6 +17,17 @@ export function errorHandler(
     return;
   }
 
+  if (
+    err instanceof Error &&
+    "type" in err &&
+    err.type === "entity.too.large"
+  ) {
+    res.status(413).json({
+      error: "El cuerpo de la solicitud supera el tamaño permitido",
+    });
+    return;
+  }
+
   res.status(500).json({
     error: "Error interno del servidor",
   });
