@@ -12,3 +12,15 @@ test("muestra un indicador accesible al iniciar la carga del menú", () => {
 
   expect(screen.getByRole("status")).toHaveTextContent("Cargando menú");
 });
+
+test("muestra los productos recibidos de la API y deja de mostrar la carga", async () => {
+  server.use(crearHandlerProductos(productosApi));
+
+  render(<MenuPage />);
+
+  for (const producto of productosApi) {
+    expect(await screen.findByText(producto.nombre)).toBeInTheDocument();
+  }
+
+  expect(screen.queryByRole("status")).not.toBeInTheDocument();
+});
