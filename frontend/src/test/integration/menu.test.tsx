@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { http, HttpResponse } from "msw";
 import { expect, test } from "vitest";
 import MenuPage from "../../pages/MenuPage";
 import { erroresApi } from "../fixtures/errores";
@@ -47,6 +48,29 @@ test("permite reintentar después de un error 500 y muestra los productos al rec
   expect(await screen.findByRole("alert")).toHaveTextContent(
     erroresApi.errorInterno.error,
   );
+
+  server.use(crearHandlerProductos(productosApi));
+  await usuario.click(screen.getByRole("button", { name: "Reintentar" }));
+
+  for (const producto of productosApi) {
+    expect(await screen.findByText(producto.nombre)).toBeInTheDocument();
+  }
+
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  expect(screen.queryByRole("status")).not.toBeInTheDocument();
+});
+
+test("informa el fallo de conexión y permite recuperar el menú al reintentar", async () => {
+  const usuario = userEvent.setup();
+  const url = new URL("/productos", window.location.origin).href;
+  server.use(http.get(url, () => HttpResponse.error()));
+
+  render(<MenuPage />);
+
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "No se pudo conectar con el servidor",
+  );
+  expect(screen.queryByRole("status")).not.toBeInTheDocument();
 
   server.use(crearHandlerProductos(productosApi));
   await usuario.click(screen.getByRole("button", { name: "Reintentar" }));
