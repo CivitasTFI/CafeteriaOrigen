@@ -14,10 +14,7 @@ function validarImporteSeguro(importe: number, mensajeError: string): void {
 }
 
 function validarEstadoPedido(estado: unknown): void {
-    if (
-        estado !== undefined &&
-        (typeof estado !== "string" || estado.trim().length === 0)
-    ) {
+    if (typeof estado !== "string" || estado.trim().length === 0) {
         throw new Error("El estado del pedido debe ser un texto no vacío");
     }
 }
