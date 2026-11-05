@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { crearPedido, listarPedidos, buscarPedidoPorId } from "../services/pedidos.service";
 import { validarObjeto } from "../utils/validar-objeto";
-import { ErrorValidacion } from "../errors/error-validacion";
 
 // POST pedidos
 export const postPedidos = (req: Request, res: Response, next: NextFunction) => {
@@ -17,10 +16,6 @@ export const postPedidos = (req: Request, res: Response, next: NextFunction) => 
             pedido
         });
     } catch (error) {
-        if (error instanceof ErrorValidacion) {
-            return res.status(400).json({ error: error.message });
-        }
-
         return next(error);
     }
 }

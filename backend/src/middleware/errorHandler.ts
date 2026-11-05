@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { ErrorValidacion } from "../errors/error-validacion";
 
 export function errorHandler(
   err: Error,
@@ -6,6 +7,11 @@ export function errorHandler(
   res: Response,
   _next: NextFunction
 ): void {
+  if (err instanceof ErrorValidacion) {
+    res.status(400).json({ error: err.message });
+    return;
+  }
+
   if (
     err instanceof SyntaxError &&
     "type" in err &&
