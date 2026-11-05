@@ -1,4 +1,5 @@
 import { useCarrito } from "../../hooks/useCarrito";
+import { ItemCarrito } from "./ItemCarrito";
 
 function CarritoVacio() {
     return <p>Tu carrito está vacio</p>;
@@ -11,5 +12,5 @@ export default function Carrito() {
         return <CarritoVacio />;
     }
 
-    return <p>{items[0].nombre}</p>;
+    return <ItemCarrito item={items[0]} />;
 }
