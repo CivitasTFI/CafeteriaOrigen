@@ -1,19 +1,11 @@
-import { createContext, useReducer, type ReactNode } from "react";
-import { carritoReducer, type ItemCarrito } from "./carrito.reducer";
+import { useReducer, type ReactNode } from "react";
+import { carritoReducer } from "./carrito.reducer";
+import { CarritoContext, type CarritoContextValue } from "./carrito.context";
 import type { Producto } from "../api/esquemas/productos";
-
-interface CarritoContextValue {
-  items: ItemCarrito[];
-  agregarProducto: (producto: Producto) => void;
-  restarProducto: (producto: Producto) => void;
-  eliminarProducto: (producto: Producto) => void;
-}
 
 interface CarritoProviderProps {
   children: ReactNode;
 }
-
-export const CarritoContext = createContext<CarritoContextValue | null>(null);
 
 export function CarritoProvider( props: CarritoProviderProps ) {
 
