@@ -4,7 +4,7 @@ import { CarritoProvider } from '../../context/CarritoContext';
 import Carrito from '../../components/carrito/Carrito';
 import userEvent from '@testing-library/user-event';
 import { useCarrito } from '../../hooks/useCarrito';
-import { cafeApi } from '../fixtures/productos';
+import { cafeApi, pasteleriaApi } from '../fixtures/productos';
 import type { Producto } from '../../api/esquemas/productos';
 
 const productoMock: Producto = {
@@ -218,4 +218,36 @@ describe("Carrito componente", () => {
             expect(confirmar).toBeDisabled();
         },
     );
+    it("actualiza los subtotales al sumar café sin modificar la pastelería", async () => {
+        const user = userEvent.setup();
+        renderizarCarrito([cafeApi, pasteleriaApi]);
+
+        await user.click(screen.getByRole("button", { name: `Agregar ${cafeApi.nombre}` }));
+        await user.click(screen.getByRole("button", { name: `Agregar ${pasteleriaApi.nombre}` }));
+        expect(screen.getByText("Subtotal orientativo: $9.860")).toBeInTheDocument();
+
+        await user.click(screen.getByRole("button", { name: `Sumar ${cafeApi.nombre}` }));
+
+        expect(screen.getByText("Cantidad: 2")).toBeInTheDocument();
+        expect(screen.getByText("Cantidad: 1")).toBeInTheDocument();
+        expect(screen.getByText("Subtotal ítem: $14.720")).toBeInTheDocument();
+        expect(screen.getByText("Subtotal ítem: $2.500")).toBeInTheDocument();
+        expect(screen.getByText("Subtotal orientativo: $17.220")).toBeInTheDocument();
+    });
+    it("actualiza los subtotales al restar pastelería sin modificar el café", async () => {
+        const user = userEvent.setup();
+        renderizarCarrito([cafeApi, pasteleriaApi]);
+
+        await user.click(screen.getByRole("button", { name: `Agregar ${cafeApi.nombre}` }));
+        await user.click(screen.getByRole("button", { name: `Agregar ${pasteleriaApi.nombre}` }));
+        await user.click(screen.getByRole("button", { name: `Agregar ${pasteleriaApi.nombre}` }));
+        expect(screen.getByText("Subtotal orientativo: $12.360")).toBeInTheDocument();
+
+        await user.click(screen.getByRole("button", { name: `Restar ${pasteleriaApi.nombre}` }));
+
+        expect(screen.getAllByText("Cantidad: 1")).toHaveLength(2);
+        expect(screen.getByText("Subtotal ítem: $7.360")).toBeInTheDocument();
+        expect(screen.getByText("Subtotal ítem: $2.500")).toBeInTheDocument();
+        expect(screen.getByText("Subtotal orientativo: $9.860")).toBeInTheDocument();
+    });
 })
