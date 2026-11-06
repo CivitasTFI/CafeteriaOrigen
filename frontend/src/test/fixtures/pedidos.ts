@@ -1,4 +1,4 @@
-import type { Pedido } from "../../api/esquemas/pedidos";
+import type { Pedido, RespuestaCrearPedido } from "../../api/esquemas/pedidos";
 
 export const pedidoApi = {
   id: 1,
@@ -9,3 +9,8 @@ export const pedidoApi = {
   estado: "pendiente",
   total: 17220,
 } satisfies Pedido;
+
+export const respuestaCrearPedidoApi = {
+  mensaje: "El pedido se guardó correctamente",
+  pedido: pedidoApi,
+} satisfies RespuestaCrearPedido;

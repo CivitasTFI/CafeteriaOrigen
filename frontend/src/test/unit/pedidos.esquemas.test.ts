@@ -3,7 +3,10 @@ import {
   esquemaPedido,
   esquemaRespuestaCrearPedido,
 } from "../../api/esquemas/pedidos";
-import { pedidoApi as pedido } from "../fixtures/pedidos";
+import {
+  pedidoApi as pedido,
+  respuestaCrearPedidoApi,
+} from "../fixtures/pedidos";
 
 test("acepta un pedido de la API actual y conserva sus datos", () => {
   expect(esquemaPedido).toBeDefined();
@@ -14,15 +17,10 @@ test("acepta un pedido de la API actual y conserva sus datos", () => {
 });
 
 test("acepta la respuesta de creación y conserva su mensaje y pedido", () => {
-  const respuesta = {
-    mensaje: "El pedido se guardó correctamente",
-    pedido,
-  };
-
   expect(esquemaRespuestaCrearPedido).toBeDefined();
-  expect(esquemaRespuestaCrearPedido.safeParse(respuesta)).toEqual({
+  expect(esquemaRespuestaCrearPedido.safeParse(respuestaCrearPedidoApi)).toEqual({
     success: true,
-    data: respuesta,
+    data: respuestaCrearPedidoApi,
   });
 });
 
