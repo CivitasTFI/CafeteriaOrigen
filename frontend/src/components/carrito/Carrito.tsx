@@ -22,25 +22,26 @@ function CarritoVacio() {
     return (
         <>
             <p>Tu carrito está vacio</p>
-            <button type="button" aria-label="Confirmar pedido" disabled>Confirmar pedido</button>
         </>
     );
 }
 
 export default function Carrito() {
     const { items } = useCarrito();
-
-    if (items.length === 0) {
-        return <CarritoVacio />;
-    }
+    const estaVacio = items.length === 0;
 
     const subtotal = calcularSubtotalCarrito(items);
 
     return (
         <>
-            <ListaItemsCarrito items={items} />
-            <p>Subtotal: {formatoPrecio(subtotal)}</p>
-            <button type="button" aria-label="Confirmar pedido">Confirmar pedido</button>
+            { estaVacio? (<CarritoVacio/>) : ( 
+                <>
+                 <ListaItemsCarrito items={items} /> 
+                <p>Subtotal: {formatoPrecio(subtotal)}</p> 
+                </> 
+                )
+            }
+            <button type="button" aria-label="Confirmar pedido" disabled={estaVacio}>Confirmar pedido</button>
         </>
     );
 }
