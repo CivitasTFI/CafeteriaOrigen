@@ -29,10 +29,12 @@ export default function Carrito() {
         return <CarritoVacio />;
     }
 
+    const subtotal = calcularSubtotalCarrito(items);
+
     return (
         <>
             <ListaItemsCarrito items={items} />
-            <p>Subtotal: {formatoPrecio(calcularSubtotalCarrito(items))}</p>
+            <p>Subtotal: {formatoPrecio(subtotal)}</p>
         </>
     );
 }
