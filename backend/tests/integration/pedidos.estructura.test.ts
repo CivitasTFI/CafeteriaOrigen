@@ -25,6 +25,24 @@ describe("Estructura de los pedidos", () => {
             caso: "una solicitud sin cuerpo",
             cuerpo: undefined,
             errorEsperado: "El cuerpo del pedido debe ser un objeto"
+        },
+        {
+            caso: "un ítem sin productoId",
+            cuerpo: { items: [{ cantidad: 1 }], estado: "pendiente" },
+            errorEsperado: "El ID del producto debe ser un entero positivo seguro"
+        },
+        {
+            caso: "un productoId como objeto",
+            cuerpo: { items: [{ productoId: {}, cantidad: 1 }], estado: "pendiente" },
+            errorEsperado: "El ID del producto debe ser un entero positivo seguro"
+        },
+        {
+            caso: "un productoId con toString numérico",
+            cuerpo: {
+                items: [{ productoId: { toString: 0 }, cantidad: 1 }],
+                estado: "pendiente"
+            },
+            errorEsperado: "El ID del producto debe ser un entero positivo seguro"
         }
     ])("POST /pedidos rechaza $caso con un error claro y conserva los datos", async ({ cuerpo, errorEsperado }) => {
         const pedidoValido = await request(app)
