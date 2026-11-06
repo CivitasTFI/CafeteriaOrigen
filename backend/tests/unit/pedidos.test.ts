@@ -4,6 +4,7 @@ import {
     buscarPedidoPorId
 } from "../../src/services/pedidos.service";
 import { reiniciarPedidos } from "../../src/data/pedidos";
+import expectCookies from "supertest/lib/cookies";
 
 describe("Servicio de pedidos", () => {
     beforeEach(() => {
@@ -152,5 +153,21 @@ describe("Servicio de pedidos", () => {
         )
 
         expect(pedido.estado).toBe("pendiente");
+    })
+
+    it("producto inexistente", () => {
+        const productoId = 24;
+
+        expect(() =>
+            crearPedido(
+                [
+                    {
+                        productoId,
+                        cantidad: 4
+                    }
+                ],
+                7
+            )
+        ).toThrow(`No existe el producto ${productoId}`);
     })
 });
