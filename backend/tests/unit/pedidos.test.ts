@@ -10,7 +10,7 @@ describe("Servicio de pedidos", () => {
         reiniciarPedidos();
     });
 
-    it("crea un pedido válido con su total calculado", () => {
+    it("crea un pedido para barra con su total calculado", () => {
         const pedido = crearPedido(
             [
                 {
@@ -31,6 +31,42 @@ describe("Servicio de pedidos", () => {
             ],
             estado: "pendiente",
             total: 10040
+        });
+
+        expect(pedido).not.toHaveProperty("mesaId");
+    });
+
+    it("crear pedido con mesa válida y total calculado", () => {
+        const pedido = crearPedido(
+            [
+                {
+                    productoId: 5,
+                    cantidad: 2
+                },
+                {
+                    productoId: 19,
+                    cantidad: 1
+                }
+            ],
+            "pendiente",
+            4
+        )
+
+        expect(pedido).toEqual({
+            id: 1,
+            items: [
+                {
+                    productoId: 5,
+                    cantidad: 2
+                },
+                {
+                    productoId: 19,
+                    cantidad: 1
+                }
+            ],
+            estado: "pendiente",
+            mesaId: 4,
+            total: 17220
         });
     });
 
