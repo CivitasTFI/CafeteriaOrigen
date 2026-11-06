@@ -12,5 +12,11 @@ export const esquemaPedido = z.object({
   total: z.number().int().nonnegative(),
 });
 
+export const esquemaRespuestaCrearPedido = z.object({
+  mensaje: z.string(),
+  pedido: esquemaPedido,
+});
+
 export type ItemPedido = z.infer<typeof esquemaItemPedido>;
 export type Pedido = z.infer<typeof esquemaPedido>;
+export type RespuestaCrearPedido = z.infer<typeof esquemaRespuestaCrearPedido>;
