@@ -156,4 +156,20 @@ describe("Carrito componente", () => {
         
         expect(screen.getByText("Cantidad: 2")).toBeInTheDocument();
     });
+    it("Resta la cantidad del producto al clickear el boton de restar", async() => {
+        const user = userEvent.setup();
+
+        render(
+            <CarritoProvider>
+                <AgregarProductoDePrueba producto={productoMock} />
+                <Carrito />
+            </CarritoProvider>,
+        );
+
+        await user.click(screen.getByRole("button", { name: "Agregar Expreso Mediano" }));
+        await user.click(screen.getByRole("button", { name: "Sumar Expreso Mediano" }));
+        await user.click(screen.getByRole("button", { name: "Restar Expreso Mediano" }));
+
+        expect(screen.getByText("Cantidad: 1")).toBeInTheDocument();
+    });
 })
