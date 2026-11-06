@@ -14,7 +14,7 @@ export function ItemCarrito({ item }: ItemCarritoProps) {
         <>
             <p>{nombre}</p>
             <p>Cantidad: {cantidad}</p>
-            <p>Subtotal: {formatoPrecio(subtotal)}</p>
+            <p>Subtotal ítem: {formatoPrecio(subtotal)}</p>
         </>
     );
 }

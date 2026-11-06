@@ -120,7 +120,7 @@ describe("Carrito componente", () => {
         const botonAgregar = screen.getByRole("button", { name: "Agregar Expreso Mediano" });
         await user.click(botonAgregar);
         await user.click(botonAgregar);
-        expect(screen.getByText("Subtotal: $14.720")).toBeInTheDocument();
+        expect(screen.getByText("Subtotal ítem: $14.720")).toBeInTheDocument();
     });
     it("Muestra el subtotal general del carrito", async() => {
         const user = userEvent.setup();
