@@ -1,7 +1,7 @@
 import { useReducer, type ReactNode } from "react";
 import { carritoReducer } from "./carrito.reducer";
 import { CarritoContext, type CarritoContextValue } from "./carrito.context";
-import type { Producto } from "../api/esquemas/productos";
+import type { ProductoBase } from "../api/esquemas/productos";
 
 interface CarritoProviderProps {
   children: ReactNode;
@@ -11,16 +11,19 @@ export function CarritoProvider( props: CarritoProviderProps ) {
 
     const [items, dispatch] = useReducer(carritoReducer, []);
 
-    function agregarProducto(producto: Producto) {
+    function agregarProducto(producto: ProductoBase) {
         dispatch({ type: "AGREGAR", producto });
     }
-    function restarProducto(producto: Producto) {
+    function restarProducto(producto: ProductoBase) {
         dispatch({ type: "RESTAR", producto });
     }
-    function eliminarProducto(producto: Producto) {
+    function eliminarProducto(producto: ProductoBase) {
         dispatch({ type: "ELIMINAR", producto });
     }
-    const value: CarritoContextValue = { items, agregarProducto, restarProducto, eliminarProducto };
+    function vaciarCarrito() {
+        dispatch({ type: "VACIAR" });
+    }
+    const value: CarritoContextValue = { items, agregarProducto, restarProducto, eliminarProducto, vaciarCarrito };
     return (
     <CarritoContext.Provider value={value}>
       {props.children}

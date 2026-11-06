@@ -49,3 +49,14 @@ test("App provee un carrito vacío que el menú puede actualizar", async () => {
 
   expect(screen.getByText("Unidades en el carrito: 1")).toBeInTheDocument();
 });
+
+test("App muestra en el carrito el producto agregado desde el menú", async () => {
+  const usuario = userEvent.setup();
+  render(<App />);
+
+  await usuario.click(
+    screen.getByRole("button", { name: "Agregar café de prueba" }),
+  );
+
+  expect(screen.getByText("Subtotal: $7.360")).toBeInTheDocument();
+});
