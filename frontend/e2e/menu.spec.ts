@@ -28,3 +28,14 @@ test("el menú no tiene scroll horizontal a 375 px", async ({ page }) => {
 
   expect(medidas.contenido).toBeLessThanOrEqual(medidas.visible);
 });
+test("impide confirmar un pedido con el carrito vacío", async ({ page }) => {
+  await page.goto("/");
+
+  await expect(
+    page.getByText("Tu carrito está vacio", { exact: true }),
+  ).toBeVisible();
+
+  await expect(
+    page.getByRole("button", { name: "Confirmar pedido" }),
+  ).toBeDisabled();
+});
