@@ -1,4 +1,5 @@
 import { calcularFacturacionTotal, cantidadVendidaPorProducto, productoMasVendido } from '../../src/services/reportes.service';
+import { ErrorValidacion } from '../../src/errors/error-validacion';
 
 interface Pedido {
     id: number;
@@ -48,6 +49,28 @@ describe('calcularFacturacionTotal', () => {
         const facturacionTotal = calcularFacturacionTotal(listaPedidos);
         // Suma esperada fija: 10000 + 5000 + 3000 = 18000
         expect(facturacionTotal).toBe(18000);
+    });
+
+    it('acepta una facturación acumulada igual al máximo entero seguro', () => {
+        const listaPedidos: Pedido[] = [Number.MAX_SAFE_INTEGER - 1, 1].map((total, indice) => ({
+            id: indice + 1,
+            items: [{ productoId: 1, cantidad: 1 }],
+            estado: 'pendiente',
+            calcularTotal: () => total
+        }));
+
+        expect(calcularFacturacionTotal(listaPedidos)).toBe(Number.MAX_SAFE_INTEGER);
+    });
+
+    it('rechaza una facturación acumulada insegura aunque cada pedido tenga un total seguro', () => {
+        const listaPedidos: Pedido[] = [Number.MAX_SAFE_INTEGER, 1].map((total, indice) => ({
+            id: indice + 1,
+            items: [{ productoId: 1, cantidad: 1 }],
+            estado: 'pendiente',
+            calcularTotal: () => total
+        }));
+
+        expect(() => calcularFacturacionTotal(listaPedidos)).toThrow(ErrorValidacion);
     });
 });
 
