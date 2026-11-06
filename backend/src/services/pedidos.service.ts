@@ -39,6 +39,14 @@ export function validarPedido(
     for (const item of pedido) {
         validarObjeto(item, "Cada ítem del pedido debe ser un objeto");
 
+        if (
+            typeof item.productoId !== "number" ||
+            !Number.isSafeInteger(item.productoId) ||
+            item.productoId <= 0
+        ) {
+            throw new ErrorValidacion("El ID del producto debe ser un entero positivo seguro");
+        }
+
         // Validar que la cantidad sea un entero positivo seguro
         if (!Number.isSafeInteger(item.cantidad) || item.cantidad <= 0) {
             throw new ErrorValidacion(
