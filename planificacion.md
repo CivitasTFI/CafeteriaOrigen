@@ -14,20 +14,20 @@ La documentación se centraliza en la raíz: [README.md](README.md) es la entrad
 
 | Área | Qué existe | Qué falta para TP3 |
 | --- | --- | --- |
-| Productos | Ambos GET devuelven los campos ampliados, origen y descripción; precio del dominio y 404 conservados. Buscador y normalización internos implementados. | Ampliar tests HTTP a filtrados/pastelería y restaurar la aserción de longitud 20 del listado. |
+| Productos | Ambos GET ampliados, 22 casos HTTP para los 20 productos y 404, precios fijos y metadatos completos. Buscador con IDs exactos en sus pruebas. | Selector y pastelería en la interfaz (M2), con sus pruebas. |
 | Consulta de productos | `esquemaProducto` distingue café/pastelería; `listarProductos()` y `useMenu` conservan el contrato completo. Tipos y fixtures derivados del esquema. | Funciones, contratos y mocks de pedidos; conectar los componentes de selección cuando estén listos. |
-| Pedidos | Alta y consulta por ID, validación de cantidades y productos, respuesta con ítems, estado y total. | Aceptar, validar, guardar y devolver `mesaId` opcional. Asignar `pendiente` cuando no se envía estado: hoy el servicio recibe el estado del cliente sin valor por defecto. |
-| Errores | JSON inválido responde 400 con `{ error }`. El menú muestra errores HTTP, de conexión y de contrato, y permite recuperarse al reintentar. | Completar validaciones de pedidos/mesas y errores de confirmación que conserven el carrito. |
+| Pedidos | Alta y consulta por ID; estado predeterminado `pendiente`; rechazo de estados, estructuras e importes incorrectos antes de guardar, con conservación de pedidos y facturación. | Completar el tipo/formato de `productoId` y aceptar, validar, guardar y devolver `mesaId` opcional. |
+| Errores | Middleware centraliza `ErrorValidacion` (400), JSON inválido (400), cuerpo demasiado grande (413) y fallo interno (500 genérico). El menú permite reintentar. | Un `productoId` mal formado aún puede producir 500. Faltan validación de mesas y errores de confirmación que conserven el carrito. |
 | Conexión desde el navegador | Proxy Vite para `/productos` y `/pedidos`. `App` monta `MenuPage`, que consulta a través del cliente HTTP único. | Funciones y pantallas de pedidos; conexión de producción al preparar el despliegue. |
 | Preparación de E2E | Función interna `reiniciarPedidos()` que vacía pedidos y reinicia IDs. | Endpoints HTTP de reset y seed disponibles únicamente con `NODE_ENV=test`. |
-| Frontend | Menú con nombres, carga, error y reintento. Proveedor del carrito montado en App y probado con dos consumidores; utilidades de carrito disponibles. | Selector, pastelería, carrito visual, pedidos, Bootstrap/SASS y Playwright. Registrar instalación limpia y arranque conjunto. |
-| Regresión | 44 tests de backend en 11 suites y 93 de frontend en 18 archivos aprobados; ambos paquetes compilan y lint pasa. | Completar cobertura restante, E2E y comprobaciones de instalación y arranque. |
+| Frontend | Menú con nombres, carga, error y reintento; proveedor del carrito probado; instalación limpia registrada. | Selector, pastelería, carrito visual, pedidos, Bootstrap/SASS, Playwright y registrar arranque conjunto. |
+| Regresión | 77 tests de backend en 15 suites y 93 de frontend en 18 archivos aprobados; ambos paquetes compilan y lint pasa. | Cubrir el ID mal formado detectado en la revisión final, funcionalidades restantes y E2E. |
 
 Desde la actualización documental del PR #19 (estado hasta #17), Matias conectó el servicio a los endpoints en #18, sin aumentar la cantidad de tests. Homero agregó 19 tests en #20 (16 del esquema ampliado y tres rechazos de la consulta) y uno en #21 para el proveedor compartido: el frontend pasó de 73 a 93 casos.
 
-Verificación del **5 de noviembre de 2026**, hasta el PR #21 (`abbae9d`): `npm test` pasó con **44 tests de backend y 93 de frontend**; `npm run build` y `npm run lint` también pasaron. El PR #20 resolvió los errores de tipos y exportaciones del carrito registrados anteriormente. Quedan **8 archivos `.pending`**, que no representan cobertura implementada.
+Verificación del **6 de noviembre de 2026**, sobre `fix/correcciones-generales` hasta `584aeb1`: `npm test` pasó con **77 tests de backend y 93 de frontend (170 en total)**; build completo y lint también pasaron. La instalación limpia con `npm run install:all` quedó registrada el 5 de noviembre. Las auditorías de producción están en cero en ambos paquetes; desarrollo conserva 20 afectados en backend y 9 en frontend, sin altos ni críticos. Quedan **8 archivos `.pending`**, que no representan cobertura implementada.
 
-Los avances siguientes están integrados en `develop`. El proveedor del carrito ya envuelve el contenido de `App`. La instalación limpia y el arranque conjunto siguen pendientes de registro. También faltan las ampliaciones de pedidos/mesas, las funciones restantes del menú y los E2E.
+La tabla histórica siguiente registra lo integrado en `develop`. Las correcciones posteriores se mantienen juntas en `fix/correcciones-generales` y todavía necesitan PR. Falta cerrar el ID mal formado reproducido en la revisión, registrar el arranque conjunto y completar mesas, funciones restantes del menú y E2E.
 
 ### Avances integrados en `develop`
 
@@ -54,8 +54,22 @@ Los avances siguientes están integrados en `develop`. El proveedor del carrito 
 | `feature/actualizar-get-productos` | #18 | Matias: conecta normalización y respuestas ampliadas a ambos GET, actualiza tests y conserva el 404. |
 | `fix/integracion-carrito` | #20 | Homero: contrato ampliado Zod y tipos inferidos, consulta/mocks actualizados, fixtures compartidos, corrección de import/mocks del carrito y separación Context/proveedor. 19 tests nuevos. |
 | `feature/proveedor-carrito` | #21 | Homero: monta `CarritoProvider` en `App` y prueba el estado compartido entre botón y resumen independientes. Ciclo RED/GREEN/REFACTOR. |
+| `docs/documentacion-general` | #22 | Documentación del estado hasta #21 y del contrato de productos y carrito. |
 
-H2 ya consume el contrato ampliado de productos y conserva pendientes los pedidos. H3 espera selector y pastelería para completar su composición. M1 ya funciona por HTTP, con cobertura adicional aún pendiente. F1 y el montaje del proveedor están integrados; F2 y F3 siguen pendientes.
+### Correcciones en `fix/correcciones-generales`, pendientes de PR
+
+Homero preparó los siguientes avances sin modificar las fórmulas ni los 20 productos de Matias:
+
+- [x] Cantidades seguras y control de subtotales/total antes de guardar; cuatro casos HTTP de rechazo conservan pedidos y facturación.
+- [x] Estructura del cuerpo e ítems con mensajes claros; tres casos HTTP y helper compartido `validarObjeto()`.
+- [x] Estados enviados válidos y `pendiente` por defecto; cinco casos HTTP incluyen creación y consulta por ID y conservación de un estado explícito.
+- [x] `ErrorValidacion`, middleware centralizado y respuestas 400/413/500; dos casos nuevos cubren tamaño e incidente interno simulado.
+- [x] Cobertura permanente del catálogo: 22 casos HTTP y fixture independiente; los tres tests del buscador ahora comprueban resultados completos.
+- [x] body-parser 2.4.0 y qs 6.17.1; override de tinypool 2.1.2 para Vitest 3.2.7; ts-jest 29.4.15 e `isolatedModules` con `strict` conservado.
+- [x] Instalación limpia, pruebas en procesos/hilos y repetición del menú en watch, registradas en [FRONTEND.md](FRONTEND.md#dependencias-de-desarrollo-y-auditoría).
+- [ ] Validar explícitamente el tipo/formato de `productoId` antes de usarlo en búsquedas o mensajes. La comprobación exploratoria del 6 de noviembre reprodujo HTTP 500 con `{"items":[{"productoId":{"toString":0},"cantidad":1}]}`; el ID ausente y un objeto simple producen mensajes con `undefined` o `[object Object]`. Aún no hay un test permanente de esos casos.
+
+H2 conserva pendientes los contratos de pedidos; H3 espera selector y pastelería. M1 tiene cubierta su API en esta rama; F1 está integrado, mientras F2 y F3 siguen pendientes. Los avisos de desarrollo restantes requieren migraciones revisadas o un parche mantenido; no se consideran resueltos.
 
 El reparto anterior del Parcial I sirve como referencia de experiencia. Para equilibrar TP3, cada integrante tendrá implementación y pruebas propias; Federico pasa a ocuparse del carrito y los E2E, porque los reportes ya están implementados.
 
@@ -66,7 +80,7 @@ Están implementadas infraestructura, contrato ampliado de productos, errores, c
 1. **Ubicación y herramientas:** `frontend/` ya utiliza Vite + React + TypeScript estricto y una regla de ESLint que rechaza `any` explícito. Vite 7, Vitest 3, MSW 2 y Zod 4 están instalados con versiones exactas y lockfile. El requisito de Node es `^20.19.0 || >=22.12.0`. La API mantiene Jest y Supertest en su propio paquete.
 2. **Productos, contrato vigente:** ambos GET conservan `id`, `nombre` y `precio`. Para café: `tipo: "cafe"`, `tipoCafe: "expreso" | "filtrado"`, `tamaño` y `variedad: { nombre, descripcion }`. Para pastelería: `tipo: "pasteleria"` y variedad textual. Zod y MSW ya usan esta estructura. Reemplaza la propuesta anterior con `tipo: "expreso"` y `tamanio`; el PDF permite variar nombres conservando la información. `gramosCafe` no se expone ni se necesita para calcular precios en el frontend.
 3. **Mesas:** acordar un conjunto explícito de mesas válidas que incluya la 4 del ejemplo. No hay una cantidad de mesas definida en el PDF. `mesaId` omitido significa retiro en barra; una mesa no existente enviada a la API produce 400 o 404. Un valor ausente o inválido de `?mesa` en la URL se interpreta como barra y no se envía como una mesa inválida.
-4. **Pedidos:** `POST /pedidos` acepta `{ mesaId?, items: [{ productoId, cantidad }] }` y asigna `pendiente` por defecto. Conservar la respuesta actual `{ mensaje, pedido }`; `pedido` debe incluir `id`, `items`, `estado`, `total` y `mesaId` cuando corresponda. Mantener `GET /pedidos/:id` como objeto directo del pedido con esa información.
+4. **Pedidos, contrato objetivo del TP3:** aceptar `{ mesaId?, items: [{ productoId, cantidad }] }` y devolver `{ mensaje, pedido }`, con `id`, `items`, `estado`, `total` y `mesaId` cuando corresponda. `GET /pedidos/:id` debe devolver directamente el pedido. **Disponible en esta rama:** estado predeterminado `pendiente`, ítems y total. **Pendiente:** `mesaId` y completar la validación de IDs; no confundir este objetivo con el contrato ya implementado.
 5. **Precios:** la API define los precios unitarios y el total confirmado. El carrito solo multiplica los precios recibidos por las cantidades y suma subtotales orientativos. La confirmación muestra exactamente el total devuelto por la API.
 6. **Red y validación:** `solicitarJson()` devuelve `unknown` y maneja HTTP/JSON/red. `solicitarValidado()` aplica Zod y devuelve el tipo inferido. `listarProductos(): Promise<Productos>` usa `esquemaProductos`, una lista de la unión discriminada de café/pastelería. `useMenu` conserva esos datos; los componentes no hacen `fetch` directo. Quedan pendientes los esquemas y funciones de pedidos.
 7. **Conectividad:** el proxy de Vite hacia Express ya está configurado para `/productos` y `/pedidos`. README y FRONTEND documentan los puertos y las rutas de desarrollo; la preparación E2E se completará con Federico y Nicolas.
@@ -97,9 +111,10 @@ Cada integrante escribe primero los tests de su funcionalidad y luego la impleme
 - [x] Alinear los tipos del carrito con Zod y resolver lint separando Context/proveedor (PR #20).
 - [x] Montar `CarritoProvider` en `App` y probar la actualización compartida entre dos consumidores (PR #21).
 - [ ] Integrar `npm run test:e2e` con la configuración de Playwright de Federico.
-- [ ] Completar la verificación final de instalación limpia y arranque de ambas aplicaciones.
+- [x] Verificar la instalación limpia de ambos paquetes con `npm run install:all` (5 de noviembre, rama de correcciones).
+- [ ] Registrar el arranque conjunto de ambas aplicaciones siguiendo los comandos del README.
 
-La guía está en [FRONTEND.md](FRONTEND.md). Están implementados el cliente, contrato ampliado de productos, mocks de éxito/error, carga del menú y proveedor montado. La compilación de la aplicación y sus tests y lint vuelven a pasar. La instalación limpia, arranque conjunto y comando E2E siguen pendientes.
+La guía está en [FRONTEND.md](FRONTEND.md). Están implementados cliente, productos ampliados, mocks, menú y proveedor. Tests, compilación y lint pasan. La instalación limpia está registrada; arranque conjunto y comando E2E siguen pendientes.
 
 ### H2. Implementar contratos y cliente HTTP
 
@@ -204,9 +219,9 @@ F1 conserva los 13 tests de Federico: seis del reducer, cuatro del Context, dos 
 - [x] Exponer campos separados para seleccionar sin extraer palabras de `nombre`.
 - [x] Actualizar tests de ambos GET para el primer expreso y conservar el 404.
 - [x] Disponer de ejemplos públicos de café/pastelería ya documentados y usados por Zod/MSW en #20.
-- [ ] Completar cobertura HTTP de filtrados y pastelería, restaurar la longitud esperada de 20 productos y reforzar la regresión de precios/campos.
+- [x] Completar cobertura HTTP de filtrados y pastelería, restaurar la longitud esperada de 20 productos y reforzar la regresión de precios/campos (rama de correcciones de Homero).
 
-El PR #2 agrega búsqueda interna, #15 prepara las respuestas y #18 las conecta a ambos GET. M1 ya entrega la información al frontend; queda pendiente ampliar su cobertura. Los tests HTTP comprueban el primer expreso y el 404; los dos tests del servicio también usan cafés. El PR #18 eliminó la aserción de longitud 20. Los textos y ejemplos del contrato público están en [README.md](README.md#contrato-público-de-productos).
+El PR #2 agrega búsqueda interna, #15 prepara respuestas y #18 las conecta a ambos GET. La rama de correcciones restaura la longitud 20 y comprueba todos los campos y precios del listado y de los 20 detalles, además del 404: 22 casos HTTP. Sus datos esperados están en `backend/tests/fixtures/productos.ts`, independientes del código de producción. Los dos tests unitarios del servicio siguen usando cafés; los HTTP cubren también filtrados y pastelería. Los textos y ejemplos están en [README.md](README.md#contrato-público-de-productos).
 
 **Ejemplo vigente:** `GET /productos/5` devuelve el contrato ya consumido por el frontend:
 
@@ -254,8 +269,10 @@ Este contrato usa `tipo: "cafe"`, bebida en `tipoCafe`, `tamaño` con ñ y oríg
 
 - [ ] Definir el conjunto de mesas válidas y agregar `mesaId` opcional al modelo, almacenamiento, servicio y respuesta de pedidos.
 - [ ] Aceptar pedidos sin mesa para retirar en barra; rechazar mesa inválida o inexistente con 400 o 404 y `{ error }`, sin guardar el pedido.
-- [ ] Asignar `pendiente` por defecto para que el frontend envíe solamente mesa e ítems, como en el PDF; mantener compatibilidad con las pruebas existentes cuando corresponda.
-- [ ] Validar el cuerpo y los ítems en ejecución: arreglo no vacío, estructura correcta, producto existente y cantidad entera positiva.
+- [x] Asignar `pendiente` por defecto y conservar estados explícitos válidos (corregido y probado por Homero en esta rama).
+- [x] Validar cuerpo como objeto, ítems como arreglo no vacío y cada ítem como objeto; rechazar cantidades e importes inseguros antes de guardar.
+- [x] Rechazar un ID numérico de producto inexistente y cantidades inválidas; conservar pruebas previas y agregar cobertura de estados y estructuras.
+- [ ] Completar la validación de tipo/formato de `productoId`, con pruebas de ID ausente y objetos; impedir el 500 reproducido con `{"toString":0}`.
 - [ ] Mantener `GET /pedidos/:id` con estado, ítems y total; agregar `mesaId` cuando exista y mantener consistente el listado de pedidos.
 - [ ] Escribir tests de pedidos con mesa y barra, mesa inexistente, cuerpo inválido, producto inexistente y consulta por ID.
 - [ ] Verificar el ejemplo: mesa 4, producto 5 × 2 y producto 19 × 1 devuelve 201, `pendiente` y total **17220**.
@@ -294,11 +311,11 @@ No se fijan fechas porque el PDF no indica una fecha de entrega. Las etapas sigu
 | 4. Integración real | Federico hace F3 con apoyo de Nicolas para reset/seed y Homero para scripts. Matias revisa accesibilidad y ancho móvil. | Recorrido E2E real repetible y todos los niveles de pruebas en verde. |
 | 5. Entrega | Homero consolida README; cada integrante verifica lo documentado para su módulo y realiza su revisión cruzada. | Checklist final completo y PR integrados a `main`. |
 
-Los nombres de archivos nuevos son orientativos. Para evitar conflictos, Homero integra cambios en scripts raíz y configuraciones comunes, Matias mantiene el SASS compartido y Nicolas coordina el registro de las rutas de test. Cada integrante trabaja en ramas por funcionalidad, no en una única rama para todo su trabajo.
+Los nombres de archivos nuevos son orientativos. Homero integra scripts y configuraciones comunes, Matias mantiene el SASS compartido y Nicolas coordina las rutas de test. El flujo general usa ramas por funcionalidad. Por decisión explícita de Homero, las correcciones de esta revisión se reúnen en una sola rama: `fix/correcciones-generales`.
 
 El flujo utilizado ya integra las ramas por funcionalidad en `develop` mediante PR; allí están la inicialización y los avances registrados en la sección 1. La entrega final en `main` sigue pendiente y es requisito de la consigna. Se deben conservar los commits que muestran RED, GREEN y REFACTOR.
 
-**Próximo paso de Homero:** integrar esta documentación y verificar la instalación limpia con `npm run install:all`, iniciar backend y frontend con los comandos del README y registrar que el menú consulta la API real. Las correcciones del carrito, proveedor y contrato ampliado ya están resueltas. H2 conserva pendientes los contratos/funciones de pedidos de N1 y H3 la conexión con selector/pastelería de M2. Cualquier edición de código requiere autorización previa del usuario.
+**Próximo paso de Homero:** guardar esta documentación y comenzar el RED de tipo/formato de `productoId`, seguido de GREEN y revisión de refactor. Después, registrar el arranque conjunto y preparar el PR de esta misma rama. H2 conserva pendientes los contratos de pedidos y H3 la composición con M2. Cualquier edición de código requiere autorización previa del usuario.
 
 ## 9. Cobertura de las nueve funcionalidades del PDF
 
@@ -319,7 +336,7 @@ El flujo utilizado ya integra las ramas por funcionalidad en `develop` mediante 
 - **Ciclo por funcionalidad:** escribir y ejecutar un test que falle por la conducta faltante; guardar ese test en un commit; implementar y guardar el código que lo vuelve verde en un commit posterior; refactorizar conservando los tests verdes.
 - **Cobertura de comportamiento existente:** si una nueva prueba pasa con la implementación actual, registrar el test como cobertura de regresión; no romper código para fabricar un RED. Así se incorporaron al menú los casos de fallo de red y respuesta incompatible.
 - **Refactores de las siguientes tareas:** después de guardar el GREEN, revisar mejoras de organización o duplicación del código y las pruebas recién agregados. Registrar el REFACTOR por separado, con los tests en verde, sin reorganizar funciones terminadas de etapas anteriores.
-- **Formato de commits:** `RED test: descripción`, `GREEN tipo: descripción` y `REFACTOR tipo: descripción`. Un cambio administrativo, de documentación o dependencias usa su tipo (`chore`, `docs`, etc.) sin inventar una etapa TDD. Cada integrante realiza sus propios commits; el asistente no los crea.
+- **Formato de commits:** `RED test: descripción`, `GREEN tipo: descripción` y `REFACTOR: descripción`, sin repetir la palabra refactor. Documentación, dependencias y cobertura de comportamiento existente usan su tipo (`docs`, `chore`, `test`) sin inventar una etapa TDD. Cada integrante realiza sus propios commits; el asistente no los crea.
 - **Reservas de pruebas:** quitar `.pending` del archivo correspondiente al comenzar la funcionalidad y escribir su primer test. La convención y los ejemplos están en FRONTEND; los archivos vacíos no se cuentan como pruebas implementadas.
 - **Historial y PR:** una rama por funcionalidad y un PR a `main`, con revisión cruzada. Preservar los commits que muestran rojo y verde; evitar un squash que elimine esa evidencia. Cada integrante aporta commits frecuentes de sus tareas durante el desarrollo.
 - **API:** conservar Jest/Supertest y agregar tests para cada cambio exigido: productos ampliados, mesa, pedidos, errores, conexión por proxy o CORS y reset/seed.
@@ -335,7 +352,7 @@ El flujo utilizado ya integra las ramas por funcionalidad en `develop` mediante 
 - [x] API original y `frontend/` conviven en el mismo repositorio.
 - [ ] Los nueve comportamientos del menú están implementados contra la API del grupo.
 - [x] Ambos endpoints de productos incluyen precio de dominio y clasificación, tamaño/origen y descripción según el tipo.
-- [ ] Completar la cobertura HTTP de todos los tipos y de los 20 productos.
+- [x] Completar la cobertura HTTP de todos los tipos y de los 20 productos (22 casos en esta rama).
 - [ ] Pedidos admiten mesa opcional, validan sus datos y devuelven estado, ítems y total; errores previstos responden 400/404 con `{ error }`.
 - [x] Proxy de Vite o CORS resuelve la conexión desde el navegador.
 - [ ] Reset y seed funcionan por HTTP solo con `NODE_ENV=test` y se ejecutan antes de cada E2E.
@@ -349,7 +366,7 @@ El flujo utilizado ya integra las ramas por funcionalidad en `develop` mediante 
 - [ ] Precios y total confirmado salen de API; el subtotal del carrito está identificado como orientativo.
 - [ ] Bootstrap personalizado con variables SASS antes de su importación y controles etiquetados.
 - [ ] Interfaz funcional a 375 px sin scroll horizontal.
-- [x] Pruebas implementadas en verde: 44 de backend y 93 de frontend, verificadas el 5 de noviembre de 2026.
+- [x] Pruebas implementadas en verde: 77 de backend y 93 de frontend, verificadas el 6 de noviembre de 2026; el caso exploratorio de ID mal formado aún no tiene test permanente.
 - [x] Compilación de backend/frontend y lint correctos, incluidos tipos de los tests.
 - [ ] Completar y aprobar los niveles de pruebas exigidos para todas las funcionalidades, incluidos los E2E reales.
 - [ ] README explica instalación, API, frontend, contratos y todos los comandos de pruebas.

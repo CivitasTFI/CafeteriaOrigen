@@ -1,6 +1,6 @@
 # Frontend — Cafetería Origen
 
-Guía del frontend y de los avances integrados de Homero, Matias y Federico para el TP3, actualizada hasta el PR #21. Este documento vive en la raíz del repositorio. Para instalar y ejecutar ambas aplicaciones, comenzar por [README.md](README.md). El reparto completo está en [planificacion.md](planificacion.md).
+Guía del frontend y de los avances del TP3, actualizada el **6 de noviembre de 2026** con las correcciones de `fix/correcciones-generales`, todavía pendientes de PR. Este documento vive en la raíz del repositorio. Para instalar y ejecutar ambas aplicaciones, comenzar por [README.md](README.md). El reparto completo está en [planificacion.md](planificacion.md).
 
 ## 1. Alcance de lo implementado
 
@@ -8,7 +8,7 @@ La aplicación tiene una entrada HTML en español, montaje con `StrictMode` y `A
 
 H2 incorpora contratos Zod de errores y productos ampliados, tipos inferidos, cliente HTTP, consulta y fixtures/handlers de éxito y error. Federico implementó reducer, Context, hook y utilidades del carrito, con 13 tests. Matias conectó el servicio ampliado a ambos GET en #18. Homero alineó contrato y carrito en #20 y montó el proveedor con un test de integración adicional en #21.
 
-Siguen pendientes selección de café, pastelería con botones/precios, interfaz del carrito, mesas, confirmación, seguimiento, estilos y E2E. Verificación del **5 de noviembre de 2026**: **93 tests del frontend aprobados**, compilación y lint correctos. Los errores de tipos y exportaciones registrados anteriormente quedaron corregidos. La instalación limpia y el arranque conjunto aún deben verificarse.
+Siguen pendientes selección de café, pastelería con botones/precios, interfaz del carrito, mesas, confirmación, seguimiento, estilos y E2E. Verificación del **6 de noviembre de 2026**: **93 tests del frontend aprobados**, compilación y lint correctos. La instalación limpia se verificó el 5 de noviembre; falta registrar el arranque conjunto siguiendo el README. El backend ya asigna `pendiente`, pero necesita completar la validación de `productoId` y las mesas antes de cerrar el contrato de pedidos.
 
 ## 2. Instalación y versiones
 
@@ -34,6 +34,7 @@ Versiones de esta base:
 | TypeScript | 5.9.3 | Tipos estrictos. |
 | Vite | 7.3.7 | Desarrollo y compilación. |
 | Vitest | 3.2.7 | Pruebas del frontend. |
+| tinypool | 2.1.2 | Override limitado a Vitest 3.2.7 para sus workers; motivo y validación en la sección de auditoría. |
 | React Testing Library | 16.3.3 | Montaje y consultas de componentes. |
 | DOM Testing Library | 10.4.2 | Consultas del DOM y dependencia de Testing Library. |
 | user-event | 14.6.8 | Reintento, pruebas del Context e integración del proveedor en App. |
@@ -337,7 +338,7 @@ Para simular el rechazo de un pedido sin ítems, registrar `crearHandlerError("/
 | [subtotalCarrito.test.ts](frontend/src/test/unit/subtotalCarrito.test.ts) | 2 | Subtotal de un ítem y suma de subtotales del carrito. |
 | [formatoPrecio.test.ts](frontend/src/test/unit/formatoPrecio.test.ts) | 1 | Formato local: 1000 se muestra como `$1.000`. |
 
-Son **93 tests en 18 archivos**, verificados hasta el PR #21. El PR #20 agregó 19 casos y #21 uno, sobre los 73 registrados antes. Las pruebas normales no necesitan Express levantado. El test del proxy inicia y cierra un servidor Vite temporal en `127.0.0.1` y MSW simula la API. Los 44 tests del backend se ejecutan con Jest y se cuentan por separado. La compilación comprueba tipos de aplicación/configuración/tests y pasa junto con lint.
+Son **93 tests en 18 archivos**, verificados nuevamente el 6 de noviembre. El PR #20 agregó 19 casos y #21 uno, sobre los 73 registrados antes. Las pruebas normales no necesitan Express levantado. El test del proxy inicia y cierra un servidor Vite temporal en `127.0.0.1` y MSW simula la API. Los **77 tests del backend**, en 15 suites de Jest, se cuentan por separado: el total es 170. La compilación comprueba tipos de aplicación/configuración/tests y pasa junto con lint.
 
 ## 7. Archivos `.pending` y comienzo de una funcionalidad
 
@@ -361,7 +362,7 @@ Las reservas restantes incluyen selector, pastelería, interfaz del carrito, URL
 
 ## 8. Trabajo con TDD y commits
 
-La unidad de avance es un comportamiento concreto. Puede requerir varios archivos de prueba e implementación, pero no se adelantan otras funcionalidades ni se completan tareas de otro integrante.
+La unidad de avance es un comportamiento concreto. Puede requerir varios archivos de prueba e implementación. Se respeta el reparto de la planificación; las correcciones comunes de esta revisión fueron autorizadas por Homero y sus aportes a M1/N1 quedan registrados allí.
 
 - **RED:** el runner funciona y la prueba falla por la capacidad que falta. Un error de sintaxis o una importación equivocada se corrige antes de registrar la evidencia del RED.
 - **GREEN:** se implementa la solución mínima y se verifica la misma prueba, conservando la cobertura existente.
@@ -378,10 +379,10 @@ Ejemplos del formato usado en esta base:
 ```text
 RED test: comprobar aislamiento de handlers de MSW entre pruebas
 GREEN chore: reiniciar los handlers de MSW después de cada prueba
-REFACTOR test: parametrizar las pruebas de montaje y aislamiento del DOM
+REFACTOR: parametrizar las pruebas de montaje y aislamiento del DOM
 ```
 
-Los cambios de documentación, dependencias o mantenimiento que no constituyen una etapa de TDD usan su tipo sin forzar un prefijo, por ejemplo `docs: actualizar la guía del frontend` o `chore: instalar Zod 4 con versión exacta`.
+Los refactores usan `REFACTOR: descripción`, sin repetir la palabra. Documentación, dependencias y cobertura de comportamiento existente usan su tipo sin forzar un prefijo, por ejemplo `docs: actualizar la guía del frontend`, `chore: instalar Zod 4 con versión exacta` o `test: ampliar cobertura HTTP del catálogo`.
 
 Cada integrante guarda sus propios commits. Durante el trabajo asistido, el asistente prepara cambios y verificaciones y se detiene entre etapas; no crea commits. Se conservan los commits RED, GREEN y REFACTOR en el historial y se evita un squash que borre esa evidencia. El flujo de integración y la revisión cruzada están en la planificación.
 
@@ -393,10 +394,10 @@ Las consultas de componentes se hacen por rol, etiqueta o texto. `getByTestId` s
 
 | Responsable | Trabajo que sigue pendiente |
 | --- | --- |
-| Homero | Registrar instalación limpia y arranque conjunto; completar contratos/funciones/mocks de pedidos y conectar selector/pastelería. Contrato ampliado de productos, tipos/lint y montaje del proveedor están resueltos. |
-| Matias | Completar cobertura HTTP de filtrados/pastelería y restaurar la aserción del catálogo de 20 productos. Implementar selector, pastelería y Bootstrap/SASS. Los campos y descripciones ya salen por ambos GET. |
+| Homero | Cerrar la corrección de `productoId`, registrar arranque conjunto, completar contratos/funciones/mocks de pedidos y conectar selector/pastelería. Instalación limpia, contrato de productos, tipos/lint y proveedor están verificados. |
+| Matias | Implementar selector, pastelería y Bootstrap/SASS. La API de M1 y sus 22 casos HTTP están completos en la rama de correcciones, pendientes de integración. |
 | Federico | Completar interfaz F2, vaciado tras confirmación y Playwright F3. Context/reducer/utilidades están disponibles y el proveedor ya está montado y probado en App. |
-| Nicolas | Mesas y pedidos en API, estado predeterminado, reset/seed, lectura de URL, confirmación y seguimiento. |
+| Nicolas | Mesas y contrato completo de pedidos en API, reset/seed, lectura de URL, confirmación y seguimiento. El estado predeterminado ya está corregido en esta rama. |
 
 Homero ya integró el proveedor y alineó los tipos y mocks. Coordinará `test:e2e` cuando esté disponible Playwright. El contrato HTTP ampliado de productos está documentado y validado por el cliente; pedidos con mesa y seed siguen pendientes de Nicolas.
 
@@ -406,12 +407,12 @@ La instalación limpia con `npm run install:all` se verificó en `fix/correccion
 
 ## 10. Estado de verificación y cierre de la base
 
-Verificación del **5 de noviembre de 2026** en `fix/correcciones-generales`, con Node.js **22.23.4** y npm **10.9.9**. Incluye las correcciones de pedidos y herramientas posteriores al PR #22:
+Verificación del **6 de noviembre de 2026** en `fix/correcciones-generales`, hasta `584aeb1`, con Node.js **22.23.4** y npm **10.9.9**. Incluye las correcciones de pedidos, herramientas y cobertura posteriores al PR #22:
 
 | Comando desde la raíz | Resultado |
 | --- | --- |
-| `npm run install:all` | Aprobado: ambos paquetes se instalaron mediante `npm ci` a partir de sus lockfiles. |
-| `npm test` | Aprobado después de la instalación limpia: 58 tests de backend en 15 suites y 93 de frontend en 18 archivos; 151 en total. |
+| `npm run install:all` | Aprobado el 5 de noviembre: ambos paquetes se instalaron mediante `npm ci` a partir de sus lockfiles. |
+| `npm test` | Aprobado el 6 de noviembre: 77 tests de backend en 15 suites y 93 de frontend en 18 archivos; 170 en total. |
 | `npm run build` | Ambos paquetes compilan; incluye tipos de los tests/configuraciones del frontend. |
 | `npm run lint` | Aprobado, sin errores. |
 
@@ -419,7 +420,7 @@ Los problemas anteriores se resolvieron en #20: exportación del tipo inferido `
 
 Vitest transpila los tests y no sustituye `tsc -b`; se ejecutaron ambas verificaciones. En backend, `isolatedModules: true` permite el uso de `Node16` con ts-jest y elimina el aviso TS151002, manteniendo `strict: true`. La comprobación completa de tipos sigue a cargo de `tsc` durante el build. Ver [documentación de ts-jest](https://kulshekhar.github.io/ts-jest/docs/guides/esm-support) y [opción de TypeScript](https://www.typescriptlang.org/tsconfig/isolatedModules.html).
 
-Rollup sigue avisando sobre comentarios de anotación de Zod; el build termina correctamente. Los E2E todavía no están implementados. La instalación limpia no certifica el recorrido en navegador ni reemplaza el arranque conjunto pendiente.
+Rollup sigue avisando sobre comentarios de anotación de Zod; el build termina correctamente. Los E2E todavía no están implementados. La instalación limpia no certifica el recorrido en navegador ni reemplaza el arranque conjunto pendiente. La revisión exploratoria detectó además que `productoId: {"toString": 0}` todavía produce HTTP 500; validar su tipo/formato y agregar sus tests es el siguiente paso antes del PR. Los tests actuales en verde no cubren ese caso.
 
 ### Dependencias de desarrollo y auditoría
 
@@ -429,7 +430,7 @@ Es una excepción al rango de tinypool declarado por Vitest 3. El cambio mayor d
 
 En backend, el lockfile actualiza ts-jest de **29.4.14** a **29.4.15**, dentro del rango permitido por `package.json`.
 
-| Auditoría del 5 de noviembre de 2026 | Backend | Frontend |
+| Auditoría del 6 de noviembre de 2026 | Backend | Frontend |
 | --- | --- | --- |
 | Dependencias de producción (`--omit=dev`) | 0 paquetes afectados | 0 paquetes afectados |
 | Todas las dependencias | 20 afectados: 4 bajos y 16 moderados | 9 afectados, todos moderados |
