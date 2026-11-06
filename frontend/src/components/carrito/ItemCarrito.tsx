@@ -12,20 +12,18 @@ export function ItemCarrito({ item }: ItemCarritoProps) {
     const { agregarProducto, restarProducto } = useCarrito();
     const subtotal = calcularSubtotalItem(item);
 
+    const producto = {
+        id: item.productoId,
+        nombre: item.nombre,
+        precio: item.precio,
+    };
+
     function sumarUnidad() {
-        agregarProducto({
-            id: item.productoId,
-            nombre: item.nombre,
-            precio: item.precio,
-        });
+        agregarProducto(producto);
     }
 
     function restarUnidad() {
-        restarProducto({
-            id: item.productoId,
-            nombre: item.nombre,
-            precio: item.precio,
-        });
+        restarProducto(producto);
     }
 
     return (
