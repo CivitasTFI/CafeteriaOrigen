@@ -13,6 +13,16 @@ export const postPedidos = (req: Request, res: Response) => {
             pedido
         });
     } catch (error) {
+
+        if (
+        error instanceof Error &&
+        error.message === "Mesa inexistente"
+        ) {
+            return res.status(404).json({
+                error: error.message
+            });
+        }
+        
         return res.status(400).json({
             error: error instanceof Error
                 ? error.message

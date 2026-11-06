@@ -10,7 +10,8 @@ const mesasValidas = [1,2,3,4,5,6,7,8];
 
 // Valida los datos del pedido
 export function validarPedido(
-    pedido: { productoId: number; cantidad: number }[]
+    pedido: { productoId: number; cantidad: number }[],
+    mesaId?: number
 ): void {
 
     // Validar que haya items
@@ -36,6 +37,16 @@ export function validarPedido(
             );
         }
     }
+
+    if (mesaId !== undefined) {
+        if (!Number.isInteger(mesaId) || mesaId < 1) {
+            throw new Error("Debe ingresar un número válido");
+        }
+
+        if (!mesasValidas.includes(mesaId)) {
+            throw new Error("Mesa inexistente");
+        }
+    }
 }
 
 // Devuelve la representación pública de un pedido
@@ -55,7 +66,7 @@ export function crearPedido(
     estado: string,
     mesaId?: number
 ) {
-    validarPedido(items);
+    validarPedido(items, mesaId);
 
     const pedido = guardarPedidos(items, estado, mesaId);
 
