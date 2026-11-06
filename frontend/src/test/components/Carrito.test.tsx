@@ -172,4 +172,19 @@ describe("Carrito componente", () => {
 
         expect(screen.getByText("Cantidad: 1")).toBeInTheDocument();
     });
+    it("Elimina el producto del carrito sin importar su cantidad al clickear el boton de eliminar", async() => {
+        const user = userEvent.setup();
+
+        render(
+            <CarritoProvider>
+                <AgregarProductoDePrueba producto={productoMock} />
+                <Carrito />
+            </CarritoProvider>,
+        );
+        await user.click(screen.getByRole("button", { name: "Agregar Expreso Mediano" }));
+        await user.click(screen.getByRole("button", { name: "Sumar Expreso Mediano" }));
+        await user.click(screen.getByRole("button", { name: "Eliminar Expreso Mediano" }));
+
+        expect(screen.getByText("Tu carrito está vacio")).toBeInTheDocument();
+    });
 })
