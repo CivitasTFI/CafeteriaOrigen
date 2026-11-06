@@ -1,6 +1,6 @@
 import { http, HttpResponse } from "msw";
 import { expect, test } from "vitest";
-import { crearPedido } from "../../api/pedidos";
+import { crearPedido, consultarPedido } from "../../api/pedidos";
 import { erroresApi } from "../fixtures/errores";
 import { pedidoApi, respuestaCrearPedidoApi } from "../fixtures/pedidos";
 import { server } from "../mocks/server";
@@ -98,4 +98,21 @@ test("informa una respuesta 400 incompatible con el contrato de errores", async 
   await expect(crearPedido(pedidoApi.items)).rejects.toThrow(
     new Error("No se pudo interpretar la respuesta de error del servidor"),
   );
+});
+
+test("consulta un pedido por su ID y conserva los datos recibidos", async () => {
+  const pedidoConsultado = { ...pedidoApi, id: 7, estado: "en preparación" };
+  const solicitudes: Request[] = [];
+  const url = new URL("/pedidos/7", window.location.origin).href;
+
+  server.use(
+    http.get(url, ({ request }) => {
+      solicitudes.push(request.clone());
+      return HttpResponse.json(pedidoConsultado);
+    }),
+  );
+
+  expect(consultarPedido).toBeDefined();
+  await expect(consultarPedido(7)).resolves.toEqual(pedidoConsultado);
+  expect(solicitudes).toHaveLength(1);
 });
