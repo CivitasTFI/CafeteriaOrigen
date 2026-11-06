@@ -21,6 +21,9 @@ export type ItemCarrito = {
  * @param accion 
  */
 export function carritoReducer(estadoCarrito: ItemCarrito[], accion: AccionCarrito): ItemCarrito[] {
+    if (accion.type === "VACIAR") {
+        return [];
+    }
     if (accion.type === "AGREGAR") {
         const productoId = accion.producto.id;
         const nuevoItem: ItemCarrito = {
@@ -60,8 +63,6 @@ export function carritoReducer(estadoCarrito: ItemCarrito[], accion: AccionCarri
     if (accion.type === "ELIMINAR") {
         return estadoCarrito.filter( (item) => item.productoId !== accion.producto.id);
     }
-    if (accion.type === "VACIAR") {
-        return [];
-    }
+
     return estadoCarrito;
 }
