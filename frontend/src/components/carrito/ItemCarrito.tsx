@@ -9,7 +9,7 @@ type ItemCarritoProps = {
 
 export function ItemCarrito({ item }: ItemCarritoProps) {
     const { nombre, cantidad } = item;
-    const { agregarProducto, restarProducto } = useCarrito();
+    const { agregarProducto, restarProducto, eliminarProducto } = useCarrito();
     const subtotal = calcularSubtotalItem(item);
 
     const producto = {
@@ -32,6 +32,9 @@ export function ItemCarrito({ item }: ItemCarritoProps) {
             <p>Cantidad: {cantidad}</p>
             <button type="button" aria-label={`Sumar ${item.nombre}`} onClick={sumarUnidad}>+</button>
             <button type="button" aria-label={`Restar ${item.nombre}`} onClick={restarUnidad}>-</button>
+            <button type="button" aria-label={`Eliminar ${item.nombre}`} onClick={() => {eliminarProducto(producto)}}>
+                Eliminar
+            </button>
             <p>Subtotal ítem: {formatoPrecio(subtotal)}</p>
         </>
     );
