@@ -32,7 +32,7 @@ export function ItemCarrito({ item }: ItemCarritoProps) {
             <p>Cantidad: {cantidad}</p>
             <button type="button" aria-label={`Sumar ${item.nombre}`} onClick={sumarUnidad}>+</button>
             <button type="button" aria-label={`Restar ${item.nombre}`} onClick={restarUnidad}>-</button>
-            <button type="button" aria-label={`Eliminar ${item.nombre}`} onClick={() => {eliminarProducto(producto)}}>
+            <button type="button" aria-label={`Eliminar ${item.nombre}`} onClick={() => eliminarProducto(producto)}>
                 Eliminar
             </button>
             <p>Subtotal ítem: {formatoPrecio(subtotal)}</p>
