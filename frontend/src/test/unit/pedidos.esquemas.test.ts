@@ -1,17 +1,8 @@
 import { describe, expect, test } from "vitest";
 import { esquemaPedido } from "../../api/esquemas/pedidos";
+import { pedidoApi as pedido } from "../fixtures/pedidos";
 
 test("acepta un pedido de la API actual y conserva sus datos", () => {
-  const pedido = {
-    id: 1,
-    items: [
-      { productoId: 5, cantidad: 2 },
-      { productoId: 19, cantidad: 1 },
-    ],
-    estado: "pendiente",
-    total: 17220,
-  };
-
   expect(esquemaPedido).toBeDefined();
   expect(esquemaPedido.safeParse(pedido)).toEqual({
     success: true,
@@ -20,16 +11,6 @@ test("acepta un pedido de la API actual y conserva sus datos", () => {
 });
 
 describe("Validaciones del contrato de pedidos", () => {
-  const pedido = {
-    id: 1,
-    items: [
-      { productoId: 5, cantidad: 2 },
-      { productoId: 19, cantidad: 1 },
-    ],
-    estado: "pendiente",
-    total: 17220,
-  };
-
   test.each([
     { caso: "una respuesta nula", respuesta: null },
     { caso: "un ID de pedido cero", respuesta: { ...pedido, id: 0 } },
