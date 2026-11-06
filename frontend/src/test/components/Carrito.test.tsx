@@ -198,4 +198,32 @@ describe("Carrito componente", () => {
         );
         expect(screen.getByRole("button", { name: "Confirmar pedido" })).toBeDisabled();
     });
+    it("quita la última unidad al restar y vuelve a mostrar el carrito vacío", async () => {
+        const user = userEvent.setup();
+        renderizarCarrito([productoMock]);
+
+        await user.click(screen.getByRole("button", { name: "Agregar Expreso Mediano" }));
+        expect(screen.getByText("Cantidad: 1")).toBeInTheDocument();
+
+        await user.click(screen.getByRole("button", { name: "Restar Expreso Mediano" }));
+
+        expect(screen.queryByText("Expreso Mediano")).not.toBeInTheDocument();
+        expect(screen.getByText("Tu carrito está vacio")).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: "Confirmar pedido" })).toBeDisabled();
+    });
+    it("habilita la confirmación al agregar y la bloquea al eliminar el último producto", async () => {
+        const user = userEvent.setup();
+        renderizarCarrito([productoMock]);
+        const confirmar = screen.getByRole("button", { name: "Confirmar pedido" });
+
+        expect(confirmar).toBeDisabled();
+
+        await user.click(screen.getByRole("button", { name: "Agregar Expreso Mediano" }));
+        expect(confirmar).toBeEnabled();
+
+        await user.click(screen.getByRole("button", { name: "Eliminar Expreso Mediano" }));
+
+        expect(confirmar).toBeDisabled();
+        expect(screen.getByText("Tu carrito está vacio")).toBeInTheDocument();
+    });
 })
