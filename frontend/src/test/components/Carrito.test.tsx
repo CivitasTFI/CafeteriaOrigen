@@ -31,6 +31,17 @@ function AgregarProductoDePrueba({ producto }: AgregarProductoDePruebaProps) {
     );
 }
 
+function renderizarCarrito(productos: Producto[]) {
+    render(
+        <CarritoProvider>
+            {productos.map((producto) => (
+                <AgregarProductoDePrueba key={producto.id} producto={producto} />
+            ))}
+            <Carrito />
+        </CarritoProvider>,
+    );
+}
+
 describe("Carrito componente", () => {
     it("Renderiza el carrito y muestra el mensaje de carrito vacio", () => {
         render(
@@ -122,13 +133,7 @@ describe("Carrito componente", () => {
     });
     it("Muestra el subtotal general del carrito como orientativo", async() => {
         const user = userEvent.setup();
-        render(
-            <CarritoProvider>
-                <AgregarProductoDePrueba producto={productoMock} />
-                <AgregarProductoDePrueba producto={productoMock2} />
-                <Carrito />
-            </CarritoProvider>,
-        );
+        renderizarCarrito([productoMock, productoMock2]);
 
         const agregarMediano = screen.getByRole("button", { name: "Agregar Expreso Mediano" });
         const agregarGrande = screen.getByRole("button", { name: "Agregar Expreso Grande" });
