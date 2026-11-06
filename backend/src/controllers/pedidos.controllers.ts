@@ -1,33 +1,22 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { crearPedido, listarPedidos, buscarPedidoPorId } from "../services/pedidos.service";
+import { validarObjeto } from "../utils/validar-objeto";
 
 // POST pedidos
-export const postPedidos = (req: Request, res: Response) => {
+export const postPedidos = (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { items, mesaId } = req.body;
+        validarObjeto(req.body, "El cuerpo del pedido debe ser un objeto");
 
-        const pedido = crearPedido(items, mesaId);
+        const { items, estado, mesaId } = req.body;
+
+        const pedido = crearPedido(items, estado, mesaId);
 
         return res.status(201).json({
             mensaje: "El pedido se guardó correctamente",
             pedido
         });
     } catch (error) {
-
-        if (
-        error instanceof Error &&
-        error.message === "Mesa inexistente"
-        ) {
-            return res.status(404).json({
-                error: error.message
-            });
-        }
-        
-        return res.status(400).json({
-            error: error instanceof Error
-                ? error.message
-                : "No se pudo guardar el pedido"
-        });
+        return next(error);
     }
 }
 

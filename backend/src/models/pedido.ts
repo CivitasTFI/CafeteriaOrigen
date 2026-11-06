@@ -1,11 +1,11 @@
 import { obtenerProducto } from "../data/catalogo";
 
 export class Pedido {
-    public estado = "pendiente";
-    
+
     constructor(
         public id: number,
         public items: { productoId: number; cantidad: number }[],
+        public estado: string,
         public mesaId?: number
     ) {}
 

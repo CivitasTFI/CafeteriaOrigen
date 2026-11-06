@@ -48,6 +48,7 @@ describe("Servicio de pedidos", () => {
                     cantidad: 1
                 }
             ],
+            undefined,
             4
         )
 
@@ -134,6 +135,7 @@ describe("Servicio de pedidos", () => {
                 productoId:12,
                 cantidad: 3
             }],
+            undefined,
             9
         )
         }).toThrow();
@@ -149,6 +151,7 @@ describe("Servicio de pedidos", () => {
                 productoId:2,
                 cantidad:5
             }],
+            undefined,
             2
         )
 
@@ -166,6 +169,7 @@ describe("Servicio de pedidos", () => {
                         cantidad: 4
                     }
                 ],
+                undefined,
                 7
             )
         ).toThrow(`No existe el producto ${productoId}`);

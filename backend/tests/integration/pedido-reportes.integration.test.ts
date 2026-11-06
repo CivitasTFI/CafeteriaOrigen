@@ -31,6 +31,27 @@ describe("Integración entre pedidos y reportes", () => {
         });
     });
 
+    it("responde 400 si la facturación acumulada supera el rango seguro tras crear pedidos válidos", async () => {
+        for (let numeroPedido = 0; numeroPedido < 6; numeroPedido++) {
+            const creacion = await request(app)
+                .post("/pedidos")
+                .send({
+                    items: [{ productoId: 1, cantidad: 1_794_262_799_749 }]
+                });
+
+            expect(creacion.status).toBe(201);
+            expect(creacion.body.pedido.total).toBe(9_007_199_254_739_980);
+        }
+
+        const reporte = await request(app)
+            .get("/reportes/facturacion");
+
+        expect(reporte.status).toBe(400);
+        expect(reporte.body).toEqual({
+            error: "La facturación total supera el rango de enteros seguros"
+        });
+    });
+
     it("actualiza el producto más vendido al crear un pedido", async () => {
     const creacion = await request(app)
         .post("/pedidos")

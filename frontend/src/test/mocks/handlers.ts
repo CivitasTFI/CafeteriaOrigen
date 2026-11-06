@@ -1,5 +1,6 @@
 import { http, HttpResponse, type HttpHandler } from "msw";
 import type { ErrorApi } from "../../api/esquemas/errores";
+import type { Pedido, RespuestaCrearPedido } from "../../api/esquemas/pedidos";
 import type { Productos } from "../../api/esquemas/productos";
 
 export function crearHandlerError(
@@ -17,4 +18,16 @@ export function crearHandlerProductos(productos: Productos): HttpHandler {
   const url = new URL("/productos", window.location.origin).href;
 
   return http.get(url, () => HttpResponse.json(productos));
+}
+
+export function crearHandlerCreacionPedido(respuesta: RespuestaCrearPedido): HttpHandler {
+  const url = new URL("/pedidos", window.location.origin).href;
+
+  return http.post(url, () => HttpResponse.json(respuesta, { status: 201 }));
+}
+
+export function crearHandlerConsultaPedido(pedido: Pedido): HttpHandler {
+  const url = new URL(`/pedidos/${pedido.id}`, window.location.origin).href;
+
+  return http.get(url, () => HttpResponse.json(pedido));
 }

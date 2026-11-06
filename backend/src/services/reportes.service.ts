@@ -1,11 +1,18 @@
 import { obtenerProducto } from "../data/catalogo";
 import { Pedido } from "../models/pedido";
+import { ErrorValidacion } from "../errors/error-validacion";
 
 // Facturación total: suma de los totales de todos los pedidos.
 // Caso borde: sin pedidos.
 export function calcularFacturacionTotal(pedidos: Pedido[]): number {
     const facturacionTotal = pedidos.reduce((total, pedido) => {
-        return total += pedido.calcularTotal();
+        const nuevoTotal = total + pedido.calcularTotal();
+
+        if (!Number.isSafeInteger(nuevoTotal)) {
+            throw new ErrorValidacion("La facturación total supera el rango de enteros seguros");
+        }
+
+        return nuevoTotal;
     }, 0);
 
     return facturacionTotal;

@@ -7,7 +7,8 @@ import {
 describe("Repositorio de pedidos", () => {
     it("reinicia los pedidos y el contador de IDs", () => {
         guardarPedidos(
-            [{ productoId: 1, cantidad: 1 }]
+            [{ productoId: 1, cantidad: 1 }],
+            "pendiente"
         );
 
         reiniciarPedidos();
@@ -15,7 +16,8 @@ describe("Repositorio de pedidos", () => {
         expect(obtenerPedidos()).toHaveLength(0);
 
         const nuevoPedido = guardarPedidos(
-            [{ productoId: 1, cantidad: 1 }]
+            [{ productoId: 1, cantidad: 1 }],
+            "pendiente"
         );
 
         expect(nuevoPedido.id).toBe(1);

@@ -1,8 +1,9 @@
-import type { Producto } from "../api/esquemas/productos";
+import type { ProductoBase } from "../api/esquemas/productos";
 
-export type AccionCarrito = | { type: "AGREGAR"; producto: Producto } 
-                     | { type: "RESTAR"; producto: Producto }
-                     | { type: "ELIMINAR"; producto: Producto }
+export type AccionCarrito = | { type: "AGREGAR"; producto: ProductoBase }
+                     | { type: "RESTAR"; producto: ProductoBase }
+                     | { type: "ELIMINAR"; producto: ProductoBase }
+                     | { type: "VACIAR" };
 
 export type ItemCarrito = {
     productoId: number;
@@ -20,6 +21,9 @@ export type ItemCarrito = {
  * @param accion 
  */
 export function carritoReducer(estadoCarrito: ItemCarrito[], accion: AccionCarrito): ItemCarrito[] {
+    if (accion.type === "VACIAR") {
+        return [];
+    }
     if (accion.type === "AGREGAR") {
         const productoId = accion.producto.id;
         const nuevoItem: ItemCarrito = {
@@ -59,5 +63,6 @@ export function carritoReducer(estadoCarrito: ItemCarrito[], accion: AccionCarri
     if (accion.type === "ELIMINAR") {
         return estadoCarrito.filter( (item) => item.productoId !== accion.producto.id);
     }
+
     return estadoCarrito;
 }
