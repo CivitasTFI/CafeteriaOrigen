@@ -129,4 +129,20 @@ describe("Servicio de pedidos", () => {
 
         expect(pedido).toBeUndefined();
     });
+
+    it("rechaza una mesa inexistente y no guarda el pedido", () => {
+        
+        expect(() => {
+            crearPedido(
+            [{
+                productoId:12,
+                cantidad: 3
+            }],
+            "pendiente",
+            9
+        )
+        }).toThrow();
+
+        expect(listarPedidos()).toHaveLength(0);
+    })
 });
