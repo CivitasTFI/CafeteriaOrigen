@@ -3,6 +3,7 @@ import { Producto } from "../api/esquemas/productos";
 export type AccionCarrito = | { type: "AGREGAR"; producto: Producto } 
                      | { type: "RESTAR"; producto: Producto }
                      | { type: "ELIMINAR"; producto: Producto }
+                     | { type: "VACIAR" };
 
 export type ItemCarrito = {
     productoId: number;
@@ -58,6 +59,9 @@ export function carritoReducer(estadoCarrito: ItemCarrito[], accion: AccionCarri
 
     if (accion.type === "ELIMINAR") {
         return estadoCarrito.filter( (item) => item.productoId !== accion.producto.id);
+    }
+    if (accion.type === "VACIAR") {
+        return [];
     }
     return estadoCarrito;
 }

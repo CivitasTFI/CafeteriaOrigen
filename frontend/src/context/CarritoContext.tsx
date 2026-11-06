@@ -7,6 +7,7 @@ interface CarritoContextValue {
   agregarProducto: (producto: Producto) => void;
   restarProducto: (producto: Producto) => void;
   eliminarProducto: (producto: Producto) => void;
+  vaciarCarrito: () => void;
 }
 
 interface CarritoProviderProps {
@@ -28,7 +29,10 @@ export function CarritoProvider( props: CarritoProviderProps ) {
     function eliminarProducto(producto: Producto) {
         dispatch({ type: "ELIMINAR", producto });
     }
-    const value: CarritoContextValue = { items, agregarProducto, restarProducto, eliminarProducto };
+    function vaciarCarrito() {
+        dispatch({ type: "VACIAR" });
+    }
+    const value: CarritoContextValue = { items, agregarProducto, restarProducto, eliminarProducto, vaciarCarrito };
     return (
     <CarritoContext.Provider value={value}>
       {props.children}
