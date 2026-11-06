@@ -12,6 +12,7 @@
     "test": "npm run test:backend && npm run test:frontend",
     "test:backend": "npm --prefix backend run test -- --runInBand",
     "test:frontend": "npm --prefix frontend run test --",
+    "test:e2e": "npm --prefix frontend run test:e2e",
     "test:watch:backend": "npm --prefix backend run test:watch --",
     "test:watch:frontend": "npm --prefix frontend run test:watch --",
     "build": "npm run build:backend && npm run build:frontend",
