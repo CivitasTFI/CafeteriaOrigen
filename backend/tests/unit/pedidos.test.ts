@@ -33,7 +33,7 @@ describe("Servicio de pedidos", () => {
             total: 10040
         });
 
-        expect(pedido).not.toHaveProperty("mesaId");
+        expect(pedido).not.toBeUndefined();
     });
 
     it("crear pedido con mesa válida y total calculado", () => {

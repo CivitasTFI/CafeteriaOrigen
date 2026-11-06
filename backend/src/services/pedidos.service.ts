@@ -6,6 +6,8 @@ import {
     obtenerPedido
 } from "../data/pedidos";
 
+const mesasValidas = [1,2,3,4,5,6,7,8];
+
 // Valida los datos del pedido
 export function validarPedido(
     pedido: { productoId: number; cantidad: number }[]
@@ -42,6 +44,7 @@ function formatearPedido(pedido: Pedido) {
         id: pedido.id,
         items: pedido.items,
         estado: pedido.estado,
+        mesaId: pedido.mesaId,
         total: pedido.calcularTotal()
     };
 }
@@ -49,11 +52,12 @@ function formatearPedido(pedido: Pedido) {
 // Crea un pedido y devuelve sus datos con el total calculado
 export function crearPedido(
     items: { productoId: number; cantidad: number }[],
-    estado: string
+    estado: string,
+    mesaId?: number
 ) {
     validarPedido(items);
 
-    const pedido = guardarPedidos(items, estado);
+    const pedido = guardarPedidos(items, estado, mesaId);
 
     return formatearPedido(pedido);
 }

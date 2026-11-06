@@ -4,9 +4,9 @@ import { crearPedido, listarPedidos, buscarPedidoPorId } from "../services/pedid
 // POST pedidos
 export const postPedidos = (req: Request, res: Response) => {
     try {
-        const { items, estado } = req.body;
+        const { items, estado, mesaId } = req.body;
 
-        const pedido = crearPedido(items, estado);
+        const pedido = crearPedido(items, estado, mesaId);
 
         return res.status(201).json({
             mensaje: "El pedido se guardó correctamente",
