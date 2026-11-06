@@ -42,6 +42,16 @@ function renderizarCarrito(productos: Producto[]) {
     );
 }
 
+async function prepararCarritoConCafeYPasteleria() {
+    const user = userEvent.setup();
+    renderizarCarrito([cafeApi, pasteleriaApi]);
+
+    await user.click(screen.getByRole("button", { name: `Agregar ${cafeApi.nombre}` }));
+    await user.click(screen.getByRole("button", { name: `Agregar ${pasteleriaApi.nombre}` }));
+
+    return user;
+}
+
 describe("Carrito componente", () => {
     it("Renderiza el carrito y muestra el mensaje de carrito vacio", () => {
         render(
@@ -219,11 +229,7 @@ describe("Carrito componente", () => {
         },
     );
     it("actualiza los subtotales al sumar café sin modificar la pastelería", async () => {
-        const user = userEvent.setup();
-        renderizarCarrito([cafeApi, pasteleriaApi]);
-
-        await user.click(screen.getByRole("button", { name: `Agregar ${cafeApi.nombre}` }));
-        await user.click(screen.getByRole("button", { name: `Agregar ${pasteleriaApi.nombre}` }));
+        const user = await prepararCarritoConCafeYPasteleria();
         expect(screen.getByText("Subtotal orientativo: $9.860")).toBeInTheDocument();
 
         await user.click(screen.getByRole("button", { name: `Sumar ${cafeApi.nombre}` }));
@@ -235,11 +241,8 @@ describe("Carrito componente", () => {
         expect(screen.getByText("Subtotal orientativo: $17.220")).toBeInTheDocument();
     });
     it("actualiza los subtotales al restar pastelería sin modificar el café", async () => {
-        const user = userEvent.setup();
-        renderizarCarrito([cafeApi, pasteleriaApi]);
+        const user = await prepararCarritoConCafeYPasteleria();
 
-        await user.click(screen.getByRole("button", { name: `Agregar ${cafeApi.nombre}` }));
-        await user.click(screen.getByRole("button", { name: `Agregar ${pasteleriaApi.nombre}` }));
         await user.click(screen.getByRole("button", { name: `Agregar ${pasteleriaApi.nombre}` }));
         expect(screen.getByText("Subtotal orientativo: $12.360")).toBeInTheDocument();
 
