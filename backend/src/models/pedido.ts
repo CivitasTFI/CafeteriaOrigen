@@ -5,7 +5,8 @@ export class Pedido {
     constructor(
         public id: number,
         public items: { productoId: number; cantidad: number }[],
-        public estado: string
+        public estado: string,
+        public mesaId?: number
     ) {}
 
     public calcularTotal(): number {

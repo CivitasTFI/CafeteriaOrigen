@@ -4,13 +4,14 @@ import {
     buscarPedidoPorId
 } from "../../src/services/pedidos.service";
 import { reiniciarPedidos } from "../../src/data/pedidos";
+import expectCookies from "supertest/lib/cookies";
 
 describe("Servicio de pedidos", () => {
     beforeEach(() => {
         reiniciarPedidos();
     });
 
-    it("crea un pedido válido con su total calculado", () => {
+    it("crea un pedido para barra con su total calculado", () => {
         const pedido = crearPedido(
             [
                 {
@@ -18,7 +19,6 @@ describe("Servicio de pedidos", () => {
                     cantidad: 2
                 }
             ],
-            "pendiente"
         );
 
         expect(pedido).toEqual({
@@ -32,11 +32,47 @@ describe("Servicio de pedidos", () => {
             estado: "pendiente",
             total: 10040
         });
+
+        expect(pedido).not.toBeUndefined();
+    });
+
+    it("crear pedido con mesa válida y total calculado", () => {
+        const pedido = crearPedido(
+            [
+                {
+                    productoId: 5,
+                    cantidad: 2
+                },
+                {
+                    productoId: 19,
+                    cantidad: 1
+                }
+            ],
+            undefined,
+            4
+        )
+
+        expect(pedido).toEqual({
+            id: 1,
+            items: [
+                {
+                    productoId: 5,
+                    cantidad: 2
+                },
+                {
+                    productoId: 19,
+                    cantidad: 1
+                }
+            ],
+            estado: "pendiente",
+            mesaId: 4,
+            total: 17220
+        });
     });
 
     it("rechaza un pedido inválido sin guardarlo", () => {
         expect(() => {
-            crearPedido([], "pendiente");
+            crearPedido([]);
         }).toThrow("El pedido debe contener al menos un producto");
 
         expect(listarPedidos()).toHaveLength(0);
@@ -49,8 +85,7 @@ describe("Servicio de pedidos", () => {
                     productoId: 1,
                     cantidad: 1
                 }
-            ],
-            "pendiente"
+            ]
         );
 
         crearPedido(
@@ -59,8 +94,7 @@ describe("Servicio de pedidos", () => {
                     productoId: 2,
                     cantidad: 1
                 }
-            ],
-            "pendiente"
+            ]
         );
 
         const pedidos = listarPedidos();
@@ -77,8 +111,7 @@ describe("Servicio de pedidos", () => {
                     productoId: 1,
                     cantidad: 1
                 }
-            ],
-            "pendiente"
+            ]
         );
 
         const pedidoEncontrado = buscarPedidoPorId(pedidoCreado.id);
@@ -93,4 +126,52 @@ describe("Servicio de pedidos", () => {
 
         expect(pedido).toBeUndefined();
     });
+
+    it("rechaza una mesa inexistente y no guarda el pedido", () => {
+        
+        expect(() => {
+            crearPedido(
+            [{
+                productoId:12,
+                cantidad: 3
+            }],
+            undefined,
+            9
+        )
+        }).toThrow();
+
+        
+
+        expect(listarPedidos()).toHaveLength(0);
+    });
+
+    it("estado pendiente predeterminado", ()=>{
+        const pedido = crearPedido(
+            [{
+                productoId:2,
+                cantidad:5
+            }],
+            undefined,
+            2
+        )
+
+        expect(pedido.estado).toBe("pendiente");
+    })
+
+    it("producto inexistente", () => {
+        const productoId = 24;
+
+        expect(() =>
+            crearPedido(
+                [
+                    {
+                        productoId,
+                        cantidad: 4
+                    }
+                ],
+                undefined,
+                7
+            )
+        ).toThrow(`No existe el producto ${productoId}`);
+    })
 });

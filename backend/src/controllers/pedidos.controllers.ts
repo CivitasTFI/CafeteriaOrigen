@@ -7,9 +7,9 @@ export const postPedidos = (req: Request, res: Response, next: NextFunction) => 
     try {
         validarObjeto(req.body, "El cuerpo del pedido debe ser un objeto");
 
-        const { items, estado } = req.body;
+        const { items, estado, mesaId } = req.body;
 
-        const pedido = crearPedido(items, estado);
+        const pedido = crearPedido(items, estado, mesaId);
 
         return res.status(201).json({
             mensaje: "El pedido se guardó correctamente",

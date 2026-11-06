@@ -8,6 +8,8 @@ import {
     obtenerPedido
 } from "../data/pedidos";
 
+const mesasValidas = [1,2,3,4,5,6,7,8];
+
 function validarImporteSeguro(importe: number, mensajeError: string): void {
     if (!Number.isSafeInteger(importe)) {
         throw new ErrorValidacion(mensajeError);
@@ -30,9 +32,24 @@ function validarIdProducto(productoId: unknown): void {
     }
 }
 
+function validarMesaPedido(mesaId?: number): void {
+    if (mesaId === undefined) {
+        return;
+    }
+
+    if (!Number.isInteger(mesaId) || mesaId < 1) {
+        throw new ErrorValidacion("Debe ingresar un número válido");
+    }
+
+    if (!mesasValidas.includes(mesaId)) {
+        throw new ErrorValidacion("Mesa inexistente");
+    }
+}
+
 // Valida los datos del pedido
 export function validarPedido(
-    pedido: { productoId: number; cantidad: number }[]
+    pedido: { productoId: number; cantidad: number }[],
+    mesaId?: number
 ): void {
 
     // Validar que los items sean un arreglo no vacío
@@ -78,6 +95,8 @@ export function validarPedido(
 
         validarImporteSeguro(total, "El total del pedido supera el rango de enteros seguros");
     }
+
+    validarMesaPedido(mesaId);
 }
 
 // Devuelve la representación pública de un pedido
@@ -86,6 +105,7 @@ function formatearPedido(pedido: Pedido) {
         id: pedido.id,
         items: pedido.items,
         estado: pedido.estado,
+        mesaId: pedido.mesaId,
         total: pedido.calcularTotal()
     };
 }
@@ -93,12 +113,13 @@ function formatearPedido(pedido: Pedido) {
 // Crea un pedido y devuelve sus datos con el total calculado
 export function crearPedido(
     items: { productoId: number; cantidad: number }[],
-    estado: string = "pendiente"
+    estado: string = "pendiente",
+    mesaId?: number
 ) {
     validarEstadoPedido(estado);
-    validarPedido(items);
+    validarPedido(items, mesaId);
 
-    const pedido = guardarPedidos(items, estado);
+    const pedido = guardarPedidos(items, estado, mesaId);
 
     return formatearPedido(pedido);
 }

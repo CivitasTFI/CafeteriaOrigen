@@ -9,9 +9,9 @@ Proyecto del Grupo 14 para Programación IV de la Tecnicatura Universitaria en P
 | Nicolás Espulef | 22901 |
 | Federico Heinrich | 21317 |
 
-La API del Parcial I está en `backend/` y ya expone los productos ampliados del TP3. El frontend carga sus datos, los valida con Zod y muestra sus nombres, un indicador de carga o un error con reintento. `App` monta el proveedor y la interfaz del carrito, con cantidades, controles para sumar/restar/eliminar, subtotales orientativos y confirmación bloqueada en vacío. H2 ya permite crear y consultar pedidos mediante funciones HTTP con respuestas validadas, fixtures y handlers compartidos. Playwright incorpora tres E2E iniciales con API real. Siguen pendientes el selector de café, la pastelería con botones de agregar y los pedidos desde la pantalla; el menú actual muestra nombres y el botón de confirmar todavía no envía pedidos.
+La API del Parcial I está en `backend/` y ya expone los productos ampliados del TP3. En esta rama también permite pedidos con mesa del 1 al 8 o retiro en barra. El frontend carga los productos, los valida con Zod y muestra sus nombres, un indicador de carga o un error con reintento. `App` monta el proveedor y la interfaz del carrito, con cantidades, controles para sumar/restar/eliminar, subtotales orientativos y confirmación bloqueada en vacío. H2 permite crear y consultar pedidos sin mesa mediante funciones HTTP con respuestas validadas, fixtures y handlers compartidos; falta ampliarlo con `mesaId`. Playwright incorpora tres E2E iniciales con API real. Siguen pendientes el selector de café, la pastelería con botones de agregar y los pedidos desde la pantalla; el menú actual muestra nombres y el botón de confirmar todavía no envía pedidos.
 
-Estado verificado el **6 de noviembre de 2026** en `feature/contratos-pedidos`, hasta `3a6a35a`, sobre `develop` (`c52f215`): **83 tests de backend y 156 de frontend aprobados (239 en total), más 3 E2E**, build completo y lint correctos. Los PR #24, #23 y #25 integraron las correcciones generales y el carrito; el PR #26 integró la preparación inicial de F3 de Federico en `develop`. Los avances de H2 descritos aquí están en `feature/contratos-pedidos`, pendientes de su PR. La instalación limpia y el arranque conjunto conservan sus comprobaciones previas registradas debajo.
+Estado verificado el **6 de noviembre de 2026** en `feature/mesa-pedidos`, hasta `18911cd`, tras incorporar `develop` (`b520964`) mediante `be018cc`: **100 tests de backend y 156 de frontend aprobados (256 en total), más 3 E2E**, build completo y lint correctos. H2 ya está integrado en `develop` mediante el PR #28 y la preparación inicial de F3 mediante #26. N1, sus correcciones de compatibilidad y su cobertura están completos en esta rama; la [PR #27](https://github.com/CivitasTFI/CafeteriaOrigen/pull/27) todavía debe actualizarse e integrarse. La instalación limpia y el arranque conjunto conservan sus comprobaciones previas registradas debajo.
 
 ## Documentación
 
@@ -113,6 +113,7 @@ npm run test:backend -- --runTestsByPath tests/integration/pedidos.limites.test.
 npm run test:backend -- --runTestsByPath tests/integration/pedidos.estructura.test.ts
 npm run test:backend -- --runTestsByPath tests/integration/pedidos.estado.test.ts
 npm run test:backend -- --runTestsByPath tests/integration/pedidos.errores.test.ts
+npm run test:backend -- --runTestsByPath tests/integration/pedidos.mesa.test.ts
 npm run test:backend -- tests/unit/reportes.test.ts tests/integration/pedido-reportes.integration.test.ts
 npm run test:frontend -- src/test/unit/esquemas.test.ts
 npm run test:frontend -- src/test/integration/cliente.test.ts
@@ -181,11 +182,11 @@ El comando de preview sirve el frontend compilado y, en esta versión de Vite, h
 
 ## Estado de la base
 
-La verificación del **6 de noviembre de 2026**, en `feature/contratos-pedidos` hasta `3a6a35a`, con base en `develop` (`c52f215`, incluido el PR #26), registró:
+La verificación del **6 de noviembre de 2026**, en `feature/mesa-pedidos` hasta `18911cd`, con `develop` incorporado hasta `b520964` (incluido el PR #28), registró:
 
 | Área | Resultado |
 | --- | --- |
-| Backend | 15 suites y 83 tests de Jest/Supertest aprobados. Incluyen límites de facturación acumulada y su respuesta HTTP. Compilación correcta. |
+| Backend | 16 suites y 100 tests de Jest/Supertest aprobados. Incluyen pedidos con mesa/barra, rechazos sin alterar datos y límites de facturación. Compilación correcta. |
 | Frontend | 22 archivos y 156 tests de Vitest aprobados. Incluyen productos, menú, carrito y 47 casos nuevos de contratos, cliente y handlers de pedidos. |
 | E2E iniciales | 3 casos de Playwright en `frontend/e2e/menu.spec.ts` aprobados con Chromium y servidores reales a 375 × 812. |
 | Compilación del frontend | Correcta; comprueba los tipos de la aplicación, los tests y las configuraciones. |
@@ -194,7 +195,7 @@ La verificación del **6 de noviembre de 2026**, en `feature/contratos-pedidos` 
 | Arranque conjunto | Comprobación previa del 6 de noviembre: scripts `dev:backend` y `dev:frontend` en 3000/5173; cliente real, Zod y proxy comprobados. Servidores propios cerrados al finalizar. |
 | Auditoría de producción | Registro previo del 6 de noviembre, anterior a incorporar Playwright: 0 paquetes afectados en backend y frontend. |
 
-El PR #20 resolvió el tipo `Producto` faltante, el import de tipos del reducer, los mocks incompatibles y las exportaciones que bloqueaban lint. El PR #23 agregó 12 tests de Federico: diez del carrito, uno del vaciado por Context y otro de integración con App. El PR #25 agregó cuatro casos del carrito y tres de facturación. El PR #26 incorporó los tres E2E iniciales. H2 agrega 47 tests de frontend: `npm test` ejecuta ahora 239 casos de Jest/Vitest; `npm run test:e2e` ejecuta otros tres con servidores reales. La comprobación de tipos de aplicación, configuraciones y tests, incluidos los de Playwright, se verifica con `npm run build`. La compra completa, reset/seed y seguimiento desde la pantalla siguen pendientes.
+El PR #20 resolvió el tipo `Producto` faltante, el import de tipos del reducer, los mocks incompatibles y las exportaciones que bloqueaban lint. El PR #23 agregó 12 tests de Federico y el PR #25 cuatro del carrito y tres de facturación. El PR #26 incorporó los tres E2E iniciales y #28 los 47 tests de H2. La rama de N1 suma cuatro unitarios de Nicolas y 13 casos HTTP de Homero: el backend pasa de 83 a 100 tests. `npm test` ejecuta ahora 256 casos de Jest/Vitest; `npm run test:e2e` ejecuta otros tres con servidores reales. La comprobación de tipos de aplicación, configuraciones y tests, incluidos los de Playwright, se verifica con `npm run build`. La compra completa, reset/seed y seguimiento desde la pantalla siguen pendientes.
 
 La cobertura permanente del catálogo ahora incluye 22 casos HTTP: listado completo, detalle de los 20 IDs y 404. Un fixture independiente fija nombres, precios y metadatos esperados. Los tres tests del buscador comprueban también los IDs exactos de sus dos búsquedas exitosas.
 
@@ -220,6 +221,7 @@ Los avances integrados en `develop` incluyen:
 - [x] Federico, PR #23: `Carrito` e `ItemCarrito` montados en App, controles accesibles, subtotales, bloqueo de confirmación en vacío y acción `VACIAR`; 12 tests nuevos. Las acciones reciben `ProductoBase`, el contrato común derivado con Zod.
 - [x] Homero, PR #25: subtotal identificado como orientativo, cuatro regresiones del carrito, límite seguro de facturación con tres tests y documentación actualizada.
 - [x] Federico, PR #26: Playwright, comandos y configuración con servidores reales; tres E2E iniciales de menú, ancho móvil y carrito vacío.
+- [x] Homero, PR #28: contratos Zod, funciones HTTP, fixtures y handlers compartidos de creación/consulta de pedidos sin mesa; 47 tests nuevos.
 
 Correcciones de Homero ya integradas en `develop` mediante el PR #24:
 
@@ -247,21 +249,30 @@ Avances de Federico en `feature/f3-api-e2e`, integrados mediante el PR #26:
 - [x] Agregar tres regresiones de navegador: menú con 20 productos reales, ancho móvil de la pantalla actual y bloqueo de confirmación con carrito vacío.
 - [x] Integrar `develop` y combinar la documentación de F3 con las correcciones de #25; verificar en esa integración 192 tests, tres E2E, build y lint.
 
-Avances de Homero en `feature/contratos-pedidos`, pendientes de integrar mediante PR:
+Avances de Homero en `feature/contratos-pedidos`, integrados mediante el PR #28:
 
 - [x] Definir `esquemaItemPedido`, `esquemaPedido` y `esquemaRespuestaCrearPedido`, con tipos derivados mediante `z.infer`.
 - [x] Implementar `crearPedido(items)` y `consultarPedido(id)` a través del cliente validado, conservando sus errores HTTP, de red y de contrato.
 - [x] Verificar el método POST, `Content-Type`, cuerpo con los ítems y una sola petición; distinguir la respuesta de creación del pedido directo de consulta.
 - [x] Compartir `pedidoApi`, `respuestaCrearPedidoApi`, el error de pedido inexistente y handlers de éxito para POST y GET.
 - [x] Agregar 47 tests: 28 de esquemas, 17 del cliente y dos de handlers; conservar ciclos RED/GREEN/REFACTOR y regresiones adicionales.
-- [x] Verificar 239 tests habituales, tres E2E, build y lint; actualizar README, FRONTEND y planificación.
-- [ ] Extender H2 con `mesaId` cuando Nicolas complete N1 y entregue su contrato.
+- [x] Verificar en esa etapa 239 tests habituales, tres E2E, build y lint; actualizar README, FRONTEND y planificación.
+- [ ] Extender H2 con `mesaId`, usando el contrato de N1 disponible en esta rama, después de integrar la PR #27.
 
-`listarProductos()` usa `solicitarValidado()` con `esquemaProductos`: valida y conserva el precio y los campos propios de café y pastelería descritos debajo. `Producto` y `Productos` se derivan con `z.infer`; el carrito usa `ProductoBase` para operar con los campos comunes. El cliente de pedidos ya está disponible para integrar la confirmación y el seguimiento. Selector, botones reales de agregar, mesas, pantallas de pedidos, Bootstrap/SASS y recorrido E2E completo con reset/seed siguen pendientes. Los ticks por integrante están en [planificacion.md](planificacion.md).
+Avances de N1 en `feature/mesa-pedidos`, pendientes de integrar mediante la PR #27:
 
-El contrato ampliado de productos está disponible y cubierto en ambos endpoints. Pedidos ya tiene estado predeterminado y validación de IDs; faltan `mesaId` y reset/seed. Instalación limpia y arranque conjunto están registrados; el recorrido completo en navegador sigue pendiente. La auditoría previa del 6 de noviembre registró 20 paquetes afectados de desarrollo en backend (4 bajos y 16 moderados) y 9 moderados en frontend, sin altos ni críticos. Las restricciones de versiones y el override están documentados en [FRONTEND.md](FRONTEND.md#dependencias-de-desarrollo-y-auditoría).
+- [x] Nicolas: agregar `mesaId` opcional al modelo, almacenamiento, servicio y respuesta; definir las mesas válidas del 1 al 8 y permitir pedidos para barra.
+- [x] Nicolas: incorporar cuatro casos unitarios de mesa válida, mesa inexistente, estado predeterminado y producto inexistente.
+- [x] Homero: incorporar `develop` y resolver los conflictos conservando `crearPedido(items, estado = "pendiente", mesaId?)`, la validación del cuerpo y las reglas de IDs, cantidades, importes y estados.
+- [x] Homero: centralizar los errores de mesa con `ErrorValidacion` y HTTP 400; mantener HTTP 500 para fallos internos.
+- [x] Homero: agregar 13 casos HTTP de mesa/barra y rechazos con conservación de pedidos, facturación e IDs; extraer `validarMesaPedido()` sin cambiar el comportamiento.
+- [x] Verificar 256 tests habituales, tres E2E, build y lint hasta `18911cd`; actualizar los tres documentos principales.
 
-En la comprobación conjunta previa, Vite sirvió `/` y `/src/main.tsx` con 200, y `listarProductos()` validó los 20 productos de Express mediante el cliente y Zod reales. Un POST por el proxy, con producto 5 × 2 y producto 19 × 1, sin mesa ni estado, respondió 201, `pendiente` y total **17220**; el GET por ID devolvió el mismo pedido. Los tres IDs mal formados respondieron 400 y se conservaron el pedido válido y su facturación. Los servidores propios se cerraron al finalizar. Esa comprobación del cliente no ejecutaba la interfaz en un navegador. F3 ahora comprueba la pantalla actual a 375 px mediante Chromium; la mesa 4, el carrito cargado en móvil y el recorrido completo siguen pendientes.
+`listarProductos()` usa `solicitarValidado()` con `esquemaProductos`: valida y conserva el precio y los campos propios de café y pastelería descritos debajo. `Producto` y `Productos` se derivan con `z.infer`; el carrito usa `ProductoBase` para operar con los campos comunes. El cliente de pedidos sin mesa está disponible para integrar la confirmación y el seguimiento. Selector, botones reales de agregar, soporte de mesa en H2 y la interfaz, pantallas de pedidos, Bootstrap/SASS y recorrido E2E completo con reset/seed siguen pendientes. Los ticks por integrante están en [planificacion.md](planificacion.md).
+
+El contrato ampliado de productos está disponible y cubierto en ambos endpoints. N1 agrega `mesaId` a la API en esta rama; el cliente frontend y las pantallas todavía deben incorporarlo. Reset/seed sigue pendiente de N2. Instalación limpia y arranque conjunto están registrados; el recorrido completo en navegador sigue pendiente. La auditoría previa del 6 de noviembre registró 20 paquetes afectados de desarrollo en backend (4 bajos y 16 moderados) y 9 moderados en frontend, sin altos ni críticos. Las restricciones de versiones y el override están documentados en [FRONTEND.md](FRONTEND.md#dependencias-de-desarrollo-y-auditoría).
+
+En la comprobación conjunta previa, Vite sirvió `/` y `/src/main.tsx` con 200, y `listarProductos()` validó los 20 productos de Express mediante el cliente y Zod reales. Un POST por el proxy, con producto 5 × 2 y producto 19 × 1, sin mesa ni estado, respondió 201, `pendiente` y total **17220**; el GET por ID devolvió el mismo pedido. Los tres IDs mal formados respondieron 400 y se conservaron el pedido válido y su facturación. Los servidores propios se cerraron al finalizar. Esa comprobación del cliente no ejecutaba la interfaz en un navegador. N1 ahora cubre el ejemplo de mesa 4 mediante HTTP; F3 comprueba la pantalla actual a 375 px mediante Chromium. Mesa desde URL, carrito cargado en móvil y recorrido completo siguen pendientes.
 
 ## Estructura general
 
@@ -288,8 +299,8 @@ La API permite consultar productos, crear y consultar pedidos y obtener reportes
 ### Contrato disponible actualmente
 
 - `GET /productos` devuelve el catálogo con `id`, `nombre`, `precio` y los campos de café/pastelería detallados en [Contrato público de productos](#contrato-público-de-productos). `GET /productos/:id` devuelve un objeto con la misma representación. El precio se obtiene de `calcularPrecio()` en el dominio; un ID inexistente responde 404 con `{ "error": "Producto no encontrado" }`.
-- `POST /pedidos` recibe `items: [{ productoId, cantidad }]` y `estado` opcional. Si se omite, el servicio asigna `"pendiente"`; conserva los estados explícitos válidos y rechaza valores que no sean textos no vacíos. No se definió un catálogo cerrado de estados.
-- Una creación válida responde 201 con `{ mensaje, pedido }`. `pedido` incluye `id`, `items`, `estado` y `total` calculado por la API.
+- `POST /pedidos` recibe `items: [{ productoId, cantidad }]`, `mesaId` opcional y `estado` opcional. Las mesas válidas son los enteros del 1 al 8; omitir `mesaId` significa retiro en barra. Si se omite `estado`, el servicio asigna `"pendiente"`; conserva los estados explícitos válidos y rechaza valores que no sean textos no vacíos. No se definió un catálogo cerrado de estados.
+- Una creación válida responde 201 con `{ mensaje, pedido }`. `pedido` incluye `id`, `items`, `estado`, `total` calculado por la API y `mesaId` cuando se envió una mesa válida.
 - `GET /pedidos` devuelve un arreglo de pedidos y `GET /pedidos/:id` un pedido directo, sin el envoltorio de creación.
 - `GET /reportes/facturacion` devuelve 200 con `{ facturacion: number }` si la suma es un entero seguro, incluido `Number.MAX_SAFE_INTEGER`. Si una suma acumulada deja de ser segura, responde 400 con `{ "error": "La facturación total supera el rango de enteros seguros" }`. Los pedidos ya creados se conservan; se rechaza la consulta del reporte inseguro.
 - Los pedidos se almacenan en memoria y se pierden al reiniciar el servidor.
@@ -309,11 +320,79 @@ Por ejemplo, crear un pedido con el producto 1 y cantidad 2, sin enviar estado, 
 }
 ```
 
-El ID del ejemplo supone que es el primer pedido desde el inicio del servidor. `mesaId` y las rutas HTTP de reset/seed todavía no están implementados. El ejemplo de la mesa 4 de la consigna sigue siendo un objetivo pendiente de pedidos; los campos ampliados de productos sí están disponibles.
+El ID del ejemplo supone que es el primer pedido desde el inicio del servidor. Para barra, `mesaId` se omite del JSON de creación, listado y consulta por ID. Las rutas HTTP de reset/seed todavía no están implementadas.
+
+### Contrato de mesas y pedidos en API (N1)
+
+Disponible en `feature/mesa-pedidos`, hasta `18911cd`, pendiente de integrar mediante la PR #27. Las mesas **1 a 8** son una decisión del grupo; el PDF exige un conjunto válido y el ejemplo de mesa 4, sin fijar su tamaño.
+
+| Valor enviado en `mesaId` | Resultado |
+| --- | --- |
+| Omitido | Pedido para retirar en barra; la respuesta omite `mesaId`. |
+| Entero del 1 al 8 | Pedido asociado a esa mesa; creación, listado y consulta por ID conservan el campo. |
+| Entero positivo fuera del conjunto, por ejemplo 9 | HTTP 400 con `{ "error": "Mesa inexistente" }`. |
+| Texto como `"4"`, `null`, booleano, objeto, arreglo, cero, negativo o decimal | HTTP 400 con `{ "error": "Debe ingresar un número válido" }`. No se convierten automáticamente a números. |
+
+Un rechazo ocurre antes de guardar: conserva los pedidos previos, la facturación y el siguiente ID disponible. El PDF permite 400 o 404 para mesas inexistentes; el contrato de esta rama usa 400 mediante `ErrorValidacion` y el middleware común. Los fallos internos mantienen HTTP 500.
+
+Ejemplo del PDF, con el servidor recién iniciado:
+
+```json
+{
+  "mesaId": 4,
+  "items": [
+    { "productoId": 5, "cantidad": 2 },
+    { "productoId": 19, "cantidad": 1 }
+  ]
+}
+```
+
+Respuesta HTTP 201:
+
+```json
+{
+  "mensaje": "El pedido se guardó correctamente",
+  "pedido": {
+    "id": 1,
+    "items": [
+      { "productoId": 5, "cantidad": 2 },
+      { "productoId": 19, "cantidad": 1 }
+    ],
+    "estado": "pendiente",
+    "mesaId": 4,
+    "total": 17220
+  }
+}
+```
+
+`GET /pedidos/1` devuelve directamente el objeto `pedido`; `GET /pedidos` lo incluye en un arreglo. El ID depende de los pedidos ya creados. Internamente se conserva `crearPedido(items, estado = "pendiente", mesaId?)`; almacenamiento y modelo mantienen el orden estado/mesa. `validarMesaPedido()` es privada y se ejecuta después de validar ítems e importes, conservando el orden de errores.
+
+La cobertura HTTP permanente está en [pedidos.mesa.test.ts](backend/tests/integration/pedidos.mesa.test.ts):
+
+| Casos | Qué verifican |
+| --- | --- |
+| Mesas 1, 4 y 8: tres casos | Límites válidos y ejemplo del PDF; 201, estado predeterminado y total 17220, conservados en creación y consultas. |
+| Sin mesa: un caso | Barra, omisión de `mesaId`, estado explícito `completado` y total 2500. |
+| Mesa 9: un caso | Mesa inexistente, 400 y mensaje del contrato. |
+| 0, -1 y 4.5: tres casos | Valores numéricos inválidos, 400 y mensaje de validación. |
+| `"4"`, `null`, `{}`, `[]` y `true`: cinco casos | Tipos incorrectos, 400 y mensaje de validación. |
+
+Los nueve rechazos también comprueban conservación de pedidos, facturación y secuencia de IDs. Para ejecutar los 13 casos:
+
+```powershell
+npm run test:backend -- --runTestsByPath tests/integration/pedidos.mesa.test.ts
+```
+
+Para revisar los tests de pedidos y comprobar tipos sin generar compilados:
+
+```powershell
+npm run test:backend -- pedidos
+npm --prefix backend run build -- --noEmit
+```
 
 ### Contratos y cliente de pedidos (H2)
 
-Disponibles en `frontend/src/api/esquemas/pedidos.ts` y `frontend/src/api/pedidos.ts` en la rama actual:
+Disponibles en `frontend/src/api/esquemas/pedidos.ts` y `frontend/src/api/pedidos.ts`, integrados en `develop` mediante el PR #28. El cliente actual cubre pedidos sin mesa:
 
 | Operación | Función del frontend | Cuerpo enviado | Respuesta validada |
 | --- | --- | --- | --- |
@@ -334,7 +413,7 @@ const respuesta = await crearPedido([
 const pedido = await consultarPedido(respuesta.pedido.id);
 ```
 
-Con el catálogo actual, la API devuelve `pendiente` y total **17220** para esos ítems. El ejemplo usa los productos y cantidades del PDF para retiro en barra; la mesa 4 sigue pendiente de N1. Los fixtures `pedidoApi` y `respuestaCrearPedidoApi` reproducen esa respuesta con ID 1. El cliente no calcula el total ni agrega `estado` o `mesaId` al POST. Aunque el backend admite estado opcional, esta función solo recibe ítems.
+Con el catálogo actual, la API devuelve `pendiente` y total **17220** para esos ítems. El ejemplo usa los productos y cantidades del PDF para retiro en barra. Los fixtures `pedidoApi` y `respuestaCrearPedidoApi` reproducen esa respuesta con ID 1. El cliente no calcula el total ni agrega `estado` o `mesaId` al POST. Aunque el backend admite mesa y estado opcionales, esta función solo recibe ítems. **Pendiente de H2:** declarar `mesaId` opcional en Zod, conservarlo al consultar y permitir enviarlo al crear; actualmente el esquema elimina ese campo de las respuestas. También deben ampliarse tipos inferidos, fixtures, mocks y tests.
 
 Al conectar el carrito, N3 debe construir los ítems con `productoId` y `cantidad`: `crearPedido()` serializa el arreglo recibido y no elimina propiedades adicionales. Confirmación, vaciado tras éxito y conservación del carrito ante fallos requieren su integración y pruebas de interfaz. Los ejemplos de mocks y la cobertura están en [FRONTEND.md](FRONTEND.md#contratos-y-cliente-de-pedidos-h2).
 
@@ -453,6 +532,16 @@ curl -X POST http://localhost:3000/pedidos \
   -d '{"items":[{"productoId":1,"cantidad":2}]}'
 ```
 
+#### Crear un pedido para la mesa 4
+
+```bash
+curl -X POST http://localhost:3000/pedidos \
+  -H "Content-Type: application/json" \
+  -d '{"mesaId":4,"items":[{"productoId":5,"cantidad":2},{"productoId":19,"cantidad":1}]}'
+```
+
+Devuelve HTTP 201, estado `pendiente`, mesa 4 y total 17220.
+
 #### Obtener todos los pedidos
 
 ```bash
@@ -515,6 +604,29 @@ Invoke-RestMethod `
     -ContentType "application/json" `
     -Body $body
 ```
+
+### Crear el pedido del PDF para la mesa 4
+
+```powershell
+$pedidoMesaJson = @{
+    mesaId = 4
+    items = @(
+        @{ productoId = 5; cantidad = 2 }
+        @{ productoId = 19; cantidad = 1 }
+    )
+} | ConvertTo-Json -Depth 3
+
+$pedidoCreado = Invoke-RestMethod `
+    -Uri "http://localhost:3000/pedidos" `
+    -Method Post `
+    -ContentType "application/json" `
+    -Body $pedidoMesaJson
+
+$pedidoCreado
+Invoke-RestMethod -Uri "http://localhost:3000/pedidos/$($pedidoCreado.pedido.id)" -Method Get
+```
+
+La creación devuelve `{ mensaje, pedido }`; la consulta devuelve el pedido directo. Ambos conservan mesa 4, estado `pendiente` y total 17220. Para comprobar un rechazo, cambiar `mesaId` a 9: el POST responde 400 y no guarda ese pedido.
 
 ### Obtener todos los pedidos
 
