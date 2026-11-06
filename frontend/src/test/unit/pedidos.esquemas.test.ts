@@ -102,3 +102,35 @@ describe("Validaciones del contrato de pedidos", () => {
     });
   });
 });
+
+describe("Validaciones de la respuesta de creación de pedidos", () => {
+  test.each([
+    { caso: "una respuesta nula", respuesta: null },
+    { caso: "un mensaje ausente", respuesta: { pedido } },
+    {
+      caso: "un mensaje numérico",
+      respuesta: { ...respuestaCrearPedidoApi, mensaje: 123 },
+    },
+    {
+      caso: "un pedido ausente",
+      respuesta: { mensaje: respuestaCrearPedidoApi.mensaje },
+    },
+    {
+      caso: "un pedido nulo",
+      respuesta: { ...respuestaCrearPedidoApi, pedido: null },
+    },
+    {
+      caso: "un pedido interno con total textual",
+      respuesta: {
+        ...respuestaCrearPedidoApi,
+        pedido: { ...pedido, total: "17220" },
+      },
+    },
+    {
+      caso: "el pedido directo del GET en lugar del envoltorio del POST",
+      respuesta: pedido,
+    },
+  ])("rechaza $caso", ({ respuesta }) => {
+    expect(esquemaRespuestaCrearPedido.safeParse(respuesta).success).toBe(false);
+  });
+});
