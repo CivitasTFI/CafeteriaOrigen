@@ -1,6 +1,6 @@
 # Frontend — Cafetería Origen
 
-Guía del frontend y de los avances del TP3, actualizada el **6 de noviembre de 2026** sobre `fix/correcciones-generales` hasta `756524a`. Incluye los PR #24 de correcciones y #23 del carrito de Federico, ya integrados en `develop`, y los ajustes posteriores de Homero, pendientes de otro PR. Este documento vive en la raíz del repositorio. Para instalar y ejecutar ambas aplicaciones, comenzar por [README.md](README.md). El reparto completo está en [planificacion.md](planificacion.md).
+Guía del frontend y de los avances del TP3, actualizada el **6 de noviembre de 2026** al integrar `develop` (`42f5657`) en `feature/f3-api-e2e` (`f4c1843`). Incluye los PR #24, #23 y #25 ya integrados y los avances iniciales de Playwright de Federico, pendientes de integrar su PR. Este documento vive en la raíz del repositorio. Para instalar y ejecutar ambas aplicaciones, comenzar por [README.md](README.md). El reparto completo está en [planificacion.md](planificacion.md).
 
 ## 1. Alcance de lo implementado
 
@@ -8,7 +8,7 @@ La aplicación tiene una entrada HTML en español, montaje con `StrictMode` y `A
 
 H2 incorpora contratos Zod de errores y productos ampliados, tipos inferidos, cliente HTTP, consulta y fixtures/handlers de éxito y error. Federico implementó reducer, Context, hook y utilidades en #16, y la interfaz del carrito, `VACIAR` y 12 tests adicionales en #23. Matias conectó el servicio ampliado a ambos GET en #18. Homero alineó contrato y carrito en #20, montó el proveedor en #21 e integró las primeras correcciones generales en #24. La etapa posterior identifica el subtotal como orientativo y agrega cuatro regresiones del carrito y tres casos de facturación.
 
-Siguen pendientes selección de café, pastelería con botones/precios, mesas, confirmación, seguimiento, estilos y E2E. El menú real aún no permite agregar productos y el botón de confirmar no tiene conectado el envío. Verificación del **6 de noviembre de 2026**: **109 tests del frontend aprobados**, compilación y lint correctos; el backend pasa 83 tests, para un total de 192. La instalación limpia del 5 y el arranque conjunto previo del 6 conservan sus registros. El backend ya asigna `pendiente` y valida `productoId`; las mesas siguen pendientes para cerrar el contrato de pedidos.
+Siguen pendientes selección de café, pastelería con botones/precios, mesas, confirmación, seguimiento, estilos y recorrido E2E completo con reset/seed. El menú real aún no permite agregar productos y el botón de confirmar no tiene conectado el envío. Playwright tiene tres pruebas iniciales con servidores reales a 375 × 812. Verificación del **6 de noviembre de 2026**: **109 tests de Vitest y 83 del backend (192 en total), más tres E2E aprobados**, compilación y lint correctos. La instalación limpia del 5 y el arranque conjunto previo del 6 conservan sus registros. El backend ya asigna `pendiente` y valida `productoId`; las mesas siguen pendientes para cerrar el contrato de pedidos.
 
 ## 2. Instalación y versiones
 
@@ -34,6 +34,7 @@ Versiones de esta base:
 | TypeScript | 5.9.3 | Tipos estrictos. |
 | Vite | 7.3.7 | Desarrollo y compilación. |
 | Vitest | 3.2.7 | Pruebas del frontend. |
+| Playwright (`@playwright/test`) | 1.65.0 | E2E con Chromium y servidores reales a 375 × 812. |
 | tinypool | 2.1.2 | Override limitado a Vitest 3.2.7 para sus workers; motivo y validación en la sección de auditoría. |
 | React Testing Library | 16.3.3 | Montaje y consultas de componentes. |
 | DOM Testing Library | 10.4.2 | Consultas del DOM y dependencia de Testing Library. |
@@ -44,7 +45,7 @@ Versiones de esta base:
 | Zod | 4.6.7 | Errores, productos ampliados, campos comunes y validación genérica. Pedidos pendientes. |
 | ESLint | 9.39.5 | Revisión estática del código. |
 
-Las versiones vigentes y sus dependencias completas están en [frontend/package.json](frontend/package.json) y [frontend/package-lock.json](frontend/package-lock.json). Bootstrap, SASS y Playwright todavía no están instalados; se incorporarán con sus tareas correspondientes.
+Las versiones vigentes y sus dependencias completas están en [frontend/package.json](frontend/package.json) y [frontend/package-lock.json](frontend/package-lock.json). Bootstrap y SASS todavía no están instalados; se incorporarán con sus tareas correspondientes.
 
 ## 3. Comandos
 
@@ -54,10 +55,11 @@ Desde la raíz:
 | --- | --- |
 | `npm run dev:frontend` | Iniciar Vite; por defecto, `http://localhost:5173`. |
 | `npm run test:frontend` | Ejecutar todas las pruebas implementadas del frontend una vez. |
+| `npm run test:e2e` | Ejecutar los E2E de Playwright con API y frontend reales; separado de Vitest. |
 | `npm run test:watch:frontend` | Mantener Vitest observando los cambios. |
 | `npm run build:frontend` | Comprobar tipos y generar `frontend/dist/`. |
 | `npm run lint` | Ejecutar ESLint sobre el frontend. |
-| `npm test` | Ejecutar backend y frontend, deteniéndose si una etapa falla. |
+| `npm test` | Ejecutar Jest y Vitest, deteniéndose si una etapa falla. E2E se ejecuta aparte. |
 
 Para ejecutar un archivo concreto desde la raíz:
 
@@ -86,13 +88,22 @@ npm run test:frontend -- src/test/unit/subtotalCarrito.test.ts
 npm run test:frontend -- src/test/unit/formatoPrecio.test.ts
 ```
 
-Desde `frontend/`, los comandos propios son `npm run dev`, `npm test`, `npm run test:watch`, `npm run build`, `npm run lint` y `npm run preview`. Por ejemplo:
+Desde `frontend/`, los comandos propios son `npm run dev`, `npm test`, `npm run test:watch`, `npm run test:e2e`, `npm run build`, `npm run lint` y `npm run preview`. Por ejemplo:
 
 ```bash
 npm test -- src/test/integration/msw.test.ts
 ```
 
-No hay un comando E2E disponible todavía. `frontend/playwright.config.ts` y `frontend/e2e/` están reservados para el trabajo de Federico.
+Después de instalar las dependencias, instalar Chromium desde `frontend/` con `npx playwright install chromium`. Desde la raíz, en PowerShell:
+
+```powershell
+Push-Location frontend
+npx playwright install chromium
+Pop-Location
+npm run test:e2e
+```
+
+Los puertos 3000 y 5173 deben estar libres. Playwright administra el arranque y cierre de API y frontend, con `reuseExistingServer: false`. La API usa `NODE_ENV=test`. Las tres pruebas iniciales verifican el menú real, el ancho de la pantalla actual y el carrito vacío; reset/seed y la compra completa siguen pendientes.
 
 ## 4. Estructura y archivos de configuración
 
@@ -109,8 +120,8 @@ frontend/
 ├── tsconfig.app.json
 ├── tsconfig.node.json
 ├── tsconfig.test.json
-├── playwright.config.ts             # Reservado, vacío
-├── e2e/                             # Reservado para Playwright
+├── playwright.config.ts             # Chromium, viewport y servidores reales
+├── e2e/                             # menu.spec.ts con tres E2E iniciales
 └── src/
     ├── App.tsx
     ├── main.tsx
@@ -150,12 +161,13 @@ frontend/
 | `vitest.config.ts` | Reutilizar Vite y definir entorno, descubrimiento y setup de pruebas. |
 | `tsconfig.json` | Referenciar los proyectos de aplicación, configuraciones y tests. |
 | `tsconfig.app.json` | Comprobar la aplicación con `strict: true`; excluye `src/test/`. |
-| `tsconfig.node.json` | Comprobar `vite.config.ts` y `vitest.config.ts` con tipos de Node. |
+| `tsconfig.node.json` | Comprobar configuraciones de Vite/Vitest/Playwright y `e2e/**/*.ts`, con tipos Node y biblioteca DOM. |
+| `playwright.config.ts` | Descubrir pruebas en `e2e/`, usar Chromium a 375 × 812 y arrancar API en 3000 y Vite en 5173; no reutiliza servidores. |
 | `tsconfig.test.json` | Heredar la configuración estricta y comprobar `src/test/`, con tipos DOM y Node. |
 | `eslint.config.js` | Reglas de TypeScript y React, incluido el rechazo del uso explícito de `any`. |
 | `.npmrc` | Guardar versiones exactas al instalar dependencias. |
 
-`npm run build` dentro del frontend ejecuta `tsc -b` antes de Vite: los tipos de los tests se comprueban aunque sus archivos no formen parte del bundle de la aplicación. Los archivos `.pending` quedan fuera de la compilación de TypeScript por su extensión.
+`npm run build` dentro del frontend ejecuta `tsc -b` antes de Vite: comprueba los tipos de los tests de Vitest y Playwright y sus configuraciones, aunque no formen parte del bundle de la aplicación. Ejecutar Playwright no sustituye esta comprobación. Los archivos `.pending` quedan fuera de la compilación de TypeScript por su extensión.
 
 ## 5. Conexión de desarrollo con la API
 
@@ -266,7 +278,7 @@ Los seis tests del menú cubren indicador inicial, carga exitosa, error 500 y re
 
 Hay seis tests del reducer, cinco del Context, dos de subtotales y uno de formato: **14 casos de lógica y utilidades**, incluido el vaciado agregado en #23. La interfaz tiene otros 14 casos y App dos de integración. Los fixtures `cafeApi` y `pasteleriaApi` conservan el contrato completo `Producto`. El Context se verifica mediante consumidores de prueba y el carrito real; todavía falta un test específico del error de `useCarrito` fuera del proveedor.
 
-El PR #20 resolvió los bloqueos de tipos/mocks y separó Context/proveedor. En #23 las acciones pasaron a recibir `ProductoBase`, derivado del esquema de campos comunes con `z.infer`: ID, nombre y precio. Los productos completos siguen siendo compatibles y la consulta de API conserva su validación ampliada. Quedan pendientes la integración del vaciado tras una confirmación exitosa, la conservación del carrito ante fallos, la revisión a 375 px y los E2E F3.
+El PR #20 resolvió los bloqueos de tipos/mocks y separó Context/proveedor. En #23 las acciones pasaron a recibir `ProductoBase`, derivado del esquema de campos comunes con `z.infer`: ID, nombre y precio. Los productos completos siguen siendo compatibles y la consulta de API conserva su validación ampliada. Quedan pendientes la integración del vaciado tras una confirmación exitosa, la conservación del carrito ante fallos, la revisión del carrito cargado a 375 px y el recorrido completo de F3. La pantalla actual con carrito vacío ya tiene una comprobación móvil inicial.
 
 ### Proveedor y carrito integrados en App (PR #21 y #23)
 
@@ -350,7 +362,19 @@ Para simular el rechazo de un pedido sin ítems, registrar `crearHandlerError("/
 | [subtotalCarrito.test.ts](frontend/src/test/unit/subtotalCarrito.test.ts) | 2 | Subtotal de un ítem y suma de subtotales del carrito. |
 | [formatoPrecio.test.ts](frontend/src/test/unit/formatoPrecio.test.ts) | 1 | Formato local: 1000 se muestra como `$1.000`. |
 
-Son **109 tests en 19 archivos**, verificados nuevamente el 6 de noviembre. El frontend tenía 93 casos después de #20 y #21; #23 agregó 12 y esta etapa otros cuatro. Las pruebas normales no necesitan Express levantado. El test del proxy inicia y cierra un servidor Vite temporal en `127.0.0.1` y MSW simula la API. Los **83 tests del backend**, en 15 suites de Jest, se cuentan por separado: el total es 192. La compilación comprueba tipos de aplicación/configuración/tests y pasa junto con lint.
+Son **109 tests en 19 archivos**, verificados nuevamente el 6 de noviembre. El frontend tenía 93 casos después de #20 y #21; #23 agregó 12 y #25 otros cuatro. Las pruebas normales no necesitan Express levantado. El test del proxy inicia y cierra un servidor Vite temporal en `127.0.0.1` y MSW simula la API. Los **83 tests del backend**, en 15 suites de Jest, se cuentan por separado: el total es 192. La compilación comprueba tipos de aplicación/configuración/tests y pasa junto con lint.
+
+### Pruebas E2E iniciales (F3)
+
+[menu.spec.ts](frontend/e2e/menu.spec.ts) contiene tres casos de Federico ejecutados por Playwright, separados de los 192 casos de Jest/Vitest:
+
+| Caso | Qué comprueba |
+| --- | --- |
+| Carga real del menú | Los 20 productos y el nombre de un café desde la API real. |
+| Ancho móvil | Después de cargar los productos, el ancho del contenido no supera el visible a 375 px. |
+| Carrito vacío | Muestra el mensaje de vacío y deshabilita “Confirmar pedido”. |
+
+Los tres casos pasaron tras incorporar `develop` hasta `42f5657`. La prueba móvil cubre la pantalla actual con carrito vacío; quedan pendientes el carrito cargado, las futuras pantallas y el recorrido completo. Reset/seed antes de cada test, mesa 4, selección, confirmación y seguimiento dependen de N1/N2/N3, H2 y M2. Son regresiones de comportamiento existente y se registran sin fabricar un RED.
 
 ## 7. Archivos `.pending` y comienzo de una funcionalidad
 
@@ -408,12 +432,12 @@ Las consultas de componentes se hacen por rol, etiqueta o texto. `getByTestId` s
 
 | Responsable | Trabajo que sigue pendiente |
 | --- | --- |
-| Homero | Completar contratos/funciones/mocks de pedidos (H2) y conectar selector/pastelería (H3). Subtotal orientativo, cuatro regresiones del carrito y tres casos de facturación están preparados para otro PR. |
+| Homero | Completar contratos/funciones/mocks de pedidos (H2) y conectar selector/pastelería (H3). Subtotal orientativo, regresiones del carrito y facturación ya están integrados en #25. |
 | Matias | Implementar selector, pastelería y Bootstrap/SASS. La API de M1 y sus 22 casos HTTP ya están integrados en `develop` mediante #18 y #24. |
-| Federico | Coordinar con Nicolas el vaciado tras éxito y conservación ante fallos, revisar 375 px con Matias e implementar Playwright F3. La interfaz del carrito y `VACIAR` ya están integrados en #23. |
+| Federico | Coordinar vaciado tras éxito y conservación ante fallos, revisar el carrito cargado a 375 px y completar F3 con reset/seed, compra y seguimiento. Playwright y tres E2E iniciales están disponibles en esta rama. |
 | Nicolas | Mesas y contrato completo de pedidos en API, reset/seed, lectura de URL, confirmación y seguimiento. Estado predeterminado y validaciones generales ya están integrados en #24. |
 
-Homero ya integró el proveedor y alineó los tipos y mocks. Coordinará `test:e2e` cuando esté disponible Playwright. El contrato HTTP ampliado de productos está documentado y validado por el cliente; pedidos con mesa y seed siguen pendientes de Nicolas.
+Homero ya integró el proveedor y alineó los tipos y mocks. `test:e2e` ya está integrado en frontend y raíz en F3. El contrato HTTP ampliado de productos está documentado y validado por el cliente; pedidos con mesa y seed siguen pendientes de Nicolas.
 
 El cliente HTTP concentra el `fetch` y ya lo consume el menú por `listarProductos()`. Las utilidades del carrito calculan subtotales orientativos con precios recibidos; el total confirmado seguirá siendo el devuelto por la API. No se reproducen las fórmulas del dominio en el frontend.
 
@@ -421,7 +445,7 @@ La instalación limpia y el arranque conjunto se verificaron en `fix/correccione
 
 ## 10. Estado de verificación y cierre de la base
 
-Verificación del **6 de noviembre de 2026** en `fix/correcciones-generales`, hasta `756524a`, con Node.js **22.23.4** y npm **10.9.9**. La rama incorpora `develop` hasta `5b179d5`, incluidos #24 y #23. Se ejecutaron nuevamente tests, build y lint sobre las correcciones posteriores; instalación limpia, arranque conjunto y auditorías conservan los registros previos:
+Verificación del **6 de noviembre de 2026** al integrar `develop` (`42f5657`, incluidos #24, #23 y #25) en `feature/f3-api-e2e` (`f4c1843`), con Node.js **22.23.4** y npm **10.9.9**. Se ejecutaron nuevamente tests, build, lint y E2E. La instalación de dependencias de frontend desde el lockfile de F3 y la instalación de Chromium también quedaron verificadas; instalación limpia de ambos paquetes, arranque conjunto manual y auditorías conservan los registros previos:
 
 | Comando desde la raíz | Resultado |
 | --- | --- |
@@ -429,15 +453,16 @@ Verificación del **6 de noviembre de 2026** en `fix/correcciones-generales`, ha
 | `npm test` | Aprobado el 6 de noviembre: 83 tests de backend en 15 suites y 109 de frontend en 19 archivos; 192 en total. |
 | `npm run build` | Ambos paquetes compilan; incluye tipos de los tests/configuraciones del frontend. |
 | `npm run lint` | Aprobado, sin errores. |
+| `npm run test:e2e` | Tres casos de Playwright aprobados con Chromium, frontend y API reales a 375 × 812. |
 | Scripts de desarrollo | Comprobación previa del 6 de noviembre: arranque conjunto en 3000/5173 y cliente real; procesos propios cerrados al finalizar. |
 
 Los problemas anteriores se resolvieron en #20: exportación del tipo inferido `Producto`, `import type` en el reducer, fixtures compatibles y separación Context/proveedor. El montaje del proveedor de #21 también está verificado.
 
 Vitest transpila los tests y no sustituye `tsc -b`; se ejecutaron ambas verificaciones. En backend, `isolatedModules: true` permite el uso de `Node16` con ts-jest y elimina el aviso TS151002, manteniendo `strict: true`. La comprobación completa de tipos sigue a cargo de `tsc` durante el build. Ver [documentación de ts-jest](https://kulshekhar.github.io/ts-jest/docs/guides/esm-support) y [opción de TypeScript](https://www.typescriptlang.org/tsconfig/isolatedModules.html).
 
-Rollup sigue avisando sobre comentarios de anotación de Zod; el build termina correctamente. Los E2E todavía no están implementados. El ID mal formado detectado en la revisión quedó corregido: los tres casos nuevos de `pedidos.estructura.test.ts` exigen 400, mensaje claro y conservación de pedidos/facturación; el archivo tiene seis casos en total.
+Rollup sigue avisando sobre comentarios de anotación de Zod; el build termina correctamente. Los tres E2E iniciales están aprobados; reset/seed y compra completa siguen pendientes. El ID mal formado detectado en la revisión quedó corregido: los tres casos nuevos de `pedidos.estructura.test.ts` exigen 400, mensaje claro y conservación de pedidos/facturación; el archivo tiene seis casos en total.
 
-La revisión posterior al carrito agregó cuatro regresiones de componente y tres casos de facturación; la suma acumulada insegura ya produce 400 con el mensaje documentado. Las pruebas JSDOM verifican comportamiento de React; la vista de 375 px y el recorrido completo con API real siguen pendientes. Guardar esta documentación y abrir otro PR de `fix/correcciones-generales` a `develop`, conservando los commits; después del merge, continuar H2 con los contratos de creación y consulta de pedidos.
+El PR #25 integró cuatro regresiones de componente y tres casos de facturación; la suma acumulada insegura ya produce 400 con el mensaje documentado. La rama de F3 conserva esos cambios y agrega las pruebas iniciales de navegador. El siguiente paso es guardar el merge de `develop` en `feature/f3-api-e2e` y subir esa rama para actualizar su PR; después del merge de la PR, continuar H2 con los contratos de creación y consulta de pedidos.
 
 ### Comprobación de arranque y conexión real
 
@@ -445,7 +470,7 @@ Se iniciaron `npm run dev:backend` y `npm run dev:frontend -- --strictPort` con 
 
 El POST por el proxy con producto 5 × 2 y producto 19 × 1, sin mesa ni estado, devolvió 201, `pendiente` y **17220**; el GET por ID devolvió el mismo pedido. Los IDs ausente, objeto simple y objeto con `toString` numérico recibieron 400. El listado conservó solo el pedido válido y la facturación siguió siendo 17220. Se cerraron los servidores propios y se verificaron libres los puertos.
 
-Esta comprobación ejercita servicios y cliente HTTP; no renderiza React en un navegador. El recorrido Playwright, la mesa 4 del ejemplo del PDF y la vista de 375 px siguen pendientes. Instalación, arranque y comprobación del cliente no certifican esos requisitos.
+Esta comprobación manual previa ejercitó servicios y cliente HTTP sin renderizar React en un navegador. Los E2E iniciales ahora verifican el menú y la pantalla actual a 375 px con Chromium. La mesa 4, reset/seed, el carrito cargado en móvil y la compra completa siguen pendientes.
 
 ### Dependencias de desarrollo y auditoría
 
@@ -461,7 +486,7 @@ En backend, el lockfile actualiza ts-jest de **29.4.14** a **29.4.15**, dentro d
 | Todas las dependencias | 20 afectados: 4 bajos y 16 moderados | 9 afectados, todos moderados |
 | Avisos altos o críticos | 0 | 0; antes había 2 críticos |
 
-Estos resultados conservan la auditoría previa del 6 de noviembre. La etapa posterior de subtotal y facturación no cambió dependencias; su verificación final volvió a ejecutar tests, build y lint.
+Estos resultados conservan la auditoría previa del 6 de noviembre, anterior a incorporar Playwright. El PR #25 no cambió dependencias; F3 agrega `@playwright/test` 1.65.0 y sus dependencias en el lockfile. La verificación de esta integración volvió a ejecutar tests, build, lint y E2E.
 
 Los avisos de desarrollo no se consideran resueltos: backend conserva las cadenas de `deepmerge`, `glob` y `minimatch`; frontend conserva `@vitest/mocker`/Vitest y `minimatch` mediante typescript-eslint. No hay versiones corregidas dentro de los rangos declarados actuales. `deepmerge` no tiene una versión corregida publicada en el [aviso vigente](https://github.com/advisories/GHSA-gcqx-w48m-w2h4). Las correcciones publicadas de mocker están en versiones mayores que Vitest 3, y las de glob/minimatch también requieren revisar cambios mayores de esas dependencias. Su migración o un parche mantenido siguen pendientes; no se aplicó `npm audit fix --force`.
 

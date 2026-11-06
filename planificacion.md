@@ -8,7 +8,7 @@ Objetivo: construir el menú de mesa sobre la API del Parcial I, con los cambios
 
 El proyecto tiene una API en Node.js, Express y TypeScript con `strict: true`, organizada en modelos, datos, servicios, controladores y rutas. Los productos y pedidos se almacenan en memoria.
 
-La API, sus configuraciones, dependencias y pruebas están en `backend/`. Ambos GET de productos ya exponen el contrato ampliado de Matias. El frontend lo consume con Zod y muestra el menú con carga, errores y reintento. `App` monta `CarritoProvider` y la interfaz del carrito de Federico, con cantidades, subtotales y controles accesibles. La etapa posterior identifica el subtotal como orientativo y refuerza su cobertura. El `package.json` raíz agrupa los comandos de ambos paquetes.
+La API, sus configuraciones, dependencias y pruebas están en `backend/`. Ambos GET de productos ya exponen el contrato ampliado de Matias. El frontend lo consume con Zod y muestra el menú con carga, errores y reintento. `App` monta `CarritoProvider` y la interfaz del carrito de Federico, con cantidades, subtotal orientativo y controles accesibles. F3 incorpora Playwright y tres E2E iniciales con API real. El `package.json` raíz agrupa los comandos de ambos paquetes, incluido `test:e2e`.
 
 La documentación se centraliza en la raíz: [README.md](README.md) es la entrada general y describe la API actual; [FRONTEND.md](FRONTEND.md) explica la base del frontend, las pruebas y el flujo TDD. Esta planificación conserva las tareas y propuestas del TP3. Las propuestas de contratos no deben confundirse con funcionalidades ya implementadas.
 
@@ -19,17 +19,17 @@ La documentación se centraliza en la raíz: [README.md](README.md) es la entrad
 | Pedidos | Alta y consulta por ID; estado predeterminado `pendiente`; rechazo de estados, estructuras, IDs e importes incorrectos antes de guardar, con conservación de pedidos y facturación. | Aceptar, validar, guardar y devolver `mesaId` opcional. |
 | Errores | Middleware centraliza validaciones e IDs mal formados (400), JSON inválido (400), cuerpo demasiado grande (413) y fallo interno (500 genérico). El menú permite reintentar. | Validación de mesas y errores de confirmación que conserven el carrito. |
 | Carrito | Context/reducer con `VACIAR`, acciones sobre `ProductoBase`, interfaz montada en App y 14 casos de componente. Subtotal identificado como orientativo. | Agregado desde selector/pastelería reales y confirmación; vaciar solo tras éxito y revisar 375 px. |
-| Reportes | Facturación acumulada validada en cada suma; acepta el máximo seguro y devuelve 400 si lo supera. Tres tests nuevos. | Integrar la corrección posterior al PR #24 desde esta rama. |
+| Reportes | Facturación acumulada validada en cada suma; acepta el máximo seguro y devuelve 400 si lo supera. Tres tests integrados en #25. | Mantener la regresión al modificar pedidos. |
 | Conexión desde el navegador | Proxy Vite para `/productos` y `/pedidos`. `App` monta `MenuPage`, que consulta a través del cliente HTTP único. | Funciones y pantallas de pedidos; conexión de producción al preparar el despliegue. |
-| Preparación de E2E | Función interna `reiniciarPedidos()` que vacía pedidos y reinicia IDs. | Endpoints HTTP de reset y seed disponibles únicamente con `NODE_ENV=test`. |
-| Frontend | Menú con nombres, carga, error y reintento; lógica e interfaz del carrito probadas; instalación limpia, arranque conjunto y cliente real registrados. | Selector, pastelería, pedidos, Bootstrap/SASS y Playwright. |
-| Regresión | 83 tests de backend en 15 suites y 109 de frontend en 19 archivos aprobados; ambos paquetes compilan y lint pasa. | Funcionalidades restantes, pruebas en navegador y E2E. |
+| Preparación de E2E | Playwright arranca API en `NODE_ENV=test` y Vite reales. Existe `reiniciarPedidos()` internamente. | Endpoints HTTP de reset/seed y su ejecución antes de cada E2E. |
+| Frontend | Menú con carga/reintento, lógica/interfaz del carrito y tres E2E iniciales a 375 px. | Selector, pastelería, pedidos, Bootstrap/SASS y recorrido E2E completo. |
+| Regresión | 83 tests de backend en 15 suites, 109 de Vitest en 19 archivos y tres E2E de Playwright aprobados; build y lint pasan. | Cobertura de las funcionalidades restantes y recorrido completo con reset/seed. |
 
 Desde la actualización documental del PR #19 (estado hasta #17), Matias conectó el servicio a los endpoints en #18. Homero agregó 19 tests en #20 y uno en #21: el frontend pasó de 73 a 93 casos. El PR #24 integró las primeras correcciones generales, con 80 tests de backend. Federico agregó 12 casos en #23: diez de componente, uno de Context y otro de App; el frontend pasó a 105. La rama reutilizada incorpora cuatro regresiones del carrito y tres casos de facturación: 109 de frontend y 83 de backend.
 
-Verificación del **6 de noviembre de 2026**, sobre `fix/correcciones-generales` hasta `756524a`, con `develop` incorporado hasta `5b179d5`: `npm test` pasó con **83 tests de backend y 109 de frontend (192 en total)**; build completo y lint también pasaron. La instalación limpia quedó registrada el 5 de noviembre. El arranque conjunto previo del 6 comprobó cliente real, 20 productos a través del proxy y creación/consulta/rechazo de pedidos; los servidores propios se cerraron al finalizar. La auditoría previa del 6 registró cero afectados de producción en ambos paquetes, 20 de desarrollo en backend y 9 en frontend, sin altos ni críticos. Esta etapa no cambió dependencias. Quedan **7 archivos `.pending`**, que no representan cobertura implementada.
+Verificación del **6 de noviembre de 2026**, al integrar `develop` (`42f5657`) en `feature/f3-api-e2e` (`f4c1843`): `npm test` pasó con **83 tests de backend y 109 de frontend (192 en total)**; `npm run test:e2e` aprobó otros **tres casos** con Chromium y servidores reales. Build y lint también pasaron. Se instalaron las dependencias de frontend desde el lockfile de F3 y Chromium. La instalación limpia anterior de ambos paquetes y el arranque manual conservan sus registros. La auditoría previa del 6, anterior a Playwright, registró cero afectados de producción, 20 de desarrollo en backend y 9 en frontend, sin altos ni críticos. Quedan **7 archivos `.pending`**, que no representan cobertura implementada.
 
-La tabla histórica siguiente registra lo integrado en `develop`, incluidos los PR #24 y #23. Solo los ajustes posteriores de subtotal, cobertura y facturación están pendientes de otro PR desde `fix/correcciones-generales`. Mesas, selección, pedidos desde la pantalla, estilos y E2E siguen pendientes del TP3; también quedan los avisos de desarrollo documentados.
+La tabla histórica siguiente registra lo integrado en `develop`, incluidos los PR #24, #23 y #25. La PR de `feature/f3-api-e2e` conserva esos cambios y agrega la preparación inicial de F3; queda pendiente su merge. Mesas, selección, pedidos desde la pantalla, estilos y recorrido E2E completo siguen pendientes del TP3; también quedan los avisos de desarrollo documentados.
 
 ### Avances integrados en `develop`
 
@@ -59,6 +59,7 @@ La tabla histórica siguiente registra lo integrado en `develop`, incluidos los 
 | `docs/documentacion-general` | #22 | Documentación del estado hasta #21 y del contrato de productos y carrito. |
 | `fix/correcciones-generales` | #24 | Homero: validaciones de pedidos y errores, catálogo completo, ajustes de dependencias/ts-jest y arranque conjunto; 80 tests de backend y 93 de frontend en esa etapa. |
 | `feature/f2-interfazCarrito` | #23 | Federico: carrito visual e ítems, controles, subtotales, confirmación bloqueada en vacío, `VACIAR` y acciones con `ProductoBase`; 12 tests nuevos. |
+| `fix/correcciones-generales` | #25 | Homero: subtotal orientativo, cuatro regresiones del carrito, facturación acumulada segura con tres tests y documentación; 192 casos de Jest/Vitest aprobados. |
 
 ### Primera etapa de correcciones, integrada en el PR #24
 
@@ -74,7 +75,7 @@ Homero integró los siguientes avances sin modificar las fórmulas ni los 20 pro
 - [x] Validar `productoId` como entero positivo seguro antes de usarlo en búsquedas o mensajes. Tres tests HTTP cubren ID ausente, objeto simple y objeto con `toString` numérico: responden 400 y conservan los datos. El ciclo RED/GREEN/REFACTOR incluye `validarIdProducto()`; el 500 reproducido quedó corregido.
 - [x] Registrar el arranque conjunto en 3000/5173: página y módulo de entrada servidos, cliente real/Zod con 20 productos, pedido sin mesa ni estado con 201/`pendiente`/17220, GET por ID y rechazos 400. Se conservaron el pedido válido y su facturación y se cerraron los procesos propios. No reemplaza las pruebas del navegador ni valida mesa 4.
 
-### Segunda etapa en la misma rama, pendiente de otro PR
+### Segunda etapa de correcciones, integrada en el PR #25
 
 Tras los merges #24 y #23, Homero volvió a `fix/correcciones-generales` e incorporó `origin/develop` mediante avance rápido hasta `5b179d5`.
 
@@ -94,7 +95,17 @@ Tras los merges #24 y #23, Homero volvió a `fix/correcciones-generales` e incor
 
 Los cuatro escenarios del carrito se registraron como cobertura existente en `92b2b9f` y `41cfb8b`; sus refactores son `2b6c8a8` y `e2f96f4`. Pasaron con la implementación existente, por lo que no se fabricó un RED.
 
-H2 conserva pendientes los contratos de pedidos; H3 espera selector y pastelería. M1 y F1 están integrados. La parte principal de F2 está implementada y probada; faltan la coordinación con la confirmación y la revisión móvil. F3 sigue pendiente. Los avisos de desarrollo restantes requieren migraciones revisadas o un parche mantenido.
+### Avance inicial de F3 en `feature/f3-api-e2e`
+
+- [x] Instalar Playwright 1.65.0 y configurar Chromium a 375 × 812 con API y frontend reales, sin reutilizar servidores existentes.
+- [x] Integrar `test:e2e` en frontend y raíz e incluir configuración y pruebas en la comprobación de TypeScript.
+- [x] Agregar tres regresiones de navegador: carga de 20 productos reales, ausencia de scroll horizontal en la pantalla actual y bloqueo de confirmación en vacío.
+- [x] Incorporar `develop` hasta `42f5657` y combinar la documentación con los avances ya integrados de #25.
+- [x] Verificar la integración con 192 tests habituales, tres E2E, build y lint aprobados.
+
+Los tres E2E no usan todavía reset/seed ni cubren la compra completa. La comprobación móvil se limita a la pantalla actual con carrito vacío. Los detalles y comandos están en FRONTEND.
+
+H2 conserva pendientes los contratos de pedidos; H3 espera selector y pastelería. M1 y F1 están integrados. La parte principal de F2 está implementada y probada; faltan la coordinación con la confirmación y la revisión móvil del carrito cargado. F3 tiene infraestructura y tres casos iniciales; faltan reset/seed, compra y seguimiento. Los avisos de desarrollo restantes requieren migraciones revisadas o un parche mantenido.
 
 El reparto anterior del Parcial I sirve como referencia de experiencia. Para equilibrar TP3, cada integrante tendrá implementación y pruebas propias; Federico pasa a ocuparse del carrito y los E2E, porque los reportes ya están implementados.
 
@@ -135,11 +146,11 @@ Cada integrante escribe primero los tests de su funcionalidad y luego la impleme
 - [x] Integrar comandos raíz para que `npm test` ejecute las pruebas de API y frontend sin necesitar un servidor API levantado.
 - [x] Alinear los tipos del carrito con Zod y resolver lint separando Context/proveedor (PR #20).
 - [x] Montar `CarritoProvider` en `App` y probar la actualización compartida entre dos consumidores (PR #21).
-- [ ] Integrar `npm run test:e2e` con la configuración de Playwright de Federico.
+- [x] Integrar `npm run test:e2e` con la configuración de Playwright de Federico (disponible en `feature/f3-api-e2e`).
 - [x] Verificar la instalación limpia de ambos paquetes con `npm run install:all` (5 de noviembre, rama de correcciones).
 - [x] Registrar el arranque conjunto de ambas aplicaciones y la conexión del cliente real a través del proxy (6 de noviembre, puertos 3000/5173).
 
-La guía está en [FRONTEND.md](FRONTEND.md). Están implementados cliente, productos ampliados, mocks, menú y proveedor. Tests, compilación y lint pasan; instalación limpia y arranque conjunto están registrados. La integración del comando E2E sigue pendiente con F3.
+La guía está en [FRONTEND.md](FRONTEND.md). Están implementados cliente, productos ampliados, mocks, menú, proveedor e interfaz del carrito. Tests, compilación y lint pasan; instalación limpia y arranque conjunto están registrados. El comando E2E está integrado en frontend y raíz y ejecuta tres casos iniciales.
 
 ### H2. Implementar contratos y cliente HTTP
 
@@ -183,7 +194,8 @@ H2 ya dispone de contratos de errores y productos ampliados, cliente, consulta y
 - [x] Actualizar README, FRONTEND y planificación hasta el PR #21, registrando la integración HTTP, las correcciones y el proveedor montado.
 - [x] Registrar los merges #24 y #23, las nuevas correcciones de subtotal/facturación y los resultados de la verificación general de 192 tests.
 - [x] Documentar el contrato público ampliado de productos, con ejemplos de café/pastelería y sus esquemas Zod.
-- [ ] Completar los contratos HTTP definitivos y los comandos E2E cuando se implementen.
+- [x] Documentar Chromium, puertos y comandos E2E de la preparación inicial de F3.
+- [ ] Completar la documentación de los contratos HTTP definitivos y la preparación E2E con reset/seed cuando se implementen.
 - [ ] Documentar las decisiones de mesas, el ejemplo de pedido del PDF y los comandos de reset/seed para E2E.
 - [x] Verificar los scripts disponibles de tests, compilación y lint después de los merges y las correcciones generales.
 - [ ] Coordinar la comprobación final de scripts y configuraciones cuando estén integradas las funcionalidades restantes y los E2E.
@@ -207,7 +219,7 @@ H2 ya dispone de contratos de errores y productos ampliados, cliente, consulta y
 - [x] Resolver `react-refresh/only-export-components` separando `carrito.context.ts` de `CarritoContext.tsx`; corrección de Homero en PR #20.
 - [x] Incorporar `VACIAR` y `vaciarCarrito()` con un test de Context, y usar `ProductoBase` para las acciones por producto (Federico, PR #23).
 
-F1 tiene ahora 14 casos de lógica y utilidades: seis del reducer, cinco del Context, dos de subtotales y uno de formato. Las operaciones son `AGREGAR`, `RESTAR`, `ELIMINAR` y `VACIAR`; repetir un producto acumula cantidad y restar desde 1 lo quita. `formatoPrecio(1000)` devuelve `$1.000`. Las acciones reciben `ProductoBase`, compatible con los campos comunes de café y pastelería. Homero corrigió la integración en #20 y montó el proveedor en #21; Federico agregó la interfaz y otro caso de App en #23. F3 sigue pendiente.
+F1 tiene ahora 14 casos de lógica y utilidades: seis del reducer, cinco del Context, dos de subtotales y uno de formato. Las operaciones son `AGREGAR`, `RESTAR`, `ELIMINAR` y `VACIAR`; repetir un producto acumula cantidad y restar desde 1 lo quita. `formatoPrecio(1000)` devuelve `$1.000`. Las acciones reciben `ProductoBase`, compatible con los campos comunes de café y pastelería. Homero corrigió la integración en #20 y montó el proveedor en #21; Federico agregó la interfaz y otro caso de App en #23. F3 tiene tres E2E iniciales y conserva pendiente el recorrido completo.
 
 ### F2. Construir la interfaz del carrito
 
@@ -226,12 +238,17 @@ F1 tiene ahora 14 casos de lógica y utilidades: seis del reducer, cinco del Con
 
 ### F3. Implementar los E2E con API real
 
-- [ ] Configurar Playwright y el arranque de frontend y API reales con `NODE_ENV=test` para la API.
+- [x] Configurar Playwright y el arranque de frontend y API reales con `NODE_ENV=test` para la API.
 - [ ] Ejecutar `POST /__test__/reset` y `POST /__test__/seed` antes de cada test; coordinar datos y contrato con Nicolas.
 - [ ] Cubrir al menos un recorrido: abrir `/?mesa=4`, elegir café, agregar pastelería, revisar carrito, confirmar y ver número, estado y total del pedido.
 - [ ] Consultar el estado desde la confirmación y comprobar que funciona sin recargar la página.
 - [ ] Ejecutar el recorrido con viewport de 375 px y verificar ausencia de scroll horizontal.
-- [ ] Conectar `npm run test:e2e` con Homero y documentar requisitos de instalación y ejecución de Playwright.
+- [x] Conectar `npm run test:e2e` en frontend y raíz y documentar instalación de Chromium, puertos y ejecución.
+- [x] Comprobar la carga de los 20 productos desde API real.
+- [x] Comprobar ausencia de scroll horizontal a 375 px en la pantalla actual con carrito vacío.
+- [x] Comprobar bloqueo de confirmación con carrito vacío en Chromium.
+
+**Avance parcial de Federico:** `frontend/e2e/menu.spec.ts` contiene esos tres casos y `playwright.config.ts` usa Chromium a 375 × 812 con servidores administrados por Playwright. El build comprueba también los tipos de configuración y pruebas E2E. La integración con `develop` aprobó 83 tests del backend, 109 de Vitest y tres E2E, además de build y lint. Reset/seed, mesa 4, selección, compra y seguimiento conservan sus tareas pendientes. La prueba móvil inicial no certifica el carrito cargado ni las pantallas futuras.
 
 **Archivos previstos:** `frontend/src/context/`, reducer y componentes de carrito, utilidad de formato, pruebas unitarias y de componentes, configuración Playwright y `frontend/e2e/`.
 
@@ -316,7 +333,7 @@ Este contrato usa `tipo: "cafe"`, bebida en `tipoCafe`, `tamaño` con ñ y oríg
 - [ ] Crear `POST /__test__/reset` y `POST /__test__/seed`, registradas únicamente cuando `NODE_ENV=test`.
 - [ ] Reutilizar `reiniciarPedidos()` para vaciar los pedidos y reiniciar IDs; definir un seed determinista con mesas y datos necesarios para el recorrido.
 - [ ] Probar los efectos de reset y seed y la ausencia de ambas rutas fuera del entorno de test.
-- [ ] Entregar a Federico las rutas y datos de preparación antes de conectar Playwright.
+- [ ] Entregar a Federico las rutas y datos de preparación antes de completar los E2E con reset/seed.
 
 ### N3. Implementar mesa, confirmación y seguimiento en el frontend
 
@@ -345,11 +362,11 @@ No se fijan fechas porque el PDF no indica una fecha de entrega. Las etapas sigu
 | 4. Integración real | Federico hace F3 con apoyo de Nicolas para reset/seed y Homero para scripts. Matias revisa accesibilidad y ancho móvil. | Recorrido E2E real repetible y todos los niveles de pruebas en verde. |
 | 5. Entrega | Homero consolida README; cada integrante verifica lo documentado para su módulo y realiza su revisión cruzada. | Checklist final completo y PR integrados a `main`. |
 
-Los nombres de archivos nuevos son orientativos. Homero integra scripts y configuraciones comunes, Matias mantiene el SASS compartido y Nicolas coordina las rutas de test. El flujo general usa ramas por funcionalidad. Por decisión explícita de Homero, las correcciones se reúnen en `fix/correcciones-generales`: la primera etapa entró por #24 y la misma rama se reutiliza para esta revisión, después de incorporar `develop` hasta `5b179d5`.
+Los nombres de archivos nuevos son orientativos. Homero integra scripts y configuraciones comunes, Matias mantiene el SASS compartido y Nicolas coordina las rutas de test. El flujo general usa ramas por funcionalidad. Por decisión explícita de Homero, las correcciones se concentraron en `fix/correcciones-generales`, integradas mediante #24 y #25. La revisión actual combina esa documentación con los avances de Federico en `feature/f3-api-e2e` e incorpora `develop` hasta `42f5657`.
 
 El flujo utilizado ya integra las ramas por funcionalidad en `develop` mediante PR; allí están la inicialización y los avances registrados en la sección 1. La entrega final en `main` sigue pendiente y es requisito de la consigna. Se deben conservar los commits que muestran RED, GREEN y REFACTOR.
 
-**Próximo paso de Homero:** guardar esta documentación, subir `fix/correcciones-generales` y abrir otro PR a `develop`, conservando los commits TDD. Después del merge, volver a `develop` actualizado y retomar H2: esquemas Zod de creación y consulta de pedidos, seguidos de funciones HTTP y mocks, coordinando el campo `mesaId` pendiente con Nicolas. H3 continúa cuando estén los componentes de M2. Los avisos de desarrollo restantes requieren una migración revisada o un parche mantenido, respetando el stack del PDF. Cualquier edición de código requiere autorización previa del usuario.
+**Próximo paso:** guardar el commit de merge de `develop` en `feature/f3-api-e2e` y subir esa rama para actualizar la PR existente, conservando sus commits y los de #25. Después de mergear la PR, volver a `develop` actualizado y retomar H2: esquemas Zod de creación y consulta de pedidos, seguidos de funciones HTTP y mocks, coordinando `mesaId` con Nicolas. H3 continúa cuando estén los componentes de M2. Los avisos de desarrollo restantes requieren una migración revisada o un parche mantenido, respetando el stack del PDF. Cualquier edición de código requiere autorización previa del usuario.
 
 ## 9. Cobertura de las nueve funcionalidades del PDF
 
@@ -363,7 +380,7 @@ El flujo utilizado ya integra las ramas por funcionalidad en `develop` mediante 
 | 6 | Confirmación con mesa e ítems, ID, estado y total de API. | Nicolas | Pendiente. | MSW verificando cuerpo enviado y E2E real. |
 | 7 | Consulta de estado sin recargar. | Nicolas | Pendiente. | Integración de seguimiento y recorrido Playwright. |
 | 8 | Mensaje de rechazo y conservación del carrito. | Nicolas, con cliente de Homero y Context de Federico | Pendiente de la confirmación; cliente y Context disponibles. | Integración 4xx que comprueba mensaje e ítems conservados. |
-| 9 | Uso a 375 px sin scroll horizontal. | Matias coordina; todos ajustan sus componentes. | Pendiente. | Revisión móvil y comprobación E2E de Federico. |
+| 9 | Uso a 375 px sin scroll horizontal. | Matias coordina; todos ajustan sus componentes. | Pantalla actual verificada; faltan carrito cargado y pantallas restantes. | E2E inicial de Federico y posterior revisión del recorrido completo. |
 
 ## 10. TDD y pruebas obligatorias
 
@@ -405,6 +422,7 @@ El flujo utilizado ya integra las ramas por funcionalidad en `develop` mediante 
 - [ ] Interfaz funcional a 375 px sin scroll horizontal.
 - [x] Pruebas implementadas en verde: 83 de backend y 109 de frontend (192 en total), verificadas el 6 de noviembre de 2026; IDs mal formados y límites de facturación cubiertos con tests permanentes.
 - [x] Compilación de backend/frontend y lint correctos, incluidos tipos de los tests.
+- [x] Playwright, comando `test:e2e` y tres pruebas iniciales con API real aprobadas; compra completa y reset/seed siguen pendientes.
 - [ ] Completar y aprobar los niveles de pruebas exigidos para todas las funcionalidades, incluidos los E2E reales.
 - [ ] README explica instalación, API, frontend, contratos y todos los comandos de pruebas.
 - [ ] Ramas por funcionalidad integradas por PR a `main`, TDD visible en commits y participación de los cuatro integrantes.
