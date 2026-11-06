@@ -140,5 +140,20 @@ describe("Carrito componente", () => {
         await user.click(agregarMediano);
 
         expect(screen.getByText("Subtotal: $22.080")).toBeInTheDocument();
-    })
+    });
+    it("Incrementa la cantidad del producto al clickear el boton de sumar", async() => {
+        const user = userEvent.setup();
+
+        render(
+            <CarritoProvider>
+                <AgregarProductoDePrueba producto={productoMock} />
+                <Carrito />
+            </CarritoProvider>,
+        );
+
+        await user.click(screen.getByRole("button", { name: "Agregar Expreso Mediano" }));
+        await user.click(screen.getByRole("button", { name: "Sumar Expreso Mediano" }));
+        
+        expect(screen.getByText("Cantidad: 2")).toBeInTheDocument();
+    });
 })
