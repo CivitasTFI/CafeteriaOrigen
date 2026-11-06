@@ -9,9 +9,9 @@ Proyecto del Grupo 14 para Programación IV de la Tecnicatura Universitaria en P
 | Nicolás Espulef | 22901 |
 | Federico Heinrich | 21317 |
 
-La API del Parcial I está en `backend/` y ya expone los productos ampliados del TP3. En esta rama también permite pedidos con mesa del 1 al 8 o retiro en barra. El frontend carga los productos, los valida con Zod y muestra sus nombres, un indicador de carga o un error con reintento. `App` monta el proveedor y la interfaz del carrito, con cantidades, controles para sumar/restar/eliminar, subtotales orientativos y confirmación bloqueada en vacío. H2 permite crear y consultar pedidos sin mesa mediante funciones HTTP con respuestas validadas, fixtures y handlers compartidos; falta ampliarlo con `mesaId`. Playwright incorpora tres E2E iniciales con API real. Siguen pendientes el selector de café, la pastelería con botones de agregar y los pedidos desde la pantalla; el menú actual muestra nombres y el botón de confirmar todavía no envía pedidos.
+La API del Parcial I está en `backend/` y ya expone los productos ampliados del TP3. También permite pedidos con mesa del 1 al 8 o retiro en barra. El frontend carga los productos, los valida con Zod y muestra sus nombres, un indicador de carga o un error con reintento. `App` monta el proveedor y la interfaz del carrito, con cantidades, controles para sumar/restar/eliminar, subtotales orientativos y confirmación bloqueada en vacío. H2 permite crear y consultar pedidos sin mesa mediante funciones HTTP con respuestas validadas, fixtures y handlers compartidos; falta ampliarlo con `mesaId`. Playwright incorpora tres E2E iniciales con API real. Siguen pendientes el selector de café, la pastelería con botones de agregar y los pedidos desde la pantalla; el menú actual muestra nombres y el botón de confirmar todavía no envía pedidos.
 
-Estado verificado el **6 de noviembre de 2026** en `feature/mesa-pedidos`, hasta `18911cd`, tras incorporar `develop` (`b520964`) mediante `be018cc`: **100 tests de backend y 156 de frontend aprobados (256 en total), más 3 E2E**, build completo y lint correctos. H2 ya está integrado en `develop` mediante el PR #28 y la preparación inicial de F3 mediante #26. N1, sus correcciones de compatibilidad y su cobertura están completos en esta rama; la [PR #27](https://github.com/CivitasTFI/CafeteriaOrigen/pull/27) todavía debe actualizarse e integrarse. La instalación limpia y el arranque conjunto conservan sus comprobaciones previas registradas debajo.
+Estado funcional integrado en `develop` hasta `749fe73`: H2 sin mesa mediante el PR #28, preparación inicial de F3 mediante #26 y N1 con sus correcciones, cobertura HTTP y refactor mediante la [PR #27](https://github.com/CivitasTFI/CafeteriaOrigen/pull/27). La última validación, del **6 de noviembre de 2026** sobre `18911cd`, aprobó **100 tests de backend y 156 de frontend (256 en total), más 3 E2E**, build completo y lint. Ese código se conservó al integrar N1. La ampliación de H2 con mesa sigue pendiente; su seguimiento está en [planificacion.md](planificacion.md#8-orden-de-trabajo-y-dependencias). La instalación limpia y el arranque conjunto conservan sus comprobaciones previas registradas debajo.
 
 ## Documentación
 
@@ -257,9 +257,9 @@ Avances de Homero en `feature/contratos-pedidos`, integrados mediante el PR #28:
 - [x] Compartir `pedidoApi`, `respuestaCrearPedidoApi`, el error de pedido inexistente y handlers de éxito para POST y GET.
 - [x] Agregar 47 tests: 28 de esquemas, 17 del cliente y dos de handlers; conservar ciclos RED/GREEN/REFACTOR y regresiones adicionales.
 - [x] Verificar en esa etapa 239 tests habituales, tres E2E, build y lint; actualizar README, FRONTEND y planificación.
-- [ ] Extender H2 con `mesaId`, usando el contrato de N1 disponible en esta rama, después de integrar la PR #27.
+- [ ] Extender H2 con `mesaId`, usando el contrato de N1 ya integrado en `develop` mediante la PR #27.
 
-Avances de N1 en `feature/mesa-pedidos`, pendientes de integrar mediante la PR #27:
+Avances de N1 en `feature/mesa-pedidos`, integrados mediante la PR #27 (`749fe73`):
 
 - [x] Nicolas: agregar `mesaId` opcional al modelo, almacenamiento, servicio y respuesta; definir las mesas válidas del 1 al 8 y permitir pedidos para barra.
 - [x] Nicolas: incorporar cuatro casos unitarios de mesa válida, mesa inexistente, estado predeterminado y producto inexistente.
@@ -270,7 +270,7 @@ Avances de N1 en `feature/mesa-pedidos`, pendientes de integrar mediante la PR #
 
 `listarProductos()` usa `solicitarValidado()` con `esquemaProductos`: valida y conserva el precio y los campos propios de café y pastelería descritos debajo. `Producto` y `Productos` se derivan con `z.infer`; el carrito usa `ProductoBase` para operar con los campos comunes. El cliente de pedidos sin mesa está disponible para integrar la confirmación y el seguimiento. Selector, botones reales de agregar, soporte de mesa en H2 y la interfaz, pantallas de pedidos, Bootstrap/SASS y recorrido E2E completo con reset/seed siguen pendientes. Los ticks por integrante están en [planificacion.md](planificacion.md).
 
-El contrato ampliado de productos está disponible y cubierto en ambos endpoints. N1 agrega `mesaId` a la API en esta rama; el cliente frontend y las pantallas todavía deben incorporarlo. Reset/seed sigue pendiente de N2. Instalación limpia y arranque conjunto están registrados; el recorrido completo en navegador sigue pendiente. La auditoría previa del 6 de noviembre registró 20 paquetes afectados de desarrollo en backend (4 bajos y 16 moderados) y 9 moderados en frontend, sin altos ni críticos. Las restricciones de versiones y el override están documentados en [FRONTEND.md](FRONTEND.md#dependencias-de-desarrollo-y-auditoría).
+El contrato ampliado de productos está disponible y cubierto en ambos endpoints. N1 agrega `mesaId` a la API y está integrado en `develop` mediante #27; el cliente frontend y las pantallas todavía deben incorporarlo. Reset/seed sigue pendiente de N2. Instalación limpia y arranque conjunto están registrados; el recorrido completo en navegador sigue pendiente. La auditoría previa del 6 de noviembre registró 20 paquetes afectados de desarrollo en backend (4 bajos y 16 moderados) y 9 moderados en frontend, sin altos ni críticos. Las restricciones de versiones y el override están documentados en [FRONTEND.md](FRONTEND.md#dependencias-de-desarrollo-y-auditoría).
 
 En la comprobación conjunta previa, Vite sirvió `/` y `/src/main.tsx` con 200, y `listarProductos()` validó los 20 productos de Express mediante el cliente y Zod reales. Un POST por el proxy, con producto 5 × 2 y producto 19 × 1, sin mesa ni estado, respondió 201, `pendiente` y total **17220**; el GET por ID devolvió el mismo pedido. Los tres IDs mal formados respondieron 400 y se conservaron el pedido válido y su facturación. Los servidores propios se cerraron al finalizar. Esa comprobación del cliente no ejecutaba la interfaz en un navegador. N1 ahora cubre el ejemplo de mesa 4 mediante HTTP; F3 comprueba la pantalla actual a 375 px mediante Chromium. Mesa desde URL, carrito cargado en móvil y recorrido completo siguen pendientes.
 
@@ -324,7 +324,7 @@ El ID del ejemplo supone que es el primer pedido desde el inicio del servidor. P
 
 ### Contrato de mesas y pedidos en API (N1)
 
-Disponible en `feature/mesa-pedidos`, hasta `18911cd`, pendiente de integrar mediante la PR #27. Las mesas **1 a 8** son una decisión del grupo; el PDF exige un conjunto válido y el ejemplo de mesa 4, sin fijar su tamaño.
+Disponible en `develop` mediante la PR #27 (`749fe73`). Las mesas **1 a 8** son una decisión del grupo; el PDF exige un conjunto válido y el ejemplo de mesa 4, sin fijar su tamaño.
 
 | Valor enviado en `mesaId` | Resultado |
 | --- | --- |
@@ -333,7 +333,7 @@ Disponible en `feature/mesa-pedidos`, hasta `18911cd`, pendiente de integrar med
 | Entero positivo fuera del conjunto, por ejemplo 9 | HTTP 400 con `{ "error": "Mesa inexistente" }`. |
 | Texto como `"4"`, `null`, booleano, objeto, arreglo, cero, negativo o decimal | HTTP 400 con `{ "error": "Debe ingresar un número válido" }`. No se convierten automáticamente a números. |
 
-Un rechazo ocurre antes de guardar: conserva los pedidos previos, la facturación y el siguiente ID disponible. El PDF permite 400 o 404 para mesas inexistentes; el contrato de esta rama usa 400 mediante `ErrorValidacion` y el middleware común. Los fallos internos mantienen HTTP 500.
+Un rechazo ocurre antes de guardar: conserva los pedidos previos, la facturación y el siguiente ID disponible. El PDF permite 400 o 404 para mesas inexistentes; el contrato implementado usa 400 mediante `ErrorValidacion` y el middleware común. Los fallos internos mantienen HTTP 500.
 
 Ejemplo del PDF, con el servidor recién iniciado:
 
