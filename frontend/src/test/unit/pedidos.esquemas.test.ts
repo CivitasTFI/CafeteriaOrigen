@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 import {
   esquemaPedido,
   esquemaRespuestaCrearPedido,
+  type Pedido,
 } from "../../api/esquemas/pedidos";
 import {
   pedidoApi as pedido,
@@ -17,7 +18,7 @@ test("acepta un pedido de la API actual y conserva sus datos", () => {
 });
 
 test("acepta un pedido con mesa y conserva su identificador", () => {
-  const pedidoConMesa = { ...pedido, mesaId: 4 };
+  const pedidoConMesa = { ...pedido, mesaId: 4 } satisfies Pedido;
 
   expect(esquemaPedido.safeParse(pedidoConMesa)).toEqual({
     success: true,
