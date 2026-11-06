@@ -12,11 +12,19 @@ export function ItemCarrito({ item }: ItemCarritoProps) {
     const { agregarProducto } = useCarrito();
     const subtotal = calcularSubtotalItem(item);
 
+    function sumarUnidad() {
+        agregarProducto({
+            id: item.productoId,
+            nombre: item.nombre,
+            precio: item.precio,
+        });
+    }
+
     return (
         <>
             <p>{nombre}</p>
             <p>Cantidad: {cantidad}</p>
-            <button type="button" aria-label={`Sumar ${item.nombre}`} onClick={() => agregarProducto({ id: item.productoId, nombre: item.nombre, precio: item.precio })}>+</button>
+            <button type="button" aria-label={`Sumar ${item.nombre}`} onClick={sumarUnidad}>+</button>
             <p>Subtotal ítem: {formatoPrecio(subtotal)}</p>
         </>
     );
