@@ -9,7 +9,7 @@ Proyecto del Grupo 14 para Programación IV de la Tecnicatura Universitaria en P
 | Nicolás Espulef | 22901 |
 | Federico Heinrich | 21317 |
 
-La API del Parcial I está en `backend/` y ya expone los productos ampliados del TP3. El frontend carga sus datos, los valida con Zod y muestra sus nombres, un indicador de carga o un error con reintento. `App` también monta el proveedor del carrito; están implementados Context, reducer, subtotales orientativos y formato de precios. Siguen pendientes el selector de café, la pastelería con botones de agregar, la interfaz del carrito y los pedidos desde la pantalla.
+La API del Parcial I está en `backend/` y ya expone los productos ampliados del TP3. El frontend carga sus datos, los valida con Zod y muestra sus nombres, un indicador de carga o un error con reintento. `App` monta el proveedor y el carrito visual; están implementados Context, reducer, subtotales orientativos y formato de precios. Playwright tiene tres pruebas iniciales con API real. Siguen pendientes el selector de café, la pastelería con botones de agregar, los pedidos desde la pantalla y el recorrido E2E completo con reset/seed.
 
 Estado verificado el **6 de noviembre de 2026** en `fix/correcciones-generales`: **80 tests de backend y 93 de frontend aprobados**, build completo, lint y arranque conjunto correctos. Las correcciones de esta rama están preparadas para PR a `develop`; los pendientes funcionales del TP3 y de dependencias siguen detallados debajo.
 
@@ -131,7 +131,19 @@ npm run test:frontend -- src/test/unit/formatoPrecio.test.ts
 
 Las pruebas normales no requieren servidores externos levantados. La prueba del proxy abre y cierra su propio servidor Vite temporal en un puerto libre y simula la API con MSW.
 
-`npm run test:e2e` todavía no está implementado. Se integrará con la configuración de Playwright de Federico.
+`npm run test:e2e` ejecuta Playwright con Chromium, frontend y API reales. Después de instalar las dependencias, instalar el navegador desde `frontend/`:
+
+```powershell
+npx playwright install chromium
+```
+
+Desde la raíz del proyecto:
+
+```powershell
+npm run test:e2e
+```
+
+Los puertos 3000 y 5173 deben estar libres. Playwright arranca y cierra ambos servidores; la API se ejecuta con `NODE_ENV=test`. Las tres pruebas iniciales comprueban la carga de los 20 productos, la ausencia de scroll horizontal en la pantalla actual a 375 px y la confirmación deshabilitada con el carrito vacío. `npm test` ejecuta Jest y Vitest; los E2E se ejecutan aparte. Reset/seed y el recorrido completo de compra siguen pendientes. Ver detalles en [FRONTEND.md](FRONTEND.md).
 
 ## Compilación y ejecución del resultado
 
@@ -155,6 +167,8 @@ El comando de preview sirve el frontend compilado y, en esta versión de Vite, h
 
 ## Estado de la base
 
+Verificación de `feature/f3-api-e2e` del **6 de noviembre de 2026**: **80 tests de backend, 105 de frontend y 3 E2E aprobados**; build completo y lint aprobados. Vitest tiene 19 archivos de pruebas y Playwright uno. La ejecución inicial dentro del sandbox encontró restricciones al cargar las configuraciones de Vite/Vitest y un error `uv_os_get_passwd` al arrancar la API de E2E; las verificaciones afectadas pasaron al repetirlas fuera del sandbox. Rollup conserva los avisos de anotaciones de Zod, sin impedir el build. Este resultado cubre los tres escenarios iniciales de F3, no el recorrido completo de compra.
+
 La verificación del **6 de noviembre de 2026**, sobre `fix/correcciones-generales` hasta `013c044`, registró:
 
 | Área | Resultado |
@@ -167,7 +181,7 @@ La verificación del **6 de noviembre de 2026**, sobre `fix/correcciones-general
 | Arranque conjunto | Scripts `dev:backend` y `dev:frontend` verificados en 3000/5173; cliente real, Zod y proxy comprobados. Servidores propios cerrados al finalizar. |
 | Auditoría de producción | 0 paquetes afectados en backend y frontend, comprobado el 6 de noviembre. |
 
-El PR #20 resolvió el tipo `Producto` faltante, el import de tipos del reducer, los mocks incompatibles y las exportaciones que bloqueaban lint. `npm test` ejecuta Jest y Vitest; la comprobación estática se verifica por separado con `npm run build`. Los 173 tests actuales no certifican las funcionalidades pendientes ni el recorrido E2E.
+El PR #20 resolvió el tipo `Producto` faltante, el import de tipos del reducer, los mocks incompatibles y las exportaciones que bloqueaban lint. `npm test` ejecuta Jest y Vitest; la comprobación estática se verifica por separado con `npm run build`. Los 173 tests de esa verificación histórica no certifican las funcionalidades pendientes ni el recorrido E2E.
 
 La cobertura permanente del catálogo ahora incluye 22 casos HTTP: listado completo, detalle de los 20 IDs y 404. Un fixture independiente fija nombres, precios y metadatos esperados. Los tres tests del buscador comprueban también los IDs exactos de sus dos búsquedas exitosas.
 
@@ -201,11 +215,11 @@ Correcciones de Homero preparadas en `fix/correcciones-generales`, pendientes de
 - [x] Validar `productoId` como entero positivo seguro antes de buscar o construir mensajes. Tres casos HTTP cubren ID ausente, objeto simple y objeto con `toString` numérico: responden 400 con mensaje claro y conservan pedidos/facturación. El ciclo RED/GREEN/REFACTOR quedó completo.
 - [x] Verificar arranque conjunto y conexión del cliente real con Express a través del proxy de Vite.
 
-`listarProductos()` usa `solicitarValidado()` con `esquemaProductos`: valida y conserva el precio y los campos propios de café y pastelería descritos debajo. `Producto` y `Productos` se derivan con `z.infer`; los esquemas base se conservan para los campos comunes. La pantalla muestra los nombres recibidos. Selector, botones de agregar, carrito visual, contratos/funciones de pedidos, Bootstrap/SASS y E2E siguen pendientes. Los ticks por integrante están en [planificacion.md](planificacion.md).
+`listarProductos()` usa `solicitarValidado()` con `esquemaProductos`: valida y conserva el precio y los campos propios de café y pastelería descritos debajo. `Producto` y `Productos` se derivan con `z.infer`; los esquemas base se conservan para los campos comunes. La pantalla muestra los nombres recibidos y `App` monta el carrito visual, con cantidades, subtotales y controles de sumar, restar y eliminar. Hay diez pruebas de componente del carrito y tres E2E iniciales. Selector, botones de agregar desde el menú, contratos/funciones de pedidos, confirmación, seguimiento, Bootstrap/SASS y el recorrido E2E completo con reset/seed siguen pendientes. Los ticks por integrante están en [planificacion.md](planificacion.md).
 
 El contrato ampliado de productos está disponible y cubierto en ambos endpoints. Pedidos ya tiene estado predeterminado y validación de IDs; faltan `mesaId` y reset/seed. Instalación limpia y arranque conjunto están registrados; el recorrido completo en navegador sigue pendiente. Persisten 20 paquetes afectados de desarrollo en backend (4 bajos y 16 moderados) y 9 moderados en frontend; no hay altos ni críticos. Las restricciones de versiones y el override están documentados en [FRONTEND.md](FRONTEND.md#dependencias-de-desarrollo-y-auditoría).
 
-En la comprobación conjunta, Vite sirvió `/` y `/src/main.tsx` con 200, y `listarProductos()` validó los 20 productos de Express mediante el cliente y Zod reales. Un POST por el proxy, con producto 5 × 2 y producto 19 × 1, sin mesa ni estado, respondió 201, `pendiente` y total **17220**; el GET por ID devolvió el mismo pedido. Los tres IDs mal formados respondieron 400 y se conservaron el pedido válido y su facturación. Se iniciaron los scripts de desarrollo; Vite usó `--strictPort` para mantener 5173. Los servidores propios se cerraron y los puertos quedaron libres. Esta comprobación del cliente no ejecuta la interfaz en un navegador; mesa 4, recorrido E2E y vista de 375 px siguen pendientes.
+En la comprobación conjunta histórica, Vite sirvió `/` y `/src/main.tsx` con 200, y `listarProductos()` validó los 20 productos de Express mediante el cliente y Zod reales. Un POST por el proxy, con producto 5 × 2 y producto 19 × 1, sin mesa ni estado, respondió 201, `pendiente` y total **17220**; el GET por ID devolvió el mismo pedido. Los tres IDs mal formados respondieron 400 y se conservaron el pedido válido y su facturación. Se iniciaron los scripts de desarrollo; Vite usó `--strictPort` para mantener 5173. Los servidores propios se cerraron y los puertos quedaron libres. Esa comprobación del cliente no ejecutaba la interfaz en un navegador. Las pruebas iniciales de F3 ahora cubren la pantalla actual a 375 px; mesa 4 y el recorrido completo siguen pendientes.
 
 ## Estructura general
 

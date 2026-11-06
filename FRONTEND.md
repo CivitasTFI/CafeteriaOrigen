@@ -279,9 +279,9 @@ Los seis tests del menú cubren indicador inicial, carga exitosa, error 500 y re
 
 | Módulo | Comportamiento implementado |
 | --- | --- |
-| `context/carrito.reducer.ts` | `AGREGAR`, `RESTAR` y `ELIMINAR`. Repetir un producto incrementa cantidad; restar desde 1 lo quita. Mantiene `productoId`, `nombre`, `precio` y `cantidad`. |
+| `context/carrito.reducer.ts` | `AGREGAR`, `RESTAR`, `ELIMINAR` y `VACIAR`. Repetir un producto incrementa cantidad; restar desde 1 lo quita; vaciar elimina todos los ítems. Mantiene `productoId`, `nombre`, `precio` y `cantidad`. |
 | `context/carrito.context.ts` | Exporta `CarritoContext` y su tipo `CarritoContextValue`. |
-| `context/CarritoContext.tsx` | Exporta el componente `CarritoProvider`, con `useReducer`; expone ítems y acciones para agregar, restar y eliminar. |
+| `context/CarritoContext.tsx` | Exporta el componente `CarritoProvider`, con `useReducer`; expone ítems y acciones para agregar, restar, eliminar y vaciar. |
 | `hooks/useCarrito.ts` | Importa el Context desde `carrito.context.ts`; lo consume y lanza un error si se utiliza fuera del proveedor. |
 | `utils/subtotalCarrito.ts` | `calcularSubtotalItem()` multiplica precio por cantidad; `calcularSubtotalCarrito()` suma subtotales orientativos. |
 | `utils/formatoPrecio.ts` | Reutiliza `Intl.NumberFormat("es-AR")`; por ejemplo, `formatoPrecio(1000)` devuelve `$1.000`. |
@@ -292,7 +292,7 @@ El PR #20 resolvió los bloqueos anteriores: `Producto` ahora se deriva del esqu
 
 ### Proveedor integrado en App (Homero, PR #21)
 
-`App.tsx` importa `CarritoProvider` desde `context/CarritoContext.tsx` y envuelve con él el contenido principal, incluidos encabezado y `MenuPage`. Esto deja disponible un mismo carrito para los componentes descendientes. La API pública de `useCarrito()` conserva `items`, `agregarProducto`, `restarProducto` y `eliminarProducto`.
+`App.tsx` importa `CarritoProvider` desde `context/CarritoContext.tsx` y envuelve con él el contenido principal, incluidos encabezado, `MenuPage` y `Carrito`. Esto deja disponible un mismo carrito para los componentes descendientes. La API pública de `useCarrito()` expone `items`, `agregarProducto`, `restarProducto`, `eliminarProducto` y `vaciarCarrito`. El vaciado ya existe; su conexión con una confirmación exitosa sigue pendiente.
 
 `app.carrito.test.tsx` verifica el proveedor real montado por `App`. Sustituye únicamente `MenuPage` por un menú de prueba con dos componentes independientes: un botón que agrega `cafeApi` y un resumen que lee el estado. Comprueba cero unidades al inicio y una tras pulsar el botón. Esa separación se registró históricamente como REFACTOR posterior al GREEN y comprueba el estado compartido entre consumidores. El carrito visual ya está montado en `App`; su conexión con la selección de M2 y la confirmación de N3 sigue pendiente.
 
@@ -358,13 +358,13 @@ Para simular el rechazo de un pedido sin ítems, registrar `crearHandlerError("/
 | [productos.test.ts](frontend/src/test/integration/productos.test.ts) | 8 | Preserva campos ampliados; admite vacía; rechaza objeto, precio textual, tipo ausente, bebida desconocida u origen sin descripción; propaga error 500. |
 | [menu.test.tsx](frontend/src/test/integration/menu.test.tsx) | 6 | Carga inicial, productos visibles, error 500 y reintento ante 500, fallo de red o respuesta inválida. |
 | [carrito.reducer.test.ts](frontend/src/test/unit/carrito.reducer.test.ts) | 6 | Agregar a vacío, agregar otro producto, acumular cantidad, restar, quitar al llegar a cero y eliminar. |
-| [carrito.context.test.tsx](frontend/src/test/integration/carrito.context.test.tsx) | 4 | Estado vacío y acciones de agregar, restar y eliminar mediante Context y un componente de prueba. |
-| [app.carrito.test.tsx](frontend/src/test/integration/app.carrito.test.tsx) | 1 | App proporciona el mismo carrito a un botón y un resumen independientes; agregar desde uno actualiza el otro. |
+| [carrito.context.test.tsx](frontend/src/test/integration/carrito.context.test.tsx) | 5 | Estado vacío y acciones de agregar, restar, eliminar y vaciar mediante Context y un componente de prueba. |
+| [app.carrito.test.tsx](frontend/src/test/integration/app.carrito.test.tsx) | 2 | Estado compartido entre consumidores y producto visible en el carrito real al agregar desde el menú de prueba. |
 | [subtotalCarrito.test.ts](frontend/src/test/unit/subtotalCarrito.test.ts) | 2 | Subtotal de un ítem y suma de subtotales del carrito. |
 | [formatoPrecio.test.ts](frontend/src/test/unit/formatoPrecio.test.ts) | 1 | Formato local: 1000 se muestra como `$1.000`. |
 | [Carrito.test.tsx](frontend/src/test/components/Carrito.test.tsx) | 10 | Vacío, nombres, cantidades, subtotales, sumar, restar, eliminar y bloqueo de confirmación en vacío. |
 
-La base histórica tenía **93 tests de Vitest en 18 archivos**, verificados el 6 de noviembre en la rama de correcciones. El PR #20 agregó 19 casos y #21 uno, sobre los 73 anteriores. La tabla incluye ahora los diez casos de `Carrito.test.tsx`, agregados después de esa verificación. Los resultados de esa base (80 tests de backend y 93 de frontend, 173 en total) se conservan en la sección 10; no representan una nueva ejecución de la rama actual. Las pruebas normales no necesitan Express levantado: el test del proxy inicia y cierra un servidor Vite temporal y MSW simula la API.
+La verificación de `feature/f3-api-e2e` del 6 de noviembre aprobó **105 tests de Vitest en 19 archivos**. Sobre los 93 casos históricos, se agregaron diez de `Carrito.test.tsx`, uno de vaciado del Context y uno de integración del carrito real en `App`. Playwright ejecuta otros tres casos por separado. Los resultados históricos de la base (80 tests de backend y 93 de frontend, 173 en total) se conservan en la sección 10. Las pruebas normales no necesitan Express levantado: el test del proxy inicia y cierra un servidor Vite temporal y MSW simula la API.
 
 
 ### Pruebas E2E iniciales (F3)
@@ -445,6 +445,21 @@ El cliente HTTP concentra el `fetch` y ya lo consume el menú por `listarProduct
 La instalación limpia y el arranque conjunto se verificaron en `fix/correcciones-generales`: el cliente real validó el catálogo de Express a través del proxy de Vite. Los contratos completos de pedidos con mesa de N1 y los componentes de M2 siguen condicionando el cierre de H2/H3.
 
 ## 10. Estado de verificación y cierre de la base
+
+### Verificación de `feature/f3-api-e2e`
+
+El **6 de noviembre de 2026** se ejecutaron las siguientes comprobaciones desde la raíz:
+
+| Comando | Resultado |
+| --- | --- |
+| `npm test` | 80 tests del backend en 15 suites y 105 de Vitest en 19 archivos aprobados; 185 en total. |
+| `npm run build` | Backend y frontend compilados; incluye tipos de configuración y pruebas de Playwright. |
+| `npm run lint` | Aprobado, sin errores. |
+| `npm run test:e2e` | Tres pruebas de Playwright aprobadas con frontend y API reales a 375 × 812. |
+
+La primera ejecución dentro del sandbox encontró errores de acceso al cargar Vite/Vitest y un error `uv_os_get_passwd` al arrancar la API de E2E. Las verificaciones afectadas pasaron al repetirlas fuera del sandbox. Rollup conserva avisos de anotaciones de Zod, sin impedir el build. No se verificó todavía el recorrido completo de compra, reset/seed ni seguimiento; las tres pruebas E2E cubren los escenarios iniciales descritos en la sección 6.
+
+### Verificación histórica de la base
 
 Verificación del **6 de noviembre de 2026** en `fix/correcciones-generales`, hasta `013c044`, con Node.js **22.23.4** y npm **10.9.9**. Incluye las correcciones de pedidos, herramientas y cobertura posteriores al PR #22:
 

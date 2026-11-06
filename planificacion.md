@@ -8,7 +8,7 @@ Objetivo: construir el menú de mesa sobre la API del Parcial I, con los cambios
 
 El proyecto tiene una API en Node.js, Express y TypeScript con `strict: true`, organizada en modelos, datos, servicios, controladores y rutas. Los productos y pedidos se almacenan en memoria.
 
-La API, sus configuraciones, dependencias y pruebas están en `backend/`. Ambos GET de productos ya exponen el contrato ampliado de Matias. El frontend lo consume con Zod y muestra el menú con carga, errores y reintento. `App` monta `CarritoProvider`; reducer, Context, subtotales y formato de precios están implementados, con tipos y exportaciones corregidos. La interfaz del carrito sigue pendiente. El `package.json` raíz agrupa los comandos de ambos paquetes.
+La API, sus configuraciones, dependencias y pruebas están en `backend/`. Ambos GET de productos ya exponen el contrato ampliado de Matias. El frontend lo consume con Zod y muestra el menú con carga, errores y reintento. `App` monta `CarritoProvider` y el carrito visual; reducer, Context, subtotales y formato de precios están implementados. F3 tiene infraestructura de Playwright y tres pruebas iniciales con API real. El `package.json` raíz agrupa los comandos de ambos paquetes, incluido `test:e2e`.
 
 La documentación se centraliza en la raíz: [README.md](README.md) es la entrada general y describe la API actual; [FRONTEND.md](FRONTEND.md) explica la base del frontend, las pruebas y el flujo TDD. Esta planificación conserva las tareas y propuestas del TP3. Las propuestas de contratos no deben confundirse con funcionalidades ya implementadas.
 
@@ -20,8 +20,8 @@ La documentación se centraliza en la raíz: [README.md](README.md) es la entrad
 | Errores | Middleware centraliza validaciones e IDs mal formados (400), JSON inválido (400), cuerpo demasiado grande (413) y fallo interno (500 genérico). El menú permite reintentar. | Validación de mesas y errores de confirmación que conserven el carrito. |
 | Conexión desde el navegador | Proxy Vite para `/productos` y `/pedidos`. `App` monta `MenuPage`, que consulta a través del cliente HTTP único. | Funciones y pantallas de pedidos; conexión de producción al preparar el despliegue. |
 | Preparación de E2E | Función interna `reiniciarPedidos()` que vacía pedidos y reinicia IDs. | Endpoints HTTP de reset y seed disponibles únicamente con `NODE_ENV=test`. |
-| Frontend | Menú con nombres, carga, error y reintento; proveedor del carrito probado; instalación limpia, arranque conjunto y cliente real registrados. | Selector, pastelería, carrito visual, pedidos, Bootstrap/SASS y Playwright. |
-| Regresión | 80 tests de backend en 15 suites y 93 de frontend en 18 archivos aprobados; ambos paquetes compilan y lint pasa. | Funcionalidades restantes, pruebas en navegador y E2E. |
+| Frontend | Menú con carga y reintento; carrito visual montado y probado; Playwright con tres pruebas iniciales a 375 px. | Selector, pastelería, pedidos, Bootstrap/SASS y recorrido E2E completo con reset/seed. |
+| Regresión | En `feature/f3-api-e2e`: 80 tests de backend en 15 suites, 105 de frontend en 19 archivos y 3 E2E aprobados; build y lint aprobados. | Cobertura de las funcionalidades restantes y recorrido E2E completo. |
 
 Desde la actualización documental del PR #19 (estado hasta #17), Matias conectó el servicio a los endpoints en #18, sin aumentar la cantidad de tests. Homero agregó 19 tests en #20 (16 del esquema ampliado y tres rechazos de la consulta) y uno en #21 para el proveedor compartido: el frontend pasó de 73 a 93 casos.
 
@@ -193,12 +193,16 @@ F1 conserva los 13 tests de Federico: seis del reducer, cuatro del Context, dos 
 
 ### F3. Implementar los E2E con API real
 
-- [ ] Configurar Playwright y el arranque de frontend y API reales con `NODE_ENV=test` para la API.
+- [x] Configurar Playwright y el arranque de frontend y API reales con `NODE_ENV=test` para la API.
 - [ ] Ejecutar `POST /__test__/reset` y `POST /__test__/seed` antes de cada test; coordinar datos y contrato con Nicolas.
 - [ ] Cubrir al menos un recorrido: abrir `/?mesa=4`, elegir café, agregar pastelería, revisar carrito, confirmar y ver número, estado y total del pedido.
 - [ ] Consultar el estado desde la confirmación y comprobar que funciona sin recargar la página.
 - [ ] Ejecutar el recorrido con viewport de 375 px y verificar ausencia de scroll horizontal.
-- [ ] Conectar `npm run test:e2e` con Homero y documentar requisitos de instalación y ejecución de Playwright.
+- [x] Conectar `npm run test:e2e` en frontend y raíz y documentar requisitos de instalación y ejecución de Playwright.
+
+**Avance parcial en `feature/f3-api-e2e`:** Playwright está configurado con Chromium a 375 × 812, arranque automático de API y frontend y comprobación de tipos de su configuración y pruebas durante el build. `frontend/e2e/menu.spec.ts` contiene tres casos: carga de los 20 productos desde la API real, ausencia de scroll horizontal después de cargar el menú y confirmación deshabilitada con carrito vacío. README y FRONTEND documentan Chromium, comandos y puertos. La prueba móvil cubre la pantalla actual; el punto del recorrido completo a 375 px permanece pendiente. Reset/seed depende de N2; mesa, selección, confirmación y seguimiento requieren N1/N3, H2 y M2.
+
+**Verificación del 6 de noviembre de 2026:** `npm test` (80 backend y 105 frontend), `npm run build`, `npm run lint` y `npm run test:e2e` (3 casos) aprobados. Vitest/Vite y el arranque de E2E encontraron errores del entorno dentro del sandbox; las comprobaciones afectadas se repitieron correctamente fuera de él. El build conserva avisos de anotaciones de Zod. No se marca como terminado el recorrido completo ni la preparación con reset/seed.
 
 **Archivos previstos:** `frontend/src/context/`, reducer y componentes de carrito, utilidad de formato, pruebas unitarias y de componentes, configuración Playwright y `frontend/e2e/`.
 
