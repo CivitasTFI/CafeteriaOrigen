@@ -187,4 +187,12 @@ describe("Carrito componente", () => {
 
         expect(screen.getByText("Tu carrito está vacio")).toBeInTheDocument();
     });
+    it("deshabilita el boton de confirmar pedido cuando el carrito esta vacio", async() => {
+        render(
+            <CarritoProvider> 
+                <Carrito/>
+            </CarritoProvider>
+        );
+        expect(screen.getByRole("button", { name: "Confirmar pedido" })).toBeDisabled();
+    });
 })
