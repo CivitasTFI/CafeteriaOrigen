@@ -19,6 +19,20 @@ function simularPostPedidos(responder: () => Response): Request[] {
   return solicitudes;
 }
 
+function simularGetPedido(id: number, responder: () => Response): Request[] {
+  const solicitudes: Request[] = [];
+  const url = new URL(`/pedidos/${id}`, window.location.origin).href;
+
+  server.use(
+    http.get(url, ({ request }) => {
+      solicitudes.push(request.clone());
+      return responder();
+    }),
+  );
+
+  return solicitudes;
+}
+
 test("envía los ítems por POST /pedidos y devuelve la respuesta de creación", async () => {
   const solicitudes = simularPostPedidos(() =>
     HttpResponse.json(respuestaCrearPedidoApi, { status: 201 }),
@@ -102,14 +116,8 @@ test("informa una respuesta 400 incompatible con el contrato de errores", async 
 
 test("consulta un pedido por su ID y conserva los datos recibidos", async () => {
   const pedidoConsultado = { ...pedidoApi, id: 7, estado: "en preparación" };
-  const solicitudes: Request[] = [];
-  const url = new URL("/pedidos/7", window.location.origin).href;
-
-  server.use(
-    http.get(url, ({ request }) => {
-      solicitudes.push(request.clone());
-      return HttpResponse.json(pedidoConsultado);
-    }),
+  const solicitudes = simularGetPedido(7, () =>
+    HttpResponse.json(pedidoConsultado),
   );
 
   expect(consultarPedido).toBeDefined();
