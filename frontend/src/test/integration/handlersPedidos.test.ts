@@ -28,7 +28,6 @@ test("el handler de creación responde 201 al POST con el contrato configurado",
 test("el handler de consulta responde 200 al GET con el pedido configurado", async () => {
   const pedidoConsultado = { ...pedidoApi, id: 7, estado: "en preparación" };
 
-  expect(crearHandlerConsultaPedido).toBeDefined();
   server.use(crearHandlerConsultaPedido(pedidoConsultado));
 
   const respuesta = await fetch(new URL("/pedidos/7", window.location.origin));
