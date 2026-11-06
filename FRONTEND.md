@@ -402,28 +402,46 @@ Homero ya integró el proveedor y alineó los tipos y mocks. Coordinará `test:e
 
 El cliente HTTP concentra el `fetch` y ya lo consume el menú por `listarProductos()`. Las utilidades del carrito calculan subtotales orientativos con precios recibidos; el total confirmado seguirá siendo el devuelto por la API. No se reproducen las fórmulas del dominio en el frontend.
 
-Después de integrar esta documentación, el siguiente paso es verificar instalación limpia con `npm run install:all` y arranque conjunto de API/frontend, y registrar la carga del catálogo real. Los contratos de pedidos de N1 y los componentes de M2 siguen condicionando el cierre de H2/H3.
+La instalación limpia con `npm run install:all` se verificó en `fix/correcciones-generales`. Falta registrar el arranque conjunto de API/frontend siguiendo el README y la carga del catálogo real. Los contratos completos de pedidos de N1 y los componentes de M2 siguen condicionando el cierre de H2/H3.
 
 ## 10. Estado de verificación y cierre de la base
 
-Verificación del **5 de noviembre de 2026**, hasta el PR #21 (`abbae9d`), con Node.js **22.23.4** y npm **10.9.9**:
+Verificación del **5 de noviembre de 2026** en `fix/correcciones-generales`, con Node.js **22.23.4** y npm **10.9.9**. Incluye las correcciones de pedidos y herramientas posteriores al PR #22:
 
 | Comando desde la raíz | Resultado |
 | --- | --- |
-| `npm test` | Aprobado: 44 tests de backend en 11 suites y 93 de frontend en 18 archivos. |
+| `npm run install:all` | Aprobado: ambos paquetes se instalaron mediante `npm ci` a partir de sus lockfiles. |
+| `npm test` | Aprobado después de la instalación limpia: 58 tests de backend en 15 suites y 93 de frontend en 18 archivos; 151 en total. |
 | `npm run build` | Ambos paquetes compilan; incluye tipos de los tests/configuraciones del frontend. |
 | `npm run lint` | Aprobado, sin errores. |
 
-Los problemas anteriores se resolvieron en #20: exportación del tipo inferido `Producto`, `import type` en el reducer, fixtures compatibles y separación Context/proveedor. El montaje del proveedor de #21 también está verificado. Esta actualización registra el estado sin cambiar código ni configuraciones.
+Los problemas anteriores se resolvieron en #20: exportación del tipo inferido `Producto`, `import type` en el reducer, fixtures compatibles y separación Context/proveedor. El montaje del proveedor de #21 también está verificado.
 
-Vitest transpila los tests y no sustituye `tsc -b`; se ejecutaron ambas verificaciones. Jest emite el aviso TS151002 de ts-jest sobre `Node16` e `isolatedModules`, y Rollup avisa sobre comentarios de anotación de Zod: no impidieron los tests ni la compilación. Los E2E todavía no están implementados.
+Vitest transpila los tests y no sustituye `tsc -b`; se ejecutaron ambas verificaciones. En backend, `isolatedModules: true` permite el uso de `Node16` con ts-jest y elimina el aviso TS151002, manteniendo `strict: true`. La comprobación completa de tipos sigue a cargo de `tsc` durante el build. Ver [documentación de ts-jest](https://kulshekhar.github.io/ts-jest/docs/guides/esm-support) y [opción de TypeScript](https://www.typescriptlang.org/tsconfig/isolatedModules.html).
 
-Queda pendiente registrar una instalación limpia con `npm run install:all` y comprobar el arranque conjunto de ambas aplicaciones siguiendo el README. La verificación de tests, compilación y lint de esta actualización no reemplaza esas comprobaciones.
+Rollup sigue avisando sobre comentarios de anotación de Zod; el build termina correctamente. Los E2E todavía no están implementados. La instalación limpia no certifica el recorrido en navegador ni reemplaza el arranque conjunto pendiente.
 
-La auditoría registrada durante la inicialización reportó tres paquetes afectados en la cadena de Vitest 3: `@vitest/mocker` (moderado), `tinypool` y `vitest` (críticos). Esa auditoría no se volvió a ejecutar en esta actualización documental. Para consultar el estado vigente desde la raíz:
+### Dependencias de desarrollo y auditoría
+
+Vitest permanece fijado en **3.2.7**, conforme a la versión mayor exigida por el TP3. En `frontend/package.json`, un override limitado a `vitest@3.2.7` fija su dependencia `tinypool` en **2.1.2**. Esta versión contiene las correcciones de los dos avisos críticos: [opciones de workers](https://github.com/advisories/GHSA-5gmw-xhrv-c9v3) y [opciones de ejecución](https://github.com/tinylibs/tinypool/releases/tag/v2.1.2).
+
+Es una excepción al rango de tinypool declarado por Vitest 3. El cambio mayor de [tinypool 2](https://github.com/tinylibs/tinypool/releases/tag/v2.0.0) elimina soporte para Node 18; su requisito de Node 20 o >=22 es compatible con el del proyecto. Se verificaron los 93 tests con procesos (`forks`) y con hilos (`threads`), y el arranque, repetición de los seis tests del menú y cierre en modo watch. Al cambiar la versión de Vitest se debe revisar este override y retirar o ajustar la excepción. `api: false` se mantiene en la configuración de Vitest; no elimina por sí solo los avisos de seguridad restantes.
+
+En backend, el lockfile actualiza ts-jest de **29.4.14** a **29.4.15**, dentro del rango permitido por `package.json`.
+
+| Auditoría del 5 de noviembre de 2026 | Backend | Frontend |
+| --- | --- | --- |
+| Dependencias de producción (`--omit=dev`) | 0 paquetes afectados | 0 paquetes afectados |
+| Todas las dependencias | 20 afectados: 4 bajos y 16 moderados | 9 afectados, todos moderados |
+| Avisos altos o críticos | 0 | 0; antes había 2 críticos |
+
+Los avisos de desarrollo no se consideran resueltos: backend conserva las cadenas de `deepmerge`, `glob` y `minimatch`; frontend conserva `@vitest/mocker`/Vitest y `minimatch` mediante typescript-eslint. No hay versiones corregidas dentro de los rangos declarados actuales. `deepmerge` no tiene una versión corregida publicada en el [aviso vigente](https://github.com/advisories/GHSA-gcqx-w48m-w2h4). Las correcciones publicadas de mocker están en versiones mayores que Vitest 3, y las de glob/minimatch también requieren revisar cambios mayores de esas dependencias. Su migración o un parche mantenido siguen pendientes; no se aplicó `npm audit fix --force`.
+
+Las auditorías completas siguen devolviendo un código distinto de cero por esos avisos. Para repetirlas desde la raíz:
 
 ```bash
+npm --prefix backend audit
 npm --prefix frontend audit
+npm --prefix backend audit --omit=dev
+npm --prefix frontend audit --omit=dev
 ```
-
-La versión mayor 3 de Vitest está fijada por la consigna. En aquella auditoría, npm proponía una actualización mayor para resolver los avisos; cualquier cambio debe coordinarse con ese requisito. Esta rama de documentación no modifica dependencias.
