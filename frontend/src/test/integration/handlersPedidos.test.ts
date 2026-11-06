@@ -5,7 +5,6 @@ import { crearHandlerCreacionPedido } from "../mocks/handlers";
 import { server } from "../mocks/server";
 
 test("el handler de creación responde 201 al POST con el contrato configurado", async () => {
-  expect(crearHandlerCreacionPedido).toBeDefined();
   server.use(crearHandlerCreacionPedido(respuestaCrearPedidoApi));
 
   const respuesta = await fetch(new URL("/pedidos", window.location.origin), {
