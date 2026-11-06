@@ -9,9 +9,9 @@ Proyecto del Grupo 14 para Programación IV de la Tecnicatura Universitaria en P
 | Nicolás Espulef | 22901 |
 | Federico Heinrich | 21317 |
 
-La API del Parcial I está en `backend/` y ya expone los productos ampliados del TP3. El frontend carga sus datos, los valida con Zod y muestra sus nombres, un indicador de carga o un error con reintento. `App` también monta el proveedor del carrito; están implementados Context, reducer, subtotales orientativos y formato de precios. Siguen pendientes el selector de café, la pastelería con botones de agregar, la interfaz del carrito y los pedidos desde la pantalla.
+La API del Parcial I está en `backend/` y ya expone los productos ampliados del TP3. El frontend carga sus datos, los valida con Zod y muestra sus nombres, un indicador de carga o un error con reintento. `App` monta el proveedor y la interfaz del carrito, con cantidades, controles para sumar/restar/eliminar, subtotales orientativos y confirmación bloqueada en vacío. Siguen pendientes el selector de café, la pastelería con botones de agregar y los pedidos desde la pantalla; el menú actual muestra nombres y el botón de confirmar todavía no envía pedidos.
 
-Estado verificado el **6 de noviembre de 2026** en `fix/correcciones-generales`: **80 tests de backend y 93 de frontend aprobados**, build completo, lint y arranque conjunto correctos. Las correcciones de esta rama están preparadas para PR a `develop`; los pendientes funcionales del TP3 y de dependencias siguen detallados debajo.
+Estado verificado el **6 de noviembre de 2026** en `fix/correcciones-generales`, hasta `756524a`: **83 tests de backend y 109 de frontend aprobados (192 en total)**, build completo y lint correctos. La rama incorpora `develop` hasta `5b179d5`, con los PR #24 de correcciones y #23 del carrito de Federico ya integrados. Las nuevas correcciones de subtotal, cobertura y facturación están preparadas para otro PR a `develop`. La instalación limpia y el arranque conjunto conservan sus comprobaciones previas registradas debajo.
 
 ## Documentación
 
@@ -112,6 +112,7 @@ npm run test:backend -- --runTestsByPath tests/integration/pedidos.limites.test.
 npm run test:backend -- --runTestsByPath tests/integration/pedidos.estructura.test.ts
 npm run test:backend -- --runTestsByPath tests/integration/pedidos.estado.test.ts
 npm run test:backend -- --runTestsByPath tests/integration/pedidos.errores.test.ts
+npm run test:backend -- tests/unit/reportes.test.ts tests/integration/pedido-reportes.integration.test.ts
 npm run test:frontend -- src/test/unit/esquemas.test.ts
 npm run test:frontend -- src/test/integration/cliente.test.ts
 npm run test:frontend -- src/test/integration/respuestas.test.ts
@@ -125,6 +126,7 @@ npm run test:frontend -- src/test/integration/menu.test.tsx
 npm run test:frontend -- src/test/unit/carrito.reducer.test.ts
 npm run test:frontend -- src/test/integration/carrito.context.test.tsx
 npm run test:frontend -- src/test/integration/app.carrito.test.tsx
+npm run test:frontend -- src/test/components/Carrito.test.tsx
 npm run test:frontend -- src/test/unit/subtotalCarrito.test.ts
 npm run test:frontend -- src/test/unit/formatoPrecio.test.ts
 ```
@@ -155,19 +157,19 @@ El comando de preview sirve el frontend compilado y, en esta versión de Vite, h
 
 ## Estado de la base
 
-La verificación del **6 de noviembre de 2026**, sobre `fix/correcciones-generales` hasta `013c044`, registró:
+La verificación del **6 de noviembre de 2026**, sobre `fix/correcciones-generales` hasta `756524a`, registró:
 
 | Área | Resultado |
 | --- | --- |
-| Backend | 15 suites y 80 tests de Jest/Supertest aprobados. Compilación correcta. |
-| Frontend | 18 archivos y 93 tests de Vitest aprobados. Incluyen contrato ampliado, menú y proveedor compartido del carrito. |
+| Backend | 15 suites y 83 tests de Jest/Supertest aprobados. Incluyen límites de facturación acumulada y su respuesta HTTP. Compilación correcta. |
+| Frontend | 19 archivos y 109 tests de Vitest aprobados. Incluyen contrato ampliado, menú, Context y 14 casos del componente del carrito. |
 | Compilación del frontend | Correcta; comprueba los tipos de la aplicación, los tests y las configuraciones. |
 | Lint | Sin errores. Context y proveedor están separados. |
 | Instalación limpia | `npm run install:all` aprobado el 5 de noviembre: ambos paquetes instalados mediante `npm ci`. |
-| Arranque conjunto | Scripts `dev:backend` y `dev:frontend` verificados en 3000/5173; cliente real, Zod y proxy comprobados. Servidores propios cerrados al finalizar. |
-| Auditoría de producción | 0 paquetes afectados en backend y frontend, comprobado el 6 de noviembre. |
+| Arranque conjunto | Comprobación previa del 6 de noviembre: scripts `dev:backend` y `dev:frontend` en 3000/5173; cliente real, Zod y proxy comprobados. Servidores propios cerrados al finalizar. |
+| Auditoría de producción | Registro previo del 6 de noviembre: 0 paquetes afectados en backend y frontend. Esta etapa no cambió dependencias. |
 
-El PR #20 resolvió el tipo `Producto` faltante, el import de tipos del reducer, los mocks incompatibles y las exportaciones que bloqueaban lint. `npm test` ejecuta Jest y Vitest; la comprobación estática se verifica por separado con `npm run build`. Los 173 tests actuales no certifican las funcionalidades pendientes ni el recorrido E2E.
+El PR #20 resolvió el tipo `Producto` faltante, el import de tipos del reducer, los mocks incompatibles y las exportaciones que bloqueaban lint. El PR #23 agregó 12 tests de Federico: diez del carrito, uno del vaciado por Context y otro de integración con App. Las correcciones posteriores de Homero agregan cuatro casos del carrito y tres de facturación. `npm test` ejecuta Jest y Vitest; la comprobación estática se verifica por separado con `npm run build`. Los 192 tests actuales no certifican las funcionalidades pendientes ni el recorrido E2E.
 
 La cobertura permanente del catálogo ahora incluye 22 casos HTTP: listado completo, detalle de los 20 IDs y 404. Un fixture independiente fija nombres, precios y metadatos esperados. Los tres tests del buscador comprueban también los IDs exactos de sus dos búsquedas exitosas.
 
@@ -189,8 +191,10 @@ Los avances integrados en `develop` incluyen:
 - [x] Matias, PR #18: conexión del servicio ampliado a ambos endpoints de productos y actualización de sus tests, conservando el 404.
 - [x] Homero, PR #20: unión discriminada Zod de café/pastelería, tipos inferidos, consulta y mocks ampliados, fixtures compartidos y corrección de tipos/lint; 19 tests nuevos.
 - [x] Homero, PR #21: proveedor del carrito montado en `App` y un test que comprueba el estado compartido entre dos consumidores independientes.
+- [x] Homero, PR #24: validaciones de pedidos, middleware, cobertura completa del catálogo, dependencias y comprobación de arranque conjunto de la primera etapa de `fix/correcciones-generales`.
+- [x] Federico, PR #23: `Carrito` e `ItemCarrito` montados en App, controles accesibles, subtotales, bloqueo de confirmación en vacío y acción `VACIAR`; 12 tests nuevos. Las acciones reciben `ProductoBase`, el contrato común derivado con Zod.
 
-Correcciones de Homero preparadas en `fix/correcciones-generales`, pendientes de integración:
+Correcciones de Homero ya integradas en `develop` mediante el PR #24:
 
 - [x] Rechazar cantidades, subtotales y totales fuera del rango de enteros seguros antes de guardar; cuatro casos verifican también pedidos y facturación previos.
 - [x] Rechazar cuerpo ausente, `items` como objeto e ítems nulos con mensajes claros; tres casos comprueban el rechazo y la conservación de datos.
@@ -201,9 +205,17 @@ Correcciones de Homero preparadas en `fix/correcciones-generales`, pendientes de
 - [x] Validar `productoId` como entero positivo seguro antes de buscar o construir mensajes. Tres casos HTTP cubren ID ausente, objeto simple y objeto con `toString` numérico: responden 400 con mensaje claro y conservan pedidos/facturación. El ciclo RED/GREEN/REFACTOR quedó completo.
 - [x] Verificar arranque conjunto y conexión del cliente real con Express a través del proxy de Vite.
 
-`listarProductos()` usa `solicitarValidado()` con `esquemaProductos`: valida y conserva el precio y los campos propios de café y pastelería descritos debajo. `Producto` y `Productos` se derivan con `z.infer`; los esquemas base se conservan para los campos comunes. La pantalla muestra los nombres recibidos. Selector, botones de agregar, carrito visual, contratos/funciones de pedidos, Bootstrap/SASS y E2E siguen pendientes. Los ticks por integrante están en [planificacion.md](planificacion.md).
+Nuevas correcciones de Homero en la misma rama, posteriores a `5b179d5` y pendientes de otro PR:
 
-El contrato ampliado de productos está disponible y cubierto en ambos endpoints. Pedidos ya tiene estado predeterminado y validación de IDs; faltan `mesaId` y reset/seed. Instalación limpia y arranque conjunto están registrados; el recorrido completo en navegador sigue pendiente. Persisten 20 paquetes afectados de desarrollo en backend (4 bajos y 16 moderados) y 9 moderados en frontend; no hay altos ni críticos. Las restricciones de versiones y el override están documentados en [FRONTEND.md](FRONTEND.md#dependencias-de-desarrollo-y-auditoría).
+- [x] Mostrar `Subtotal orientativo` en el carrito y actualizar sus pruebas de componente e integración con App; ciclo RED/GREEN/REFACTOR.
+- [x] Agregar cuatro casos de regresión: restar/eliminar la última unidad con bloqueo de confirmación, sumar café y restar pastelería con precios distintos. El componente tiene 14 casos.
+- [x] Validar cada suma de facturación acumulada y responder 400 con un mensaje claro cuando supera el rango de enteros seguros. Dos tests unitarios cubren el límite exacto y su exceso; uno HTTP crea seis pedidos válidos y comprueba el error del reporte.
+- [x] Compartir la preparación del carrito y de pedidos con totales, y parametrizar las dos formas de quitar la última unidad; refactores separados con pruebas verdes.
+- [x] Verificar `npm test`, `npm run build` y `npm run lint` sobre los cambios completos.
+
+`listarProductos()` usa `solicitarValidado()` con `esquemaProductos`: valida y conserva el precio y los campos propios de café y pastelería descritos debajo. `Producto` y `Productos` se derivan con `z.infer`; el carrito usa `ProductoBase` para operar con los campos comunes. Selector, botones reales de agregar, contratos/funciones de pedidos, Bootstrap/SASS y E2E siguen pendientes. Los ticks por integrante están en [planificacion.md](planificacion.md).
+
+El contrato ampliado de productos está disponible y cubierto en ambos endpoints. Pedidos ya tiene estado predeterminado y validación de IDs; faltan `mesaId` y reset/seed. Instalación limpia y arranque conjunto están registrados; el recorrido completo en navegador sigue pendiente. La auditoría previa del 6 de noviembre registró 20 paquetes afectados de desarrollo en backend (4 bajos y 16 moderados) y 9 moderados en frontend, sin altos ni críticos. Las restricciones de versiones y el override están documentados en [FRONTEND.md](FRONTEND.md#dependencias-de-desarrollo-y-auditoría).
 
 En la comprobación conjunta, Vite sirvió `/` y `/src/main.tsx` con 200, y `listarProductos()` validó los 20 productos de Express mediante el cliente y Zod reales. Un POST por el proxy, con producto 5 × 2 y producto 19 × 1, sin mesa ni estado, respondió 201, `pendiente` y total **17220**; el GET por ID devolvió el mismo pedido. Los tres IDs mal formados respondieron 400 y se conservaron el pedido válido y su facturación. Se iniciaron los scripts de desarrollo; Vite usó `--strictPort` para mantener 5173. Los servidores propios se cerraron y los puertos quedaron libres. Esta comprobación del cliente no ejecuta la interfaz en un navegador; mesa 4, recorrido E2E y vista de 375 px siguen pendientes.
 
@@ -212,7 +224,7 @@ En la comprobación conjunta, Vite sirvió `/` y `/src/main.tsx` con 200, y `lis
 ```text
 CafeteriaOrigen/
 ├── backend/             # API, configuraciones, dependencias y pruebas de Jest
-├── frontend/            # React, carga del menú, lógica del carrito y pruebas
+├── frontend/            # React, carga del menú, lógica/interfaz del carrito y pruebas
 ├── package.json         # Comandos generales; sin dependencias propias
 ├── README.md            # Entrada y documentación del backend actual
 ├── FRONTEND.md          # Guía principal del frontend y sus pruebas
@@ -235,6 +247,7 @@ La API permite consultar productos, crear y consultar pedidos y obtener reportes
 - `POST /pedidos` recibe `items: [{ productoId, cantidad }]` y `estado` opcional. Si se omite, el servicio asigna `"pendiente"`; conserva los estados explícitos válidos y rechaza valores que no sean textos no vacíos. No se definió un catálogo cerrado de estados.
 - Una creación válida responde 201 con `{ mensaje, pedido }`. `pedido` incluye `id`, `items`, `estado` y `total` calculado por la API.
 - `GET /pedidos` devuelve un arreglo de pedidos y `GET /pedidos/:id` un pedido directo, sin el envoltorio de creación.
+- `GET /reportes/facturacion` devuelve 200 con `{ facturacion: number }` si la suma es un entero seguro, incluido `Number.MAX_SAFE_INTEGER`. Si una suma acumulada deja de ser segura, responde 400 con `{ "error": "La facturación total supera el rango de enteros seguros" }`. Los pedidos ya creados se conservan; se rechaza la consulta del reporte inseguro.
 - Los pedidos se almacenan en memoria y se pierden al reiniciar el servidor.
 - Los errores de validación usan HTTP 400 con `{ "error": "mensaje" }`. Un `productoId` mal formado en `POST /pedidos` responde 400 con `{ "error": "El ID del producto debe ser un entero positivo seguro" }`; un ID numérico válido pero inexistente conserva `No existe el producto N`. Un JSON malformado responde 400 con `{ "error": "El cuerpo de la solicitud contiene JSON inválido" }`. Un cuerpo que supera el límite de Express responde 413 con `{ "error": "El cuerpo de la solicitud supera el tamaño permitido" }`. Los fallos internos responden 500 con `{ "error": "Error interno del servidor" }`.
 
@@ -319,7 +332,7 @@ En el listado se usan estas mismas representaciones. La descripción del café q
 
 La bebida se indica con `tipoCafe`; `tipo` distingue café y pastelería. El campo público es `tamaño`, con ñ, y los nombres de origen van en minúsculas. La propuesta anterior con `tipo: "expreso"` y `tamanio` quedó reemplazada por este contrato; el PDF admite variaciones de nombres que conserven la información. Zod, consulta y fixtures ya usan la representación actual.
 
-Los 22 casos HTTP comprueban el listado de 20 productos, cada GET individual (9 expresos, 9 filtrados y 2 productos de pastelería) y el 404. Comparan las respuestas con `backend/tests/fixtures/productos.ts`, que fija precios y campos públicos sin importar el catálogo ni las funciones de cálculo de producción. Se restauró la longitud 20 eliminada en #18. Los dos tests del servicio de respuestas siguen siendo unitarios de café; la cobertura HTTP adicional completa el pendiente de M1 en esta rama.
+Los 22 casos HTTP comprueban el listado de 20 productos, cada GET individual (9 expresos, 9 filtrados y 2 productos de pastelería) y el 404. Comparan las respuestas con `backend/tests/fixtures/productos.ts`, que fija precios y campos públicos sin importar el catálogo ni las funciones de cálculo de producción. Se restauró la longitud 20 eliminada en #18. Los dos tests del servicio de respuestas siguen siendo unitarios de café; la cobertura HTTP adicional completó M1 y ya está integrada mediante el PR #24.
 
 ### Productos
 
