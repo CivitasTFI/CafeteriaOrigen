@@ -1,5 +1,8 @@
 import { describe, expect, test } from "vitest";
-import { esquemaPedido } from "../../api/esquemas/pedidos";
+import {
+  esquemaPedido,
+  esquemaRespuestaCrearPedido,
+} from "../../api/esquemas/pedidos";
 import { pedidoApi as pedido } from "../fixtures/pedidos";
 
 test("acepta un pedido de la API actual y conserva sus datos", () => {
@@ -7,6 +10,19 @@ test("acepta un pedido de la API actual y conserva sus datos", () => {
   expect(esquemaPedido.safeParse(pedido)).toEqual({
     success: true,
     data: pedido,
+  });
+});
+
+test("acepta la respuesta de creación y conserva su mensaje y pedido", () => {
+  const respuesta = {
+    mensaje: "El pedido se guardó correctamente",
+    pedido,
+  };
+
+  expect(esquemaRespuestaCrearPedido).toBeDefined();
+  expect(esquemaRespuestaCrearPedido.safeParse(respuesta)).toEqual({
+    success: true,
+    data: respuesta,
   });
 });
 
