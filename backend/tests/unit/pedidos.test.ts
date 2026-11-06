@@ -146,5 +146,17 @@ describe("Servicio de pedidos", () => {
         
 
         expect(listarPedidos()).toHaveLength(0);
+    });
+
+    it("estado pendiente predeterminado", ()=>{
+        const pedido = crearPedido(
+            [{
+                productoId:2,
+                cantidad:5
+            }],
+            2
+        )
+
+        expect(pedido.estado).toBe("pendiente");
     })
 });
