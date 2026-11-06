@@ -58,5 +58,5 @@ test("App muestra en el carrito el producto agregado desde el menú", async () =
     screen.getByRole("button", { name: "Agregar café de prueba" }),
   );
 
-  expect(screen.getByText("Subtotal: $7.360")).toBeInTheDocument();
+  expect(screen.getByText("Subtotal orientativo: $7.360")).toBeInTheDocument();
 });

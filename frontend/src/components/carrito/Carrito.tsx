@@ -31,7 +31,7 @@ export default function Carrito() {
             {estaVacio ? <CarritoVacio /> : (
                 <>
                     <ListaItemsCarrito items={items} />
-                    <p>Subtotal: {formatoPrecio(calcularSubtotalCarrito(items))}</p>
+                    <p>Subtotal orientativo: {formatoPrecio(calcularSubtotalCarrito(items))}</p>
                 </>
             )}
             <button type="button" aria-label="Confirmar pedido" disabled={estaVacio}>Confirmar pedido</button>
