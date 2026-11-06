@@ -16,6 +16,15 @@ test("acepta un pedido de la API actual y conserva sus datos", () => {
   });
 });
 
+test("acepta un pedido con mesa y conserva su identificador", () => {
+  const pedidoConMesa = { ...pedido, mesaId: 4 };
+
+  expect(esquemaPedido.safeParse(pedidoConMesa)).toEqual({
+    success: true,
+    data: pedidoConMesa,
+  });
+});
+
 test("acepta la respuesta de creación y conserva su mensaje y pedido", () => {
   expect(esquemaRespuestaCrearPedido).toBeDefined();
   expect(esquemaRespuestaCrearPedido.safeParse(respuestaCrearPedidoApi)).toEqual({
