@@ -198,32 +198,24 @@ describe("Carrito componente", () => {
         );
         expect(screen.getByRole("button", { name: "Confirmar pedido" })).toBeDisabled();
     });
-    it("quita la última unidad al restar y vuelve a mostrar el carrito vacío", async () => {
-        const user = userEvent.setup();
-        renderizarCarrito([productoMock]);
+    it.each(["Restar", "Eliminar"])(
+        "vacía el carrito y bloquea la confirmación al usar %s sobre la última unidad",
+        async (accion) => {
+            const user = userEvent.setup();
+            renderizarCarrito([productoMock]);
+            const confirmar = screen.getByRole("button", { name: "Confirmar pedido" });
 
-        await user.click(screen.getByRole("button", { name: "Agregar Expreso Mediano" }));
-        expect(screen.getByText("Cantidad: 1")).toBeInTheDocument();
+            expect(confirmar).toBeDisabled();
 
-        await user.click(screen.getByRole("button", { name: "Restar Expreso Mediano" }));
+            await user.click(screen.getByRole("button", { name: "Agregar Expreso Mediano" }));
+            expect(screen.getByText("Cantidad: 1")).toBeInTheDocument();
+            expect(confirmar).toBeEnabled();
 
-        expect(screen.queryByText("Expreso Mediano")).not.toBeInTheDocument();
-        expect(screen.getByText("Tu carrito está vacio")).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: "Confirmar pedido" })).toBeDisabled();
-    });
-    it("habilita la confirmación al agregar y la bloquea al eliminar el último producto", async () => {
-        const user = userEvent.setup();
-        renderizarCarrito([productoMock]);
-        const confirmar = screen.getByRole("button", { name: "Confirmar pedido" });
+            await user.click(screen.getByRole("button", { name: `${accion} ${productoMock.nombre}` }));
 
-        expect(confirmar).toBeDisabled();
-
-        await user.click(screen.getByRole("button", { name: "Agregar Expreso Mediano" }));
-        expect(confirmar).toBeEnabled();
-
-        await user.click(screen.getByRole("button", { name: "Eliminar Expreso Mediano" }));
-
-        expect(confirmar).toBeDisabled();
-        expect(screen.getByText("Tu carrito está vacio")).toBeInTheDocument();
-    });
+            expect(screen.queryByText("Expreso Mediano")).not.toBeInTheDocument();
+            expect(screen.getByText("Tu carrito está vacio")).toBeInTheDocument();
+            expect(confirmar).toBeDisabled();
+        },
+    );
 })
