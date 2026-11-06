@@ -120,7 +120,7 @@ describe("Carrito componente", () => {
         await user.click(botonAgregar);
         expect(screen.getByText("Subtotal ítem: $14.720")).toBeInTheDocument();
     });
-    it("Muestra el subtotal general del carrito", async() => {
+    it("Muestra el subtotal general del carrito como orientativo", async() => {
         const user = userEvent.setup();
         render(
             <CarritoProvider>
@@ -137,7 +137,7 @@ describe("Carrito componente", () => {
         await user.click(agregarGrande);
         await user.click(agregarMediano);
 
-        expect(screen.getByText("Subtotal: $22.080")).toBeInTheDocument();
+        expect(screen.getByText("Subtotal orientativo: $22.080")).toBeInTheDocument();
     });
     it("Incrementa la cantidad del producto al clickear el boton de sumar", async() => {
         const user = userEvent.setup();
