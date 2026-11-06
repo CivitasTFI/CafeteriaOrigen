@@ -19,7 +19,12 @@ function ListaItemsCarrito({ items }: ListaItemsCarritoProps) {
 }
 
 function CarritoVacio() {
-    return <p>Tu carrito está vacio</p>;
+    return (
+        <>
+            <p>Tu carrito está vacio</p>
+            <button type="button" aria-label="Confirmar pedido" disabled>Confirmar pedido</button>
+        </>
+    );
 }
 
 export default function Carrito() {
@@ -35,6 +40,7 @@ export default function Carrito() {
         <>
             <ListaItemsCarrito items={items} />
             <p>Subtotal: {formatoPrecio(subtotal)}</p>
+            <button type="button" aria-label="Confirmar pedido">Confirmar pedido</button>
         </>
     );
 }
