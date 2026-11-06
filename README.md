@@ -11,7 +11,7 @@ Proyecto del Grupo 14 para Programación IV de la Tecnicatura Universitaria en P
 
 La API del Parcial I está en `backend/` y ya expone los productos ampliados del TP3. El frontend carga sus datos, los valida con Zod y muestra sus nombres, un indicador de carga o un error con reintento. `App` también monta el proveedor del carrito; están implementados Context, reducer, subtotales orientativos y formato de precios. Siguen pendientes el selector de café, la pastelería con botones de agregar, la interfaz del carrito y los pedidos desde la pantalla.
 
-Estado verificado el **6 de noviembre de 2026** en `fix/correcciones-generales`: **77 tests de backend y 93 de frontend aprobados**, compilación de ambos paquetes y lint correctos. Las correcciones de esta rama todavía requieren PR a `develop`. Sigue pendiente cerrar la validación de `productoId` ante cuerpos mal formados, detallada debajo.
+Estado verificado el **6 de noviembre de 2026** en `fix/correcciones-generales`: **80 tests de backend y 93 de frontend aprobados**, build completo, lint y arranque conjunto correctos. Las correcciones de esta rama están preparadas para PR a `develop`; los pendientes funcionales del TP3 y de dependencias siguen detallados debajo.
 
 ## Documentación
 
@@ -155,18 +155,19 @@ El comando de preview sirve el frontend compilado y, en esta versión de Vite, h
 
 ## Estado de la base
 
-La verificación del **6 de noviembre de 2026**, sobre `fix/correcciones-generales` hasta `584aeb1`, registró:
+La verificación del **6 de noviembre de 2026**, sobre `fix/correcciones-generales` hasta `013c044`, registró:
 
 | Área | Resultado |
 | --- | --- |
-| Backend | 15 suites y 77 tests de Jest/Supertest aprobados. Compilación correcta. |
+| Backend | 15 suites y 80 tests de Jest/Supertest aprobados. Compilación correcta. |
 | Frontend | 18 archivos y 93 tests de Vitest aprobados. Incluyen contrato ampliado, menú y proveedor compartido del carrito. |
 | Compilación del frontend | Correcta; comprueba los tipos de la aplicación, los tests y las configuraciones. |
 | Lint | Sin errores. Context y proveedor están separados. |
 | Instalación limpia | `npm run install:all` aprobado el 5 de noviembre: ambos paquetes instalados mediante `npm ci`. |
+| Arranque conjunto | Scripts `dev:backend` y `dev:frontend` verificados en 3000/5173; cliente real, Zod y proxy comprobados. Servidores propios cerrados al finalizar. |
 | Auditoría de producción | 0 paquetes afectados en backend y frontend, comprobado el 6 de noviembre. |
 
-El PR #20 resolvió el tipo `Producto` faltante, el import de tipos del reducer, los mocks incompatibles y las exportaciones que bloqueaban lint. `npm test` ejecuta Jest y Vitest; la comprobación estática se verifica por separado con `npm run build`. Los 170 tests actuales no certifican las funcionalidades pendientes ni el recorrido E2E.
+El PR #20 resolvió el tipo `Producto` faltante, el import de tipos del reducer, los mocks incompatibles y las exportaciones que bloqueaban lint. `npm test` ejecuta Jest y Vitest; la comprobación estática se verifica por separado con `npm run build`. Los 173 tests actuales no certifican las funcionalidades pendientes ni el recorrido E2E.
 
 La cobertura permanente del catálogo ahora incluye 22 casos HTTP: listado completo, detalle de los 20 IDs y 404. Un fixture independiente fija nombres, precios y metadatos esperados. Los tres tests del buscador comprueban también los IDs exactos de sus dos búsquedas exitosas.
 
@@ -197,11 +198,14 @@ Correcciones de Homero preparadas en `fix/correcciones-generales`, pendientes de
 - [x] Distinguir `ErrorValidacion` (400), cuerpo demasiado grande (413) y fallo interno (500 con mensaje genérico); centralizar las respuestas en el middleware.
 - [x] Completar cobertura HTTP del catálogo y reforzar los resultados del buscador; refactores de fixtures y auxiliares de tests.
 - [x] Actualizar body-parser/qs, aplicar el override de tinypool para Vitest 3 y corregir la configuración de ts-jest, manteniendo TypeScript estricto.
-- [ ] Validar explícitamente el tipo y formato de `productoId` antes de buscar o construir mensajes. La revisión del 6 de noviembre reprodujo un 500 con `productoId: {"toString": 0}` y mensajes con `undefined` o `[object Object]` para otros IDs mal formados.
+- [x] Validar `productoId` como entero positivo seguro antes de buscar o construir mensajes. Tres casos HTTP cubren ID ausente, objeto simple y objeto con `toString` numérico: responden 400 con mensaje claro y conservan pedidos/facturación. El ciclo RED/GREEN/REFACTOR quedó completo.
+- [x] Verificar arranque conjunto y conexión del cliente real con Express a través del proxy de Vite.
 
 `listarProductos()` usa `solicitarValidado()` con `esquemaProductos`: valida y conserva el precio y los campos propios de café y pastelería descritos debajo. `Producto` y `Productos` se derivan con `z.infer`; los esquemas base se conservan para los campos comunes. La pantalla muestra los nombres recibidos. Selector, botones de agregar, carrito visual, contratos/funciones de pedidos, Bootstrap/SASS y E2E siguen pendientes. Los ticks por integrante están en [planificacion.md](planificacion.md).
 
-El contrato ampliado de productos está disponible y cubierto en ambos endpoints. Pedidos ya tiene estado predeterminado; faltan `mesaId`, reset/seed y completar la validación de IDs. La instalación limpia está registrada; el arranque conjunto siguiendo los comandos del README y el recorrido en navegador siguen pendientes. Persisten 20 paquetes afectados de desarrollo en backend (4 bajos y 16 moderados) y 9 moderados en frontend; no hay altos ni críticos. Las restricciones de versiones y el override están documentados en [FRONTEND.md](FRONTEND.md#dependencias-de-desarrollo-y-auditoría).
+El contrato ampliado de productos está disponible y cubierto en ambos endpoints. Pedidos ya tiene estado predeterminado y validación de IDs; faltan `mesaId` y reset/seed. Instalación limpia y arranque conjunto están registrados; el recorrido completo en navegador sigue pendiente. Persisten 20 paquetes afectados de desarrollo en backend (4 bajos y 16 moderados) y 9 moderados en frontend; no hay altos ni críticos. Las restricciones de versiones y el override están documentados en [FRONTEND.md](FRONTEND.md#dependencias-de-desarrollo-y-auditoría).
+
+En la comprobación conjunta, Vite sirvió `/` y `/src/main.tsx` con 200, y `listarProductos()` validó los 20 productos de Express mediante el cliente y Zod reales. Un POST por el proxy, con producto 5 × 2 y producto 19 × 1, sin mesa ni estado, respondió 201, `pendiente` y total **17220**; el GET por ID devolvió el mismo pedido. Los tres IDs mal formados respondieron 400 y se conservaron el pedido válido y su facturación. Se iniciaron los scripts de desarrollo; Vite usó `--strictPort` para mantener 5173. Los servidores propios se cerraron y los puertos quedaron libres. Esta comprobación del cliente no ejecuta la interfaz en un navegador; mesa 4, recorrido E2E y vista de 375 px siguen pendientes.
 
 ## Estructura general
 
@@ -232,7 +236,7 @@ La API permite consultar productos, crear y consultar pedidos y obtener reportes
 - Una creación válida responde 201 con `{ mensaje, pedido }`. `pedido` incluye `id`, `items`, `estado` y `total` calculado por la API.
 - `GET /pedidos` devuelve un arreglo de pedidos y `GET /pedidos/:id` un pedido directo, sin el envoltorio de creación.
 - Los pedidos se almacenan en memoria y se pierden al reiniciar el servidor.
-- Los errores de validación identificados usan HTTP 400 con `{ "error": "mensaje" }`. Un JSON malformado responde 400 con `{ "error": "El cuerpo de la solicitud contiene JSON inválido" }`. Un cuerpo que supera el límite de Express responde 413 con `{ "error": "El cuerpo de la solicitud supera el tamaño permitido" }`. Los fallos internos responden 500 con `{ "error": "Error interno del servidor" }`. Queda pendiente clasificar correctamente todos los IDs de producto mal formados.
+- Los errores de validación usan HTTP 400 con `{ "error": "mensaje" }`. Un `productoId` mal formado en `POST /pedidos` responde 400 con `{ "error": "El ID del producto debe ser un entero positivo seguro" }`; un ID numérico válido pero inexistente conserva `No existe el producto N`. Un JSON malformado responde 400 con `{ "error": "El cuerpo de la solicitud contiene JSON inválido" }`. Un cuerpo que supera el límite de Express responde 413 con `{ "error": "El cuerpo de la solicitud supera el tamaño permitido" }`. Los fallos internos responden 500 con `{ "error": "Error interno del servidor" }`.
 
 Por ejemplo, crear un pedido con el producto 1 y cantidad 2, sin enviar estado, devuelve `pendiente` y un total de `10040`:
 

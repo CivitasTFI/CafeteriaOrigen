@@ -8,7 +8,7 @@ La aplicación tiene una entrada HTML en español, montaje con `StrictMode` y `A
 
 H2 incorpora contratos Zod de errores y productos ampliados, tipos inferidos, cliente HTTP, consulta y fixtures/handlers de éxito y error. Federico implementó reducer, Context, hook y utilidades del carrito, con 13 tests. Matias conectó el servicio ampliado a ambos GET en #18. Homero alineó contrato y carrito en #20 y montó el proveedor con un test de integración adicional en #21.
 
-Siguen pendientes selección de café, pastelería con botones/precios, interfaz del carrito, mesas, confirmación, seguimiento, estilos y E2E. Verificación del **6 de noviembre de 2026**: **93 tests del frontend aprobados**, compilación y lint correctos. La instalación limpia se verificó el 5 de noviembre; falta registrar el arranque conjunto siguiendo el README. El backend ya asigna `pendiente`, pero necesita completar la validación de `productoId` y las mesas antes de cerrar el contrato de pedidos.
+Siguen pendientes selección de café, pastelería con botones/precios, interfaz del carrito, mesas, confirmación, seguimiento, estilos y E2E. Verificación del **6 de noviembre de 2026**: **93 tests del frontend aprobados**, compilación, lint y arranque conjunto correctos. La instalación limpia se verificó el 5 de noviembre. El backend ya asigna `pendiente` y valida `productoId`; las mesas siguen pendientes para cerrar el contrato de pedidos.
 
 ## 2. Instalación y versiones
 
@@ -338,7 +338,7 @@ Para simular el rechazo de un pedido sin ítems, registrar `crearHandlerError("/
 | [subtotalCarrito.test.ts](frontend/src/test/unit/subtotalCarrito.test.ts) | 2 | Subtotal de un ítem y suma de subtotales del carrito. |
 | [formatoPrecio.test.ts](frontend/src/test/unit/formatoPrecio.test.ts) | 1 | Formato local: 1000 se muestra como `$1.000`. |
 
-Son **93 tests en 18 archivos**, verificados nuevamente el 6 de noviembre. El PR #20 agregó 19 casos y #21 uno, sobre los 73 registrados antes. Las pruebas normales no necesitan Express levantado. El test del proxy inicia y cierra un servidor Vite temporal en `127.0.0.1` y MSW simula la API. Los **77 tests del backend**, en 15 suites de Jest, se cuentan por separado: el total es 170. La compilación comprueba tipos de aplicación/configuración/tests y pasa junto con lint.
+Son **93 tests en 18 archivos**, verificados nuevamente el 6 de noviembre. El PR #20 agregó 19 casos y #21 uno, sobre los 73 registrados antes. Las pruebas normales no necesitan Express levantado. El test del proxy inicia y cierra un servidor Vite temporal en `127.0.0.1` y MSW simula la API. Los **80 tests del backend**, en 15 suites de Jest, se cuentan por separado: el total es 173. La compilación comprueba tipos de aplicación/configuración/tests y pasa junto con lint.
 
 ## 7. Archivos `.pending` y comienzo de una funcionalidad
 
@@ -394,7 +394,7 @@ Las consultas de componentes se hacen por rol, etiqueta o texto. `getByTestId` s
 
 | Responsable | Trabajo que sigue pendiente |
 | --- | --- |
-| Homero | Cerrar la corrección de `productoId`, registrar arranque conjunto, completar contratos/funciones/mocks de pedidos y conectar selector/pastelería. Instalación limpia, contrato de productos, tipos/lint y proveedor están verificados. |
+| Homero | Completar contratos/funciones/mocks de pedidos y conectar selector/pastelería. Instalación limpia, arranque conjunto, correcciones de pedidos, contrato de productos, tipos/lint y proveedor están verificados. |
 | Matias | Implementar selector, pastelería y Bootstrap/SASS. La API de M1 y sus 22 casos HTTP están completos en la rama de correcciones, pendientes de integración. |
 | Federico | Completar interfaz F2, vaciado tras confirmación y Playwright F3. Context/reducer/utilidades están disponibles y el proveedor ya está montado y probado en App. |
 | Nicolas | Mesas y contrato completo de pedidos en API, reset/seed, lectura de URL, confirmación y seguimiento. El estado predeterminado ya está corregido en esta rama. |
@@ -403,24 +403,33 @@ Homero ya integró el proveedor y alineó los tipos y mocks. Coordinará `test:e
 
 El cliente HTTP concentra el `fetch` y ya lo consume el menú por `listarProductos()`. Las utilidades del carrito calculan subtotales orientativos con precios recibidos; el total confirmado seguirá siendo el devuelto por la API. No se reproducen las fórmulas del dominio en el frontend.
 
-La instalación limpia con `npm run install:all` se verificó en `fix/correcciones-generales`. Falta registrar el arranque conjunto de API/frontend siguiendo el README y la carga del catálogo real. Los contratos completos de pedidos de N1 y los componentes de M2 siguen condicionando el cierre de H2/H3.
+La instalación limpia y el arranque conjunto se verificaron en `fix/correcciones-generales`: el cliente real validó el catálogo de Express a través del proxy de Vite. Los contratos completos de pedidos con mesa de N1 y los componentes de M2 siguen condicionando el cierre de H2/H3.
 
 ## 10. Estado de verificación y cierre de la base
 
-Verificación del **6 de noviembre de 2026** en `fix/correcciones-generales`, hasta `584aeb1`, con Node.js **22.23.4** y npm **10.9.9**. Incluye las correcciones de pedidos, herramientas y cobertura posteriores al PR #22:
+Verificación del **6 de noviembre de 2026** en `fix/correcciones-generales`, hasta `013c044`, con Node.js **22.23.4** y npm **10.9.9**. Incluye las correcciones de pedidos, herramientas y cobertura posteriores al PR #22:
 
 | Comando desde la raíz | Resultado |
 | --- | --- |
 | `npm run install:all` | Aprobado el 5 de noviembre: ambos paquetes se instalaron mediante `npm ci` a partir de sus lockfiles. |
-| `npm test` | Aprobado el 6 de noviembre: 77 tests de backend en 15 suites y 93 de frontend en 18 archivos; 170 en total. |
+| `npm test` | Aprobado el 6 de noviembre: 80 tests de backend en 15 suites y 93 de frontend en 18 archivos; 173 en total. |
 | `npm run build` | Ambos paquetes compilan; incluye tipos de los tests/configuraciones del frontend. |
 | `npm run lint` | Aprobado, sin errores. |
+| Scripts de desarrollo | Arranque conjunto en 3000/5173 y cliente real verificados; procesos propios cerrados al finalizar. |
 
 Los problemas anteriores se resolvieron en #20: exportación del tipo inferido `Producto`, `import type` en el reducer, fixtures compatibles y separación Context/proveedor. El montaje del proveedor de #21 también está verificado.
 
 Vitest transpila los tests y no sustituye `tsc -b`; se ejecutaron ambas verificaciones. En backend, `isolatedModules: true` permite el uso de `Node16` con ts-jest y elimina el aviso TS151002, manteniendo `strict: true`. La comprobación completa de tipos sigue a cargo de `tsc` durante el build. Ver [documentación de ts-jest](https://kulshekhar.github.io/ts-jest/docs/guides/esm-support) y [opción de TypeScript](https://www.typescriptlang.org/tsconfig/isolatedModules.html).
 
-Rollup sigue avisando sobre comentarios de anotación de Zod; el build termina correctamente. Los E2E todavía no están implementados. La instalación limpia no certifica el recorrido en navegador ni reemplaza el arranque conjunto pendiente. La revisión exploratoria detectó además que `productoId: {"toString": 0}` todavía produce HTTP 500; validar su tipo/formato y agregar sus tests es el siguiente paso antes del PR. Los tests actuales en verde no cubren ese caso.
+Rollup sigue avisando sobre comentarios de anotación de Zod; el build termina correctamente. Los E2E todavía no están implementados. El ID mal formado detectado en la revisión quedó corregido: los tres casos nuevos de `pedidos.estructura.test.ts` exigen 400, mensaje claro y conservación de pedidos/facturación; el archivo tiene seis casos en total.
+
+### Comprobación de arranque y conexión real
+
+Se iniciaron `npm run dev:backend` y `npm run dev:frontend -- --strictPort` con la configuración existente, en 3000 y 5173. Vite sirvió la página y `/src/main.tsx` con HTTP 200. Se ejecutó `listarProductos()` con el origen local de Vite y los módulos reales de cliente/Zod: validó 20 productos de Express a través del proxy, sin MSW.
+
+El POST por el proxy con producto 5 × 2 y producto 19 × 1, sin mesa ni estado, devolvió 201, `pendiente` y **17220**; el GET por ID devolvió el mismo pedido. Los IDs ausente, objeto simple y objeto con `toString` numérico recibieron 400. El listado conservó solo el pedido válido y la facturación siguió siendo 17220. Se cerraron los servidores propios y se verificaron libres los puertos.
+
+Esta comprobación ejercita servicios y cliente HTTP; no renderiza React en un navegador. El recorrido Playwright, la mesa 4 del ejemplo del PDF y la vista de 375 px siguen pendientes. Instalación, arranque y comprobación del cliente no certifican esos requisitos.
 
 ### Dependencias de desarrollo y auditoría
 
