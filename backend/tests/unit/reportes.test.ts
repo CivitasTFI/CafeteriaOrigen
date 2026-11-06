@@ -8,6 +8,15 @@ interface Pedido {
     calcularTotal: () => number;
 }
 
+function crearPedidosConTotales(totales: number[]): Pedido[] {
+    return totales.map((total, indice) => ({
+        id: indice + 1,
+        items: [{ productoId: 1, cantidad: 1 }],
+        estado: 'pendiente',
+        calcularTotal: () => total
+    }));
+}
+
 describe('calcularFacturacionTotal', () => {
     it('verifica que la facturación total (suma de los totales de todos los pedidos) sea 0 cuando no hay pedidos', () => {
         const listaPedidos: Pedido[] = [];
@@ -52,23 +61,13 @@ describe('calcularFacturacionTotal', () => {
     });
 
     it('acepta una facturación acumulada igual al máximo entero seguro', () => {
-        const listaPedidos: Pedido[] = [Number.MAX_SAFE_INTEGER - 1, 1].map((total, indice) => ({
-            id: indice + 1,
-            items: [{ productoId: 1, cantidad: 1 }],
-            estado: 'pendiente',
-            calcularTotal: () => total
-        }));
+        const listaPedidos = crearPedidosConTotales([Number.MAX_SAFE_INTEGER - 1, 1]);
 
         expect(calcularFacturacionTotal(listaPedidos)).toBe(Number.MAX_SAFE_INTEGER);
     });
 
     it('rechaza una facturación acumulada insegura aunque cada pedido tenga un total seguro', () => {
-        const listaPedidos: Pedido[] = [Number.MAX_SAFE_INTEGER, 1].map((total, indice) => ({
-            id: indice + 1,
-            items: [{ productoId: 1, cantidad: 1 }],
-            estado: 'pendiente',
-            calcularTotal: () => total
-        }));
+        const listaPedidos = crearPedidosConTotales([Number.MAX_SAFE_INTEGER, 1]);
 
         expect(() => calcularFacturacionTotal(listaPedidos)).toThrow(ErrorValidacion);
     });
