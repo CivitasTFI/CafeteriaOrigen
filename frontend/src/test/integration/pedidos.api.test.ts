@@ -4,15 +4,23 @@ import { crearPedido } from "../../api/pedidos";
 import { pedidoApi, respuestaCrearPedidoApi } from "../fixtures/pedidos";
 import { server } from "../mocks/server";
 
-test("envía los ítems por POST /pedidos y devuelve la respuesta de creación", async () => {
+function simularPostPedidos(responder: () => Response): Request[] {
   const solicitudes: Request[] = [];
   const url = new URL("/pedidos", window.location.origin).href;
 
   server.use(
     http.post(url, ({ request }) => {
       solicitudes.push(request.clone());
-      return HttpResponse.json(respuestaCrearPedidoApi, { status: 201 });
+      return responder();
     }),
+  );
+
+  return solicitudes;
+}
+
+test("envía los ítems por POST /pedidos y devuelve la respuesta de creación", async () => {
+  const solicitudes = simularPostPedidos(() =>
+    HttpResponse.json(respuestaCrearPedidoApi, { status: 201 }),
   );
 
   expect(crearPedido).toBeDefined();
