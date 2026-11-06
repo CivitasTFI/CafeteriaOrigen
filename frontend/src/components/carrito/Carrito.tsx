@@ -19,28 +19,21 @@ function ListaItemsCarrito({ items }: ListaItemsCarritoProps) {
 }
 
 function CarritoVacio() {
-    return (
-        <>
-            <p>Tu carrito está vacio</p>
-        </>
-    );
+    return <p>Tu carrito está vacio</p>;
 }
 
 export default function Carrito() {
     const { items } = useCarrito();
     const estaVacio = items.length === 0;
 
-    const subtotal = calcularSubtotalCarrito(items);
-
     return (
         <>
-            { estaVacio? (<CarritoVacio/>) : ( 
+            {estaVacio ? <CarritoVacio /> : (
                 <>
-                 <ListaItemsCarrito items={items} /> 
-                <p>Subtotal: {formatoPrecio(subtotal)}</p> 
-                </> 
-                )
-            }
+                    <ListaItemsCarrito items={items} />
+                    <p>Subtotal: {formatoPrecio(calcularSubtotalCarrito(items))}</p>
+                </>
+            )}
             <button type="button" aria-label="Confirmar pedido" disabled={estaVacio}>Confirmar pedido</button>
         </>
     );

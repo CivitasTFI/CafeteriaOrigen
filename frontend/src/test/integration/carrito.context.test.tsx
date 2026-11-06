@@ -3,18 +3,12 @@ import { useCarrito } from "../../hooks/useCarrito";
 import { CarritoProvider } from "../../context/CarritoContext";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { cafeApi as productoMock } from "../fixtures/productos";
 import type { Producto } from "../../api/esquemas/productos";
 
-const productoMock: Producto = {
-  id: 5,
-  tipo: "expreso",
-  nombre: "Expreso Mediano",
-  precio: 7360,
-};
-
 const productoMock2: Producto = {
+  ...productoMock,
   id: 9,
-  tipo: "expreso",
   nombre: "Expreso Chico",
   precio: 1360,
 };

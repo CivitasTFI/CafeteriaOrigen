@@ -4,20 +4,18 @@ import { CarritoProvider } from '../../context/CarritoContext';
 import Carrito from '../../components/carrito/Carrito';
 import userEvent from '@testing-library/user-event';
 import { useCarrito } from '../../hooks/useCarrito';
+import { cafeApi } from '../fixtures/productos';
 import type { Producto } from '../../api/esquemas/productos';
 
 const productoMock: Producto = {
-    id: 5,
-    tipo: "expreso",
+    ...cafeApi,
     nombre: "Expreso Mediano",
-    precio: 7360,
 };
 
 const productoMock2: Producto = {
+    ...cafeApi,
     id: 6,
-    tipo: "expreso",
     nombre: "Expreso Grande",
-    precio: 7360,
 };
 
 type AgregarProductoDePruebaProps = {

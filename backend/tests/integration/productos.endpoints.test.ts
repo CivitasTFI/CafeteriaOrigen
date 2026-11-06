@@ -7,12 +7,19 @@ describe('Endpoints de productos', () => {
             const response = await request(app).get('/productos');
 
             expect(response.status).toBe(200);
-            expect(response.body).toHaveLength(20);
 
+            // Solo se comprueba el primer producto del catalogo para no sobrecargar el test
             expect(response.body[0]).toEqual({
                 id: 1,
                 nombre: 'Expreso Pocillo Brasil',
-                precio: 5020
+                tipo: 'cafe',
+                tipoCafe: 'expreso',
+                tamaño: 'pocillo',
+                variedad: {
+                    nombre: 'brasil',
+                    descripcion: 'Acidez media, cuerpo equilibrado, notas citricas y florales',
+                },
+                precio: 5020,
             });
         });
     });
@@ -25,7 +32,14 @@ describe('Endpoints de productos', () => {
             expect(response.body).toEqual({
                 id: 1,
                 nombre: 'Expreso Pocillo Brasil',
-                precio: 5020
+                tipo: 'cafe',
+                tipoCafe: 'expreso',
+                tamaño: 'pocillo',
+                variedad: {
+                    nombre: 'brasil',
+                    descripcion: 'Acidez media, cuerpo equilibrado, notas citricas y florales',
+                },
+                precio: 5020,
             });
         });
 

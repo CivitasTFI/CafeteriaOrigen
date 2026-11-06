@@ -11,21 +11,10 @@
 
 import { describe, expect, it } from "vitest";
 import { carritoReducer } from "../../context/carrito.reducer";
-import type { Producto } from "../../api/esquemas/productos";
-
-const productoMock: Producto = {
-  id: 5,
-  tipo: "expreso",
-  nombre: "Expreso Mediano",
-  precio: 7360,
-};
-
-const productoMock2: Producto = {
-  id: 6,
-  tipo: "expreso",
-  nombre: "Expreso Grande",
-  precio: 8360,
-};
+import {
+  cafeApi as productoMock,
+  pasteleriaApi as productoMock2,
+} from "../fixtures/productos";
 
 describe("carritoReducer", () => {
     it("agrega un producto al carrito vacio", () => {

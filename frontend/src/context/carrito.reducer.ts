@@ -1,8 +1,8 @@
-import { Producto } from "../api/esquemas/productos";
+import type { ProductoBase } from "../api/esquemas/productos";
 
-export type AccionCarrito = | { type: "AGREGAR"; producto: Producto } 
-                     | { type: "RESTAR"; producto: Producto }
-                     | { type: "ELIMINAR"; producto: Producto }
+export type AccionCarrito = | { type: "AGREGAR"; producto: ProductoBase }
+                     | { type: "RESTAR"; producto: ProductoBase }
+                     | { type: "ELIMINAR"; producto: ProductoBase }
                      | { type: "VACIAR" };
 
 export type ItemCarrito = {
