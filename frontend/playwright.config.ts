@@ -5,6 +5,7 @@ export default defineConfig({
   use: {
     baseURL: "http://localhost:5173",
     browserName: "chromium",
+    viewport: { width: 375, height: 812 }
   },
   webServer: [
     {
