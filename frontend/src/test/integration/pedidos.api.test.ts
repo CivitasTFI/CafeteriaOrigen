@@ -124,3 +124,64 @@ test("consulta un pedido por su ID y conserva los datos recibidos", async () => 
   await expect(consultarPedido(7)).resolves.toEqual(pedidoConsultado);
   expect(solicitudes).toHaveLength(1);
 });
+
+test.each([
+  { id: 0, estado: 400, errorApi: erroresApi.pedidoIdInvalido },
+  { id: 999, estado: 404, errorApi: erroresApi.pedidoNoEncontrado },
+  { id: 7, estado: 500, errorApi: erroresApi.errorInterno },
+])(
+  "rechaza GET /pedidos/$id con $estado y conserva el mensaje de la API",
+  async ({ id, estado, errorApi }) => {
+    simularGetPedido(id, () => HttpResponse.json(errorApi, { status: estado }));
+
+    await expect(consultarPedido(id)).rejects.toThrow(new Error(errorApi.error));
+  },
+);
+
+test("informa un fallo de conexión al consultar un pedido", async () => {
+  simularGetPedido(pedidoApi.id, () => HttpResponse.error());
+
+  await expect(consultarPedido(pedidoApi.id)).rejects.toThrow(
+    new Error("No se pudo conectar con el servidor"),
+  );
+});
+
+test.each([
+  {
+    caso: "contiene el envoltorio de creación en lugar del pedido directo",
+    cuerpo: respuestaCrearPedidoApi,
+  },
+  {
+    caso: "el pedido contiene un total textual",
+    cuerpo: { ...pedidoApi, total: "17220" },
+  },
+])("rechaza una consulta 200 si $caso", async ({ cuerpo }) => {
+  simularGetPedido(pedidoApi.id, () => HttpResponse.json(cuerpo));
+
+  await expect(consultarPedido(pedidoApi.id)).rejects.toThrow(
+    new Error("La respuesta del servidor no tiene el formato esperado"),
+  );
+});
+
+test("informa un JSON incompleto en la respuesta de consulta", async () => {
+  simularGetPedido(pedidoApi.id, () =>
+    new HttpResponse('{"id":', {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    }),
+  );
+
+  await expect(consultarPedido(pedidoApi.id)).rejects.toThrow(
+    new Error("No se pudo interpretar la respuesta del servidor"),
+  );
+});
+
+test("informa una respuesta 404 incompatible con el contrato de errores", async () => {
+  simularGetPedido(999, () =>
+    HttpResponse.json({ mensaje: "Pedido no encontrado" }, { status: 404 }),
+  );
+
+  await expect(consultarPedido(999)).rejects.toThrow(
+    new Error("No se pudo interpretar la respuesta de error del servidor"),
+  );
+});
