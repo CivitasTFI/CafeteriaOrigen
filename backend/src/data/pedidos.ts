@@ -6,10 +6,9 @@ let siguienteID = 1;
 
 export function guardarPedidos(
     items: { productoId: number; cantidad: number }[],
-    estado: string,
     mesaId?: number
 ): Pedido {
-    const nuevoPedido = new Pedido(siguienteID++, items, estado, mesaId);
+    const nuevoPedido = new Pedido(siguienteID++, items, mesaId);
 
     pedidos.push(nuevoPedido);
 

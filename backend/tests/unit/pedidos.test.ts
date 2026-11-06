@@ -18,7 +18,6 @@ describe("Servicio de pedidos", () => {
                     cantidad: 2
                 }
             ],
-            "pendiente"
         );
 
         expect(pedido).toEqual({
@@ -48,7 +47,6 @@ describe("Servicio de pedidos", () => {
                     cantidad: 1
                 }
             ],
-            "pendiente",
             4
         )
 
@@ -72,7 +70,7 @@ describe("Servicio de pedidos", () => {
 
     it("rechaza un pedido inválido sin guardarlo", () => {
         expect(() => {
-            crearPedido([], "pendiente");
+            crearPedido([]);
         }).toThrow("El pedido debe contener al menos un producto");
 
         expect(listarPedidos()).toHaveLength(0);
@@ -85,8 +83,7 @@ describe("Servicio de pedidos", () => {
                     productoId: 1,
                     cantidad: 1
                 }
-            ],
-            "pendiente"
+            ]
         );
 
         crearPedido(
@@ -95,8 +92,7 @@ describe("Servicio de pedidos", () => {
                     productoId: 2,
                     cantidad: 1
                 }
-            ],
-            "pendiente"
+            ]
         );
 
         const pedidos = listarPedidos();
@@ -113,8 +109,7 @@ describe("Servicio de pedidos", () => {
                     productoId: 1,
                     cantidad: 1
                 }
-            ],
-            "pendiente"
+            ]
         );
 
         const pedidoEncontrado = buscarPedidoPorId(pedidoCreado.id);
@@ -138,7 +133,6 @@ describe("Servicio de pedidos", () => {
                 productoId:12,
                 cantidad: 3
             }],
-            "pendiente",
             9
         )
         }).toThrow();
