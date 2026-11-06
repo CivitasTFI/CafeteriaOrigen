@@ -11,7 +11,7 @@ Proyecto del Grupo 14 para Programación IV de la Tecnicatura Universitaria en P
 
 La API del Parcial I está en `backend/` y ya expone los productos ampliados del TP3. El frontend carga sus datos, los valida con Zod y muestra sus nombres, un indicador de carga o un error con reintento. `App` también monta el proveedor del carrito; están implementados Context, reducer, subtotales orientativos y formato de precios. Siguen pendientes el selector de café, la pastelería con botones de agregar, la interfaz del carrito y los pedidos desde la pantalla.
 
-Estado verificado el **5 de noviembre de 2026**, hasta el PR #21: **44 tests de backend y 93 de frontend aprobados**, compilación de ambos paquetes y lint correctos. Los problemas de tipos y exportaciones del carrito quedaron resueltos en el PR #20.
+Estado verificado el **6 de noviembre de 2026** en `fix/correcciones-generales`: **80 tests de backend y 93 de frontend aprobados**, build completo, lint y arranque conjunto correctos. Las correcciones de esta rama están preparadas para PR a `develop`; los pendientes funcionales del TP3 y de dependencias siguen detallados debajo.
 
 ## Documentación
 
@@ -107,6 +107,11 @@ Para verificar los últimos avances desde la raíz:
 ```bash
 npm --prefix backend test -- --runInBand tests/integration/app.test.ts
 npm --prefix backend test -- --runInBand tests/unit/buscar-producto.test.ts
+npm run test:backend -- --runTestsByPath tests/integration/productos.endpoints.test.ts
+npm run test:backend -- --runTestsByPath tests/integration/pedidos.limites.test.ts
+npm run test:backend -- --runTestsByPath tests/integration/pedidos.estructura.test.ts
+npm run test:backend -- --runTestsByPath tests/integration/pedidos.estado.test.ts
+npm run test:backend -- --runTestsByPath tests/integration/pedidos.errores.test.ts
 npm run test:frontend -- src/test/unit/esquemas.test.ts
 npm run test:frontend -- src/test/integration/cliente.test.ts
 npm run test:frontend -- src/test/integration/respuestas.test.ts
@@ -150,18 +155,21 @@ El comando de preview sirve el frontend compilado y, en esta versión de Vite, h
 
 ## Estado de la base
 
-La verificación del **5 de noviembre de 2026**, con los avances integrados hasta el PR #21 (`abbae9d`), registró:
+La verificación del **6 de noviembre de 2026**, sobre `fix/correcciones-generales` hasta `013c044`, registró:
 
 | Área | Resultado |
 | --- | --- |
-| Backend | 11 suites y 44 tests de Jest/Supertest aprobados. Compilación correcta. |
+| Backend | 15 suites y 80 tests de Jest/Supertest aprobados. Compilación correcta. |
 | Frontend | 18 archivos y 93 tests de Vitest aprobados. Incluyen contrato ampliado, menú y proveedor compartido del carrito. |
 | Compilación del frontend | Correcta; comprueba los tipos de la aplicación, los tests y las configuraciones. |
 | Lint | Sin errores. Context y proveedor están separados. |
+| Instalación limpia | `npm run install:all` aprobado el 5 de noviembre: ambos paquetes instalados mediante `npm ci`. |
+| Arranque conjunto | Scripts `dev:backend` y `dev:frontend` verificados en 3000/5173; cliente real, Zod y proxy comprobados. Servidores propios cerrados al finalizar. |
+| Auditoría de producción | 0 paquetes afectados en backend y frontend, comprobado el 6 de noviembre. |
 
-El PR #20 resolvió el tipo `Producto` faltante, el import de tipos del reducer, los mocks incompatibles y las exportaciones que bloqueaban lint. `npm test` ejecuta Jest y Vitest; la comprobación estática se verifica por separado con `npm run build`. Esta actualización modifica únicamente documentación.
+El PR #20 resolvió el tipo `Producto` faltante, el import de tipos del reducer, los mocks incompatibles y las exportaciones que bloqueaban lint. `npm test` ejecuta Jest y Vitest; la comprobación estática se verifica por separado con `npm run build`. Los 173 tests actuales no certifican las funcionalidades pendientes ni el recorrido E2E.
 
-También se comprobó puntualmente con Express/Supertest que el listado contiene 20 productos compatibles con Zod y que los tres ejemplos JSON de productos de README y planificación coinciden con sus GET individuales. Esta comprobación no agrega tests al repositorio; la cobertura permanente pendiente de M1 se detalla debajo.
+La cobertura permanente del catálogo ahora incluye 22 casos HTTP: listado completo, detalle de los 20 IDs y 404. Un fixture independiente fija nombres, precios y metadatos esperados. Los tres tests del buscador comprueban también los IDs exactos de sus dos búsquedas exitosas.
 
 Los avances integrados en `develop` incluyen:
 
@@ -182,9 +190,22 @@ Los avances integrados en `develop` incluyen:
 - [x] Homero, PR #20: unión discriminada Zod de café/pastelería, tipos inferidos, consulta y mocks ampliados, fixtures compartidos y corrección de tipos/lint; 19 tests nuevos.
 - [x] Homero, PR #21: proveedor del carrito montado en `App` y un test que comprueba el estado compartido entre dos consumidores independientes.
 
+Correcciones de Homero preparadas en `fix/correcciones-generales`, pendientes de integración:
+
+- [x] Rechazar cantidades, subtotales y totales fuera del rango de enteros seguros antes de guardar; cuatro casos verifican también pedidos y facturación previos.
+- [x] Rechazar cuerpo ausente, `items` como objeto e ítems nulos con mensajes claros; tres casos comprueban el rechazo y la conservación de datos.
+- [x] Validar los estados enviados y asignar `pendiente` cuando se omite; cinco casos cubren estados incorrectos, valor predeterminado y conservación de uno explícito.
+- [x] Distinguir `ErrorValidacion` (400), cuerpo demasiado grande (413) y fallo interno (500 con mensaje genérico); centralizar las respuestas en el middleware.
+- [x] Completar cobertura HTTP del catálogo y reforzar los resultados del buscador; refactores de fixtures y auxiliares de tests.
+- [x] Actualizar body-parser/qs, aplicar el override de tinypool para Vitest 3 y corregir la configuración de ts-jest, manteniendo TypeScript estricto.
+- [x] Validar `productoId` como entero positivo seguro antes de buscar o construir mensajes. Tres casos HTTP cubren ID ausente, objeto simple y objeto con `toString` numérico: responden 400 con mensaje claro y conservan pedidos/facturación. El ciclo RED/GREEN/REFACTOR quedó completo.
+- [x] Verificar arranque conjunto y conexión del cliente real con Express a través del proxy de Vite.
+
 `listarProductos()` usa `solicitarValidado()` con `esquemaProductos`: valida y conserva el precio y los campos propios de café y pastelería descritos debajo. `Producto` y `Productos` se derivan con `z.infer`; los esquemas base se conservan para los campos comunes. La pantalla muestra los nombres recibidos. Selector, botones de agregar, carrito visual, contratos/funciones de pedidos, Bootstrap/SASS y E2E siguen pendientes. Los ticks por integrante están en [planificacion.md](planificacion.md).
 
-El contrato ampliado de productos ya está disponible en ambos endpoints. Pedidos mantiene el contrato previo: aún faltan `mesaId`, estado predeterminado y reset/seed. La instalación limpia y el arranque conjunto siguen pendientes de registro; son la siguiente verificación de H1.
+El contrato ampliado de productos está disponible y cubierto en ambos endpoints. Pedidos ya tiene estado predeterminado y validación de IDs; faltan `mesaId` y reset/seed. Instalación limpia y arranque conjunto están registrados; el recorrido completo en navegador sigue pendiente. Persisten 20 paquetes afectados de desarrollo en backend (4 bajos y 16 moderados) y 9 moderados en frontend; no hay altos ni críticos. Las restricciones de versiones y el override están documentados en [FRONTEND.md](FRONTEND.md#dependencias-de-desarrollo-y-auditoría).
+
+En la comprobación conjunta, Vite sirvió `/` y `/src/main.tsx` con 200, y `listarProductos()` validó los 20 productos de Express mediante el cliente y Zod reales. Un POST por el proxy, con producto 5 × 2 y producto 19 × 1, sin mesa ni estado, respondió 201, `pendiente` y total **17220**; el GET por ID devolvió el mismo pedido. Los tres IDs mal formados respondieron 400 y se conservaron el pedido válido y su facturación. Se iniciaron los scripts de desarrollo; Vite usó `--strictPort` para mantener 5173. Los servidores propios se cerraron y los puertos quedaron libres. Esta comprobación del cliente no ejecuta la interfaz en un navegador; mesa 4, recorrido E2E y vista de 375 px siguen pendientes.
 
 ## Estructura general
 
@@ -202,7 +223,7 @@ CafeteriaOrigen/
 └── .gitignore
 ```
 
-La organización interna del backend se mantiene en `src/controllers/`, `data/`, `middleware/`, `models/`, `routes/` y `services/`; sus pruebas están en `backend/tests/unit/` e `integration/`. `backend/src/app.ts` configura Express y `server.ts` inicia el servidor.
+El backend se organiza en `src/controllers/`, `data/`, `errors/`, `middleware/`, `models/`, `routes/`, `services/` y `utils/`. Sus pruebas están en `backend/tests/unit/` e `integration/`, con el catálogo esperado en `tests/fixtures/productos.ts`. `backend/src/app.ts` configura Express y `server.ts` inicia el servidor.
 
 ## API
 
@@ -211,13 +232,13 @@ La API permite consultar productos, crear y consultar pedidos y obtener reportes
 ### Contrato disponible actualmente
 
 - `GET /productos` devuelve el catálogo con `id`, `nombre`, `precio` y los campos de café/pastelería detallados en [Contrato público de productos](#contrato-público-de-productos). `GET /productos/:id` devuelve un objeto con la misma representación. El precio se obtiene de `calcularPrecio()` en el dominio; un ID inexistente responde 404 con `{ "error": "Producto no encontrado" }`.
-- `POST /pedidos` recibe `items: [{ productoId, cantidad }]` y `estado`. Los ejemplos envían `"pendiente"` explícitamente: todavía no existe un estado predeterminado en el servicio.
+- `POST /pedidos` recibe `items: [{ productoId, cantidad }]` y `estado` opcional. Si se omite, el servicio asigna `"pendiente"`; conserva los estados explícitos válidos y rechaza valores que no sean textos no vacíos. No se definió un catálogo cerrado de estados.
 - Una creación válida responde 201 con `{ mensaje, pedido }`. `pedido` incluye `id`, `items`, `estado` y `total` calculado por la API.
 - `GET /pedidos` devuelve un arreglo de pedidos y `GET /pedidos/:id` un pedido directo, sin el envoltorio de creación.
 - Los pedidos se almacenan en memoria y se pierden al reiniciar el servidor.
-- Los errores previstos usan `{ "error": "mensaje" }`. Un cuerpo JSON malformado responde 400 con `{ "error": "El cuerpo de la solicitud contiene JSON inválido" }`. Los errores internos responden 500 con `{ "error": "Error interno del servidor" }`.
+- Los errores de validación usan HTTP 400 con `{ "error": "mensaje" }`. Un `productoId` mal formado en `POST /pedidos` responde 400 con `{ "error": "El ID del producto debe ser un entero positivo seguro" }`; un ID numérico válido pero inexistente conserva `No existe el producto N`. Un JSON malformado responde 400 con `{ "error": "El cuerpo de la solicitud contiene JSON inválido" }`. Un cuerpo que supera el límite de Express responde 413 con `{ "error": "El cuerpo de la solicitud supera el tamaño permitido" }`. Los fallos internos responden 500 con `{ "error": "Error interno del servidor" }`.
 
-Por ejemplo, crear un pedido con el producto 1, cantidad 2 y estado `pendiente` devuelve actualmente un total de `10040`:
+Por ejemplo, crear un pedido con el producto 1 y cantidad 2, sin enviar estado, devuelve `pendiente` y un total de `10040`:
 
 ```json
 {
@@ -237,7 +258,7 @@ El ID del ejemplo supone que es el primer pedido desde el inicio del servidor. `
 
 Los modelos ya disponen de `tipo` (`cafe` o `pasteleria`) y, para cafés, `tipoCafe`, `tamaño` y `variedad`. `backend/src/services/buscar-producto.service.ts` permite filtrar el catálogo por esos parámetros opcionales; devuelve los productos encontrados o el texto `Producto no encontrado` si no hay coincidencias.
 
-Este buscador tiene tres pruebas unitarias y sigue sin estar conectado a rutas de búsqueda. El servicio de respuestas del PR #15 es independiente: el PR #18 lo conectó a los controladores de ambos GET de productos.
+Este buscador tiene tres pruebas unitarias y sigue sin estar conectado a rutas de búsqueda. Los casos exitosos exigen los IDs `1, 4, 7, 10, 13, 16` para cafés de Brasil y `7, 8, 9` para expresos grandes, además de sus atributos; el tercero conserva el resultado sin coincidencias. El servicio de respuestas del PR #15 es independiente: el PR #18 lo conectó a los controladores de ambos GET de productos.
 
 ### Contrato público de productos
 
@@ -298,7 +319,7 @@ En el listado se usan estas mismas representaciones. La descripción del café q
 
 La bebida se indica con `tipoCafe`; `tipo` distingue café y pastelería. El campo público es `tamaño`, con ñ, y los nombres de origen van en minúsculas. La propuesta anterior con `tipo: "expreso"` y `tamanio` quedó reemplazada por este contrato; el PDF admite variaciones de nombres que conserven la información. Zod, consulta y fixtures ya usan la representación actual.
 
-Los tests HTTP comprueban el primer expreso del listado, el GET individual y el 404. Los dos tests del servicio verifican un café y una lista de dos cafés. Falta ampliar la cobertura del backend a filtrados y pastelería y recuperar la aserción de longitud 20 eliminada en el PR #18; por eso la cobertura de M1 sigue parcial. Los tests Zod del frontend no reemplazan esas verificaciones de la API.
+Los 22 casos HTTP comprueban el listado de 20 productos, cada GET individual (9 expresos, 9 filtrados y 2 productos de pastelería) y el 404. Comparan las respuestas con `backend/tests/fixtures/productos.ts`, que fija precios y campos públicos sin importar el catálogo ni las funciones de cálculo de producción. Se restauró la longitud 20 eliminada en #18. Los dos tests del servicio de respuestas siguen siendo unitarios de café; la cobertura HTTP adicional completa el pendiente de M1 en esta rama.
 
 ### Productos
 
@@ -345,7 +366,7 @@ curl http://localhost:3000/productos/1
 ```bash
 curl -X POST http://localhost:3000/pedidos \
   -H "Content-Type: application/json" \
-  -d '{"items":[{"productoId":1,"cantidad":2}],"estado":"pendiente"}'
+  -d '{"items":[{"productoId":1,"cantidad":2}]}'
 ```
 
 #### Obtener todos los pedidos
@@ -402,7 +423,6 @@ $body = @{
             cantidad = 2
         }
     )
-    estado = "pendiente"
 } | ConvertTo-Json -Depth 3
 
 Invoke-RestMethod `
