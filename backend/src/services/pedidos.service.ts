@@ -32,6 +32,20 @@ function validarIdProducto(productoId: unknown): void {
     }
 }
 
+function validarMesaPedido(mesaId?: number): void {
+    if (mesaId === undefined) {
+        return;
+    }
+
+    if (!Number.isInteger(mesaId) || mesaId < 1) {
+        throw new ErrorValidacion("Debe ingresar un número válido");
+    }
+
+    if (!mesasValidas.includes(mesaId)) {
+        throw new ErrorValidacion("Mesa inexistente");
+    }
+}
+
 // Valida los datos del pedido
 export function validarPedido(
     pedido: { productoId: number; cantidad: number }[],
@@ -82,15 +96,7 @@ export function validarPedido(
         validarImporteSeguro(total, "El total del pedido supera el rango de enteros seguros");
     }
 
-    if (mesaId !== undefined) {
-        if (!Number.isInteger(mesaId) || mesaId < 1) {
-            throw new ErrorValidacion("Debe ingresar un número válido");
-        }
-
-        if (!mesasValidas.includes(mesaId)) {
-            throw new ErrorValidacion("Mesa inexistente");
-        }
-    }
+    validarMesaPedido(mesaId);
 }
 
 // Devuelve la representación pública de un pedido
