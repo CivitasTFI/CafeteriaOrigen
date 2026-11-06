@@ -144,11 +144,11 @@ La parte genérica de validación y errores de H2 está implementada. `mocks/han
 
 ### F2. Construir la interfaz del carrito
 
-- [ ] Mostrar producto, cantidad, subtotal por ítem y subtotal general orientativo.
-- [ ] Agregar controles accesibles para sumar, restar y quitar; mostrar el estado vacío.
-- [ ] Deshabilitar la confirmación si el carrito está vacío y exponer a Nicolas los ítems para enviar el pedido.
+- [x] Mostrar producto, cantidad, subtotal por ítem y subtotal general orientativo.
+- [x] Agregar controles accesibles para sumar, restar y quitar; mostrar el estado vacío.
+- [x] Deshabilitar la confirmación si el carrito está vacío y exponer a Nicolas los ítems para enviar el pedido.
 - [ ] Acordar con Nicolas que el carrito se vacía únicamente después de una confirmación exitosa; cualquier fallo conserva su contenido.
-- [ ] Probar con Testing Library y user-event agregar, sumar, restar, quitar y bloquear la confirmación en vacío.
+- [x] Probar con Testing Library y user-event agregar, sumar, restar, quitar y bloquear la confirmación en vacío.
 - [ ] Revisar con Matias que el carrito respete el ancho de 375 px.
 
 ### F3. Implementar los E2E con API real
