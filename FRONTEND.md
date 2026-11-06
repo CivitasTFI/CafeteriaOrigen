@@ -1,14 +1,14 @@
 # Frontend — Cafetería Origen
 
-Guía del frontend y de los avances del TP3, actualizada el **6 de noviembre de 2026** al integrar `develop` (`42f5657`) en `feature/f3-api-e2e` (`f4c1843`). Incluye los PR #24, #23 y #25 ya integrados y los avances iniciales de Playwright de Federico, pendientes de integrar su PR. Este documento vive en la raíz del repositorio. Para instalar y ejecutar ambas aplicaciones, comenzar por [README.md](README.md). El reparto completo está en [planificacion.md](planificacion.md).
+Guía del frontend y de los avances del TP3, actualizada el **6 de noviembre de 2026** en `feature/contratos-pedidos`, hasta `3a6a35a`, sobre `develop` (`c52f215`). Incluye las correcciones y el carrito de los PR #24, #23 y #25, y la preparación inicial de Playwright de Federico, integrada mediante #26. Los avances de H2 de la rama actual están pendientes de integrar mediante PR. Este documento vive en la raíz del repositorio. Para instalar y ejecutar ambas aplicaciones, comenzar por [README.md](README.md). El reparto completo está en [planificacion.md](planificacion.md).
 
 ## 1. Alcance de lo implementado
 
 La aplicación tiene una entrada HTML en español, montaje con `StrictMode` y `App` con `CarritoProvider` envolviendo encabezado, `MenuPage` y `Carrito`. La página consulta productos ampliados mediante `useMenu` y `listarProductos()`, conserva sus campos y muestra nombres, carga, error y reintento. El carrito muestra cantidades, subtotales orientativos y controles para sumar/restar/eliminar; bloquea la confirmación en vacío. Vite, TypeScript estricto, ESLint y la infraestructura de pruebas están configurados.
 
-H2 incorpora contratos Zod de errores y productos ampliados, tipos inferidos, cliente HTTP, consulta y fixtures/handlers de éxito y error. Federico implementó reducer, Context, hook y utilidades en #16, y la interfaz del carrito, `VACIAR` y 12 tests adicionales en #23. Matias conectó el servicio ampliado a ambos GET en #18. Homero alineó contrato y carrito en #20, montó el proveedor en #21 e integró las primeras correcciones generales en #24. La etapa posterior identifica el subtotal como orientativo y agrega cuatro regresiones del carrito y tres casos de facturación.
+H2 incorpora contratos Zod de errores, productos ampliados y pedidos de la API actual, tipos inferidos, cliente HTTP y fixtures/handlers de éxito y error. `crearPedido()` y `consultarPedido()` ya permiten enviar ítems y validar ambas respuestas; H2 agrega 47 tests. Federico implementó reducer, Context, hook y utilidades en #16, y la interfaz del carrito, `VACIAR` y 12 tests adicionales en #23. Matias conectó el servicio ampliado a ambos GET en #18. Homero alineó contrato y carrito en #20, montó el proveedor en #21 e integró las primeras correcciones generales en #24. El PR #25 identifica el subtotal como orientativo y agrega cuatro regresiones del carrito y tres casos de facturación.
 
-Siguen pendientes selección de café, pastelería con botones/precios, mesas, confirmación, seguimiento, estilos y recorrido E2E completo con reset/seed. El menú real aún no permite agregar productos y el botón de confirmar no tiene conectado el envío. Playwright tiene tres pruebas iniciales con servidores reales a 375 × 812. Verificación del **6 de noviembre de 2026**: **109 tests de Vitest y 83 del backend (192 en total), más tres E2E aprobados**, compilación y lint correctos. La instalación limpia del 5 y el arranque conjunto previo del 6 conservan sus registros. El backend ya asigna `pendiente` y valida `productoId`; las mesas siguen pendientes para cerrar el contrato de pedidos.
+Siguen pendientes selección de café, pastelería con botones/precios, mesas, confirmación, seguimiento, estilos y recorrido E2E completo con reset/seed. El menú real aún no permite agregar productos y el botón de confirmar no tiene conectado el envío. Playwright tiene tres pruebas iniciales con servidores reales a 375 × 812. Verificación del **6 de noviembre de 2026**: **156 tests de Vitest y 83 del backend (239 en total), más tres E2E aprobados**, compilación y lint correctos. La instalación limpia del 5 y el arranque conjunto previo del 6 conservan sus registros. H2 queda completo para el contrato actual sin mesa; su ampliación con `mesaId` depende de N1.
 
 ## 2. Instalación y versiones
 
@@ -42,7 +42,7 @@ Versiones de esta base:
 | jest-dom | 6.9.1 | Matchers como `toBeInTheDocument()`. |
 | jsdom | 28.1.0 | Entorno de navegador simulado. |
 | MSW | 2.15.0 | Interceptación de peticiones en pruebas. |
-| Zod | 4.6.7 | Errores, productos ampliados, campos comunes y validación genérica. Pedidos pendientes. |
+| Zod | 4.6.7 | Errores, productos ampliados, pedidos de la API actual, tipos inferidos y validación genérica. |
 | ESLint | 9.39.5 | Revisión estática del código. |
 
 Las versiones vigentes y sus dependencias completas están en [frontend/package.json](frontend/package.json) y [frontend/package-lock.json](frontend/package-lock.json). Bootstrap y SASS todavía no están instalados; se incorporarán con sus tareas correspondientes.
@@ -67,7 +67,7 @@ Para ejecutar un archivo concreto desde la raíz:
 npm run test:frontend -- src/test/components/App.test.tsx
 ```
 
-Para probar contratos, consulta, menú y lógica/interfaz del carrito:
+Para probar contratos, consultas de productos/pedidos, menú y lógica/interfaz del carrito:
 
 ```bash
 npm run test:frontend -- src/test/unit/esquemas.test.ts
@@ -86,6 +86,15 @@ npm run test:frontend -- src/test/integration/app.carrito.test.tsx
 npm run test:frontend -- src/test/components/Carrito.test.tsx
 npm run test:frontend -- src/test/unit/subtotalCarrito.test.ts
 npm run test:frontend -- src/test/unit/formatoPrecio.test.ts
+npm run test:frontend -- src/test/unit/pedidos.esquemas.test.ts
+npm run test:frontend -- src/test/integration/pedidos.api.test.ts
+npm run test:frontend -- src/test/integration/handlersPedidos.test.ts
+```
+
+Los tres archivos de pedidos reúnen 47 casos nuevos de H2. Para ejecutarlos juntos desde la raíz:
+
+```bash
+npm run test:frontend -- src/test/unit/pedidos.esquemas.test.ts src/test/integration/pedidos.api.test.ts src/test/integration/handlersPedidos.test.ts
 ```
 
 Desde `frontend/`, los comandos propios son `npm run dev`, `npm test`, `npm run test:watch`, `npm run test:e2e`, `npm run build`, `npm run lint` y `npm run preview`. Por ejemplo:
@@ -130,9 +139,10 @@ frontend/
     │   ├── cliente.ts               # Petición, lectura de JSON y validación genérica
     │   ├── errores.ts               # Interpretación de mensajes de error de la API
     │   ├── productos.ts             # listarProductos(), consulta validada
+    │   ├── pedidos.ts               # crearPedido() y consultarPedido(), respuestas validadas
     │   └── esquemas/
     │       ├── errores.ts           # esquemaError y tipo ErrorApi
-    │       ├── pedidos.ts           # Reservado, vacío
+    │       ├── pedidos.ts           # Esquemas de ítem, pedido y creación; tipos inferidos
     │       └── productos.ts         # Contratos base y ampliados, tipos inferidos
     ├── components/                  # Comunes y carrito implementados; selección/pedidos pendientes
     ├── config/
@@ -143,11 +153,11 @@ frontend/
     ├── utils/                       # Subtotales y formato de precio implementados
     └── test/
         ├── components/              # App.test.tsx, Carrito.test.tsx y reservas .pending
-        ├── fixtures/                # Errores y productos implementados; pedidos pendiente
-        ├── integration/             # HTTP, menú, Context, proveedor de App y reservas
+        ├── fixtures/                # Errores, productos y pedidos implementados
+        ├── integration/             # HTTP, pedidos, handlers, menú, Context, App y reservas
         ├── mocks/
         │   ├── server.ts
-        │   └── handlers.ts          # crearHandlerError() y crearHandlerProductos()
+        │   └── handlers.ts          # Errores, productos, creación y consulta de pedidos
         ├── unit/                    # Esquemas, reducer, utilidades, configuración
         ├── render.tsx               # Helper compartido reservado
         └── setup.ts
@@ -196,7 +206,7 @@ Funciones disponibles:
 | --- | --- |
 | `realizarPeticion()` | Función interna que ejecuta `fetch` y transforma un fallo de conexión en un mensaje claro. |
 | `solicitarJson()` | Lee el JSON y maneja errores HTTP y de lectura. Devuelve `unknown`; por sí sola no valida la estructura de una respuesta exitosa. |
-| `solicitarValidado()` | Valida los datos con Zod y devuelve el tipo inferido. La usa `listarProductos()` y la usarán las funciones de pedidos. |
+| `solicitarValidado()` | Valida los datos con Zod y devuelve el tipo inferido. La usan `listarProductos()`, `crearPedido()` y `consultarPedido()`. |
 | `obtenerMensajeError()` | En `src/api/errores.ts`, valida el cuerpo de error y devuelve el mensaje de la API o el mensaje de formato incompatible. |
 
 Firmas públicas de `src/api/cliente.ts`:
@@ -245,7 +255,48 @@ Hay 11 tests base, 16 ampliados, dos del handler y ocho de la consulta. Los 16 a
 
 `cafeApi` y `pasteleriaApi` se reutilizan en los tests del contrato y carrito para evitar duplicaciones y mocks de formatos anteriores. Los cuerpos incompatibles se simulan con handlers locales, manteniendo bien tipados los fixtures compartidos.
 
-Matias preparó `normalizarInput()`, `formarRespuestaObjeto()` y `formarRespuestaArray()` en #15 y los conectó a ambos GET en #18. El [README](README.md#contrato-público-de-productos) documenta los ejemplos públicos de café y pastelería y los textos de origen. El frontend ya consume este contrato. Queda ampliar en backend la cobertura HTTP de filtrados/pastelería y del catálogo de 20 productos.
+Matias preparó `normalizarInput()`, `formarRespuestaObjeto()` y `formarRespuestaArray()` en #15 y los conectó a ambos GET en #18. El [README](README.md#contrato-público-de-productos) documenta los ejemplos públicos de café y pastelería y los textos de origen. El frontend ya consume este contrato. La cobertura HTTP del listado completo, los 20 detalles y el 404 quedó completada en #24: 22 casos, incluidos filtrados y pastelería.
+
+### Contratos y cliente de pedidos (H2)
+
+`src/api/esquemas/pedidos.ts` define los contratos de respuesta disponibles en la API actual. Los tipos se derivan con `z.infer`:
+
+| Esquema / tipo | Validación |
+| --- | --- |
+| `esquemaItemPedido` / `ItemPedido` | `productoId` y `cantidad`: enteros positivos seguros. |
+| `esquemaPedido` / `Pedido` | `id` entero positivo seguro, `items` con al menos un ítem válido, `estado` textual con algún carácter distinto de espacio y `total` entero seguro no negativo. |
+| `esquemaRespuestaCrearPedido` / `RespuestaCrearPedido` | `mensaje` textual y `pedido` validado con `esquemaPedido`. |
+
+Se conserva el estado recibido, incluidos sus espacios; no se recorta ni se restringe a un conjunto cerrado. El mensaje no tiene que ser una frase literal concreta. El total se recibe de la API y no se recalcula con las fórmulas del dominio.
+
+`src/api/pedidos.ts` exporta:
+
+| Función | Petición | Respuesta |
+| --- | --- | --- |
+| `crearPedido(items: ItemPedido[]): Promise<RespuestaCrearPedido>` | `POST /pedidos`, `Content-Type: application/json`, cuerpo `JSON.stringify({ items })`. | Envoltorio `{ mensaje, pedido }`, validado mediante `esquemaRespuestaCrearPedido`. |
+| `consultarPedido(id: number): Promise<Pedido>` | `GET /pedidos/:id`, sin cuerpo. | Pedido directo validado mediante `esquemaPedido`. |
+
+Ambas funciones usan `solicitarValidado()` y conservan el manejo común de errores HTTP, JSON, red y contrato. La validación Zod se aplica a la respuesta; la API valida los ítems enviados y el ID consultado. La creación solo recibe ítems, sin `estado` ni `mesaId`. La API asigna `pendiente` cuando falta el estado, aunque también admite un estado explícito en su contrato de backend.
+
+Ejemplo para conectar desde un módulo en `src/`:
+
+```ts
+import { crearPedido, consultarPedido } from "./api/pedidos";
+
+const respuesta = await crearPedido([
+  { productoId: 5, cantidad: 2 },
+  { productoId: 19, cantidad: 1 },
+]);
+const pedidoActualizado = await consultarPedido(respuesta.pedido.id);
+```
+
+Con el catálogo actual, esos ítems producen total **17220** y estado inicial `pendiente`. `pedidoApi` usa esos datos con ID 1 y `respuestaCrearPedidoApi` lo envuelve con `mensaje`. Ambos fixtures emplean `satisfies` con sus tipos inferidos. Reproducen los productos y cantidades del PDF para barra; la mesa 4 sigue pendiente.
+
+Al integrar N3, transformar los ítems del Context a `{ productoId, cantidad }` antes de llamar a `crearPedido()`. La función serializa el arreglo recibido y no filtra campos adicionales del carrito. La pantalla debe usar el total devuelto, vaciar solo después del éxito y conservar el carrito ante fallos; esas conductas de interfaz aún requieren implementación y pruebas.
+
+**Dependencia pendiente:** cuando Nicolas complete `mesaId` en N1, acordar su representación y extender esquema, tipos inferidos, función de creación, fixtures y tests. El esquema actual no declara ese campo y elimina propiedades desconocidas al interpretar la respuesta. H2 está completo para la API actual; no acredita todavía pedidos con mesa ni el recorrido completo de TP3.
+
+Los 47 tests se distribuyen en 28 de esquemas, 17 de funciones HTTP y dos de handlers compartidos. Las regresiones adicionales cubren errores de contrato y de transporte sin fabricar un RED cuando el cliente común ya resolvía el escenario. Los ciclos y sus commits están registrados en la planificación.
 
 ### Carga del menú y reintento (Homero, PR #17)
 
@@ -307,7 +358,7 @@ El entorno predeterminado del frontend es jsdom. Las pruebas de configuración T
 3. Después de cada prueba, limpia el DOM y restablece los handlers iniciales de MSW.
 4. Cierra MSW al terminar.
 
-La instancia se exporta desde `src/test/mocks/server.ts` y continúa sin handlers iniciales. Cada prueba registra el escenario con `server.use(...)`. Se reutilizan `crearHandlerError()`, `crearHandlerProductos()`, `erroresApi` y `productosApi`, además de handlers locales para cuerpos incompatibles o `HttpResponse.error()`. Las pruebas de `App` preparan los productos con `beforeEach`, sin cambiar el servidor global. `onUnhandledRequest: "error"` detecta solicitudes no previstas. El test del proxy usa `passthrough()` explícito para llegar a su propio servidor real.
+La instancia se exporta desde `src/test/mocks/server.ts` y continúa sin handlers iniciales. Cada prueba registra el escenario con `server.use(...)`. Se reutilizan los handlers de errores, productos y pedidos, con sus fixtures, además de handlers locales para cuerpos incompatibles o `HttpResponse.error()`. Las pruebas de `App` preparan los productos con `beforeEach`, sin cambiar el servidor global. `onUnhandledRequest: "error"` detecta solicitudes no previstas. El test del proxy usa `passthrough()` explícito para llegar a su propio servidor real.
 
 La API propia de Vitest está desactivada mediante `api: false`. Esto es independiente de la API Express del proyecto.
 
@@ -318,6 +369,7 @@ La API propia de Vitest está desactivada mediante `api: false`. Esto es indepen
 | Fixture | Mensaje de la API | Escenario probado |
 | --- | --- | --- |
 | `pedidoIdInvalido` | `El ID debe ser un número entero positivo` | GET `/pedidos/abc`, 400. |
+| `pedidoNoEncontrado` | `No se encontró un pedido con ese ID` | GET `/pedidos/999`, 404, en las pruebas de `consultarPedido()`. |
 | `productoNoEncontrado` | `Producto no encontrado` | GET `/productos/999`, 404. |
 | `pedidoSinItems` | `El pedido debe contener al menos un producto` | POST `/pedidos` con ítems vacíos, 400. |
 | `errorInterno` | `Error interno del servidor` | Error 500 al consultar `/productos`. |
@@ -336,7 +388,34 @@ server.use(
 );
 ```
 
-Para simular el rechazo de un pedido sin ítems, registrar `crearHandlerError("/pedidos", erroresApi.pedidoSinItems, 400, "post")`. Para una lista ampliada válida, usar `server.use(crearHandlerProductos(productosApi))`; `crearHandlerProductos([])` simula lista vacía. Los fixtures/handlers de pedidos siguen pendientes.
+Para simular el rechazo de un pedido sin ítems, registrar `crearHandlerError("/pedidos", erroresApi.pedidoSinItems, 400, "post")`. Para una lista ampliada válida, usar `server.use(crearHandlerProductos(productosApi))`; `crearHandlerProductos([])` simula lista vacía. Hay cinco fixtures de errores; las cuatro pruebas originales de `handlersErrores.test.ts` se conservan y el 404 de pedido se cubre además en `pedidos.api.test.ts`.
+
+### Fixtures y handlers compartidos de pedidos
+
+| Exportación | Escenario |
+| --- | --- |
+| `pedidoApi` | Pedido 1 con producto 5 × 2 y producto 19 × 1, estado `pendiente` y total 17220. |
+| `respuestaCrearPedidoApi` | `{ mensaje: "El pedido se guardó correctamente", pedido: pedidoApi }`. |
+| `crearHandlerCreacionPedido(respuesta: RespuestaCrearPedido)` | Simula POST `/pedidos` con estado 201 y el envoltorio configurado. |
+| `crearHandlerConsultaPedido(pedido: Pedido)` | Simula GET `/pedidos/${pedido.id}` con estado 200 y el pedido directo. La ruta sigue el ID recibido. |
+
+Uso desde un test de integración:
+
+```ts
+import { pedidoApi, respuestaCrearPedidoApi } from "../fixtures/pedidos";
+import {
+  crearHandlerCreacionPedido,
+  crearHandlerConsultaPedido,
+} from "../mocks/handlers";
+import { server } from "../mocks/server";
+
+server.use(
+  crearHandlerCreacionPedido(respuestaCrearPedidoApi),
+  crearHandlerConsultaPedido(pedidoApi),
+);
+```
+
+Son respuestas configuradas: los handlers no validan el pedido enviado ni calculan precios. Sus dos pruebas verifican método, ruta, estado y JSON contra los esquemas y los datos esperados; la consulta se prueba con ID 7 para comprobar que la ruta no queda fija en 1. Los errores se registran por separado con `crearHandlerError()`. Los cuerpos exitosos incompatibles usan handlers locales para mantener válidos los fixtures compartidos.
 
 ### Pruebas implementadas
 
@@ -361,12 +440,17 @@ Para simular el rechazo de un pedido sin ítems, registrar `crearHandlerError("/
 | [Carrito.test.tsx](frontend/src/test/components/Carrito.test.tsx) | 14 | Vacío, nombres, cantidades, subtotales, sumar/restar/eliminar, bloqueo al quitar la última unidad y operaciones con precios distintos. |
 | [subtotalCarrito.test.ts](frontend/src/test/unit/subtotalCarrito.test.ts) | 2 | Subtotal de un ítem y suma de subtotales del carrito. |
 | [formatoPrecio.test.ts](frontend/src/test/unit/formatoPrecio.test.ts) | 1 | Formato local: 1000 se muestra como `$1.000`. |
+| [pedidos.esquemas.test.ts](frontend/src/test/unit/pedidos.esquemas.test.ts) | 28 | Pedido directo y creación válidos, estado personalizado conservado y rechazo de 18 pedidos y siete respuestas de creación incompatibles. |
+| [pedidos.api.test.ts](frontend/src/test/integration/pedidos.api.test.ts) | 17 | Ocho casos de creación y nueve de consulta: petición correcta, respuesta validada, errores HTTP, red, JSON inválido y contrato incompatible. |
+| [handlersPedidos.test.ts](frontend/src/test/integration/handlersPedidos.test.ts) | 2 | POST 201 con envoltorio y GET por ID 200 con pedido directo; método, ruta, esquema y datos configurados. |
 
-Son **109 tests en 19 archivos**, verificados nuevamente el 6 de noviembre. El frontend tenía 93 casos después de #20 y #21; #23 agregó 12 y #25 otros cuatro. Las pruebas normales no necesitan Express levantado. El test del proxy inicia y cierra un servidor Vite temporal en `127.0.0.1` y MSW simula la API. Los **83 tests del backend**, en 15 suites de Jest, se cuentan por separado: el total es 192. La compilación comprueba tipos de aplicación/configuración/tests y pasa junto con lint.
+Son **156 tests en 22 archivos**, verificados el 6 de noviembre hasta `3a6a35a`. El frontend tenía 93 casos después de #20 y #21; #23 agregó 12 y #25 otros cuatro, llegando a 109. H2 agrega 47 y llega a 156. Las pruebas normales no necesitan Express levantado. El test del proxy inicia y cierra un servidor Vite temporal en `127.0.0.1` y MSW simula la API. Los **83 tests del backend**, en 15 suites de Jest, se cuentan por separado: el total habitual es **239**. La compilación comprueba tipos de aplicación/configuración/tests y pasa junto con lint.
+
+Los 28 casos de esquemas incluyen dos respuestas válidas, un estado personalizado y 25 rechazos: 18 del pedido y siete del envoltorio de creación. Los 17 casos HTTP comprueban una sola petición en cada éxito, POST con cabecera y cuerpo exactos, GET por el ID solicitado y preservación de los mensajes 400/404/500 aplicables. También cubren fallos de red, JSON inválido, errores HTTP sin contrato válido y respuestas exitosas incompatibles. `simularPostPedidos()` y `simularGetPedido()` comparten la preparación local de MSW y la captura de peticiones en ese archivo.
 
 ### Pruebas E2E iniciales (F3)
 
-[menu.spec.ts](frontend/e2e/menu.spec.ts) contiene tres casos de Federico ejecutados por Playwright, separados de los 192 casos de Jest/Vitest:
+[menu.spec.ts](frontend/e2e/menu.spec.ts) contiene tres casos de Federico integrados en #26 y ejecutados por Playwright, separados de los 239 casos de Jest/Vitest:
 
 | Caso | Qué comprueba |
 | --- | --- |
@@ -374,7 +458,7 @@ Son **109 tests en 19 archivos**, verificados nuevamente el 6 de noviembre. El f
 | Ancho móvil | Después de cargar los productos, el ancho del contenido no supera el visible a 375 px. |
 | Carrito vacío | Muestra el mensaje de vacío y deshabilita “Confirmar pedido”. |
 
-Los tres casos pasaron tras incorporar `develop` hasta `42f5657`. La prueba móvil cubre la pantalla actual con carrito vacío; quedan pendientes el carrito cargado, las futuras pantallas y el recorrido completo. Reset/seed antes de cada test, mesa 4, selección, confirmación y seguimiento dependen de N1/N2/N3, H2 y M2. Son regresiones de comportamiento existente y se registran sin fabricar un RED.
+Los tres casos volvieron a pasar en `feature/contratos-pedidos` hasta `3a6a35a`. La prueba móvil cubre la pantalla actual con carrito vacío; quedan pendientes el carrito cargado, las futuras pantallas y el recorrido completo. Reset/seed antes de cada test, mesa 4, selección, confirmación y seguimiento dependen de N1/N2/N3 y M2/M3; la extensión de H2 con mesa espera a N1. Las funciones HTTP de pedidos ya están disponibles para N3. Los tres E2E iniciales son regresiones de comportamiento existente y se registran sin fabricar un RED.
 
 ## 7. Archivos `.pending` y comienzo de una funcionalidad
 
@@ -394,7 +478,7 @@ Por ejemplo, `components/SelectorCafe.test.tsx.pending` pasará a llamarse `comp
 npm run test:frontend -- src/test/components/SelectorCafe.test.tsx
 ```
 
-Las siete reservas de tests restantes son `unit/leerMesa`, `unit/buscarCafe`, `integration/seguimiento`, `integration/pedidos` y los componentes `SelectorCafe`, `Pasteleria` y `Encabezado`. Los módulos de estilos también siguen reservados. Ya están implementados cliente, contratos de productos/errores, mocks, página/hook del menú y lógica/interfaz del carrito. Cada responsable completa los archivos pendientes junto con sus pruebas.
+Las siete reservas de tests restantes son `unit/leerMesa`, `unit/buscarCafe`, `integration/seguimiento`, `integration/pedidos` y los componentes `SelectorCafe`, `Pasteleria` y `Encabezado`. `integration/pedidos.test.tsx.pending` corresponde a la futura integración de interfaz de N3; las funciones HTTP de H2 ya tienen cobertura en `pedidos.api.test.ts`. Los módulos de estilos también siguen reservados. Ya están implementados cliente, contratos de productos/errores/pedidos actuales, mocks, página/hook del menú y lógica/interfaz del carrito. Cada responsable completa los archivos pendientes junto con sus pruebas.
 
 ## 8. Trabajo con TDD y commits
 
@@ -410,21 +494,23 @@ Los PR #20 y #21 agregan parametrización de listas ampliadas, centralización d
 
 Después de #23, Homero conservó los ciclos RED/GREEN/REFACTOR del texto orientativo y de la facturación acumulada. Los cuatro escenarios nuevos del carrito ya pasaban con el comportamiento existente y se registraron como `test:`; luego se extrajeron auxiliares y se parametrizó el vaciado. La planificación identifica los commits de cada ciclo.
 
+H2 conserva seis ciclos de esquemas, funciones HTTP y handlers. Sus refactores extraen el esquema del ítem, centralizan fixtures y preparación local de MSW, y eliminan comprobaciones redundantes en las pruebas de handlers. La cobertura adicional de errores se registra por separado como `test:`.
+
 Cuando una prueba nueva pasa con el comportamiento existente, se incorpora como cobertura de regresión sin romper el código para fabricar un RED. Los escenarios de fallo de conexión y respuesta inválida de `MenuPage` se registraron así: ya los resolvían el cliente validado y el hook.
 
-Ejemplos del formato usado en esta base:
+Formato vigente para los nuevos commits de TDD, con las etapas en mayúsculas por indicación de Homero:
 
 ```text
-RED test: comprobar aislamiento de handlers de MSW entre pruebas
-GREEN chore: reiniciar los handlers de MSW después de cada prueba
-REFACTOR: parametrizar las pruebas de montaje y aislamiento del DOM
+RED: probar el handler compartido de consulta de pedidos
+GREEN: implementar el handler de consulta de pedidos
+REFACTOR: quitar comprobacion redundante del handler de consulta
 ```
 
 Los refactores usan `REFACTOR: descripción`, sin repetir la palabra. Documentación, dependencias y cobertura de comportamiento existente usan su tipo sin forzar un prefijo, por ejemplo `docs: actualizar la guía del frontend`, `chore: instalar Zod 4 con versión exacta` o `test: ampliar cobertura HTTP del catálogo`.
 
-Cada integrante guarda sus propios commits. Durante el trabajo asistido, el asistente prepara cambios y verificaciones y se detiene entre etapas; no crea commits. Se conservan los commits RED, GREEN y REFACTOR en el historial y se evita un squash que borre esa evidencia. El flujo de integración y la revisión cruzada están en la planificación.
+Cada integrante guarda sus propios commits. Durante el trabajo asistido se aborda una tarea por vez y se espera autorización para pasar de RED a GREEN y de GREEN a REFACTOR. El asistente no ejecuta `git add`, `git commit` ni `git push`, ni modifica el staging; los comandos completos se entregan al usuario. Crear, cambiar, renombrar o eliminar ramas requiere autorización explícita. Se conservan los commits RED, GREEN y REFACTOR en el historial y se evita un squash que borre esa evidencia. Los mensajes históricos mantienen su formato original. El flujo de integración y la revisión cruzada están en la planificación.
 
-El asistente solo edita código con autorización previa y explícita del usuario. Una consulta o un pedido de explicación no autoriza cambios. Cada cierre informa qué terminó, explica brevemente cada prueba o funcionalidad nueva, incluye el comando para probarlo, el commit que corresponde y el siguiente paso. Al preparar un PR, también se entrega un título y una descripción breve. Una actualización documental usa un commit `docs:` y no requiere inventar etapas RED/GREEN.
+El asistente solo edita código con autorización previa y explícita del usuario. Una consulta o un pedido de explicación no autoriza cambios. Cada cierre informa qué terminó, archivos modificados, breve explicación de cada prueba o funcionalidad nueva, comandos exactos de verificación, resultados ejecutados y comprobaciones pendientes, comandos completos para el commit y próximo paso sin ejecutarlo. Al preparar un PR, también se entrega un título y una descripción breve. Una actualización documental usa un commit `docs:` y no requiere inventar etapas RED/GREEN.
 
 Las consultas de componentes se hacen por rol, etiqueta o texto. `getByTestId` se reserva para los casos sin una alternativa adecuada. Los tests de reintento y del Context ya usan `userEvent.setup()` para simular las interacciones.
 
@@ -432,25 +518,25 @@ Las consultas de componentes se hacen por rol, etiqueta o texto. `getByTestId` s
 
 | Responsable | Trabajo que sigue pendiente |
 | --- | --- |
-| Homero | Completar contratos/funciones/mocks de pedidos (H2) y conectar selector/pastelería (H3). Subtotal orientativo, regresiones del carrito y facturación ya están integrados en #25. |
+| Homero | Integrar la rama de H2; ampliar `mesaId` cuando N1 esté listo y conectar selector/pastelería cuando M2 esté listo. Contratos, funciones y mocks de pedidos de la API actual están terminados. Mantener la documentación de las entregas restantes. |
 | Matias | Implementar selector, pastelería y Bootstrap/SASS. La API de M1 y sus 22 casos HTTP ya están integrados en `develop` mediante #18 y #24. |
-| Federico | Coordinar vaciado tras éxito y conservación ante fallos, revisar el carrito cargado a 375 px y completar F3 con reset/seed, compra y seguimiento. Playwright y tres E2E iniciales están disponibles en esta rama. |
-| Nicolas | Mesas y contrato completo de pedidos en API, reset/seed, lectura de URL, confirmación y seguimiento. Estado predeterminado y validaciones generales ya están integrados en #24. |
+| Federico | Coordinar vaciado tras éxito y conservación ante fallos, revisar el carrito cargado a 375 px y completar F3 con reset/seed, compra y seguimiento. Playwright y tres E2E iniciales están integrados en `develop` mediante #26. |
+| Nicolas | Mesas en API, reset/seed, lectura de URL, confirmación y seguimiento. Estado predeterminado y validaciones generales ya están integrados en #24. Puede reutilizar funciones, tipos y mocks de H2 al integrar esta rama. |
 
 Homero ya integró el proveedor y alineó los tipos y mocks. `test:e2e` ya está integrado en frontend y raíz en F3. El contrato HTTP ampliado de productos está documentado y validado por el cliente; pedidos con mesa y seed siguen pendientes de Nicolas.
 
-El cliente HTTP concentra el `fetch` y ya lo consume el menú por `listarProductos()`. Las utilidades del carrito calculan subtotales orientativos con precios recibidos; el total confirmado seguirá siendo el devuelto por la API. No se reproducen las fórmulas del dominio en el frontend.
+El cliente HTTP concentra el `fetch` y ya lo usan `listarProductos()`, `crearPedido()` y `consultarPedido()`. Las utilidades del carrito calculan subtotales orientativos con precios recibidos; la futura pantalla de confirmación deberá mostrar el total recibido en `pedido.total`. No se reproducen las fórmulas del dominio en el frontend.
 
-La instalación limpia y el arranque conjunto se verificaron en `fix/correcciones-generales`: el cliente real validó el catálogo de Express a través del proxy de Vite. Los contratos completos de pedidos con mesa de N1 y los componentes de M2 siguen condicionando el cierre de H2/H3.
+La instalación limpia y el arranque conjunto se verificaron en `fix/correcciones-generales`: el cliente real validó el catálogo de Express a través del proxy de Vite. N1 condiciona la futura ampliación de H2 con mesa; M2 condiciona la integración restante de H3. La creación y consulta de pedidos sin mesa ya están listas para que Nicolas avance con N3.
 
 ## 10. Estado de verificación y cierre de la base
 
-Verificación del **6 de noviembre de 2026** al integrar `develop` (`42f5657`, incluidos #24, #23 y #25) en `feature/f3-api-e2e` (`f4c1843`), con Node.js **22.23.4** y npm **10.9.9**. Se ejecutaron nuevamente tests, build, lint y E2E. La instalación de dependencias de frontend desde el lockfile de F3 y la instalación de Chromium también quedaron verificadas; instalación limpia de ambos paquetes, arranque conjunto manual y auditorías conservan los registros previos:
+Verificación del **6 de noviembre de 2026** en `feature/contratos-pedidos`, hasta `3a6a35a`, sobre `develop` (`c52f215`, incluido #26), con Node.js **22.23.4** y npm **10.9.9**. Se ejecutaron tests, build, lint y E2E después de completar el último REFACTOR de H2. Chromium estaba disponible y los puertos 3000/5173 quedaron libres tras la ejecución. Las instalaciones previas de frontend/Chromium, instalación limpia de ambos paquetes, arranque conjunto manual y auditorías conservan sus registros; no se repitieron esas instalaciones ni auditorías para H2:
 
 | Comando desde la raíz | Resultado |
 | --- | --- |
 | `npm run install:all` | Aprobado el 5 de noviembre: ambos paquetes se instalaron mediante `npm ci` a partir de sus lockfiles. |
-| `npm test` | Aprobado el 6 de noviembre: 83 tests de backend en 15 suites y 109 de frontend en 19 archivos; 192 en total. |
+| `npm test` | Aprobado el 6 de noviembre: 83 tests de backend en 15 suites y 156 de frontend en 22 archivos; 239 en total. |
 | `npm run build` | Ambos paquetes compilan; incluye tipos de los tests/configuraciones del frontend. |
 | `npm run lint` | Aprobado, sin errores. |
 | `npm run test:e2e` | Tres casos de Playwright aprobados con Chromium, frontend y API reales a 375 × 812. |
@@ -462,7 +548,7 @@ Vitest transpila los tests y no sustituye `tsc -b`; se ejecutaron ambas verifica
 
 Rollup sigue avisando sobre comentarios de anotación de Zod; el build termina correctamente. Los tres E2E iniciales están aprobados; reset/seed y compra completa siguen pendientes. El ID mal formado detectado en la revisión quedó corregido: los tres casos nuevos de `pedidos.estructura.test.ts` exigen 400, mensaje claro y conservación de pedidos/facturación; el archivo tiene seis casos en total.
 
-El PR #25 integró cuatro regresiones de componente y tres casos de facturación; la suma acumulada insegura ya produce 400 con el mensaje documentado. La rama de F3 conserva esos cambios y agrega las pruebas iniciales de navegador. El siguiente paso es guardar el merge de `develop` en `feature/f3-api-e2e` y subir esa rama para actualizar su PR; después del merge de la PR, continuar H2 con los contratos de creación y consulta de pedidos.
+El PR #25 integró cuatro regresiones de componente y tres casos de facturación; la suma acumulada insegura ya produce 400 con el mensaje documentado. El PR #26 integró las pruebas iniciales de navegador. H2 agrega los contratos y funciones de creación/consulta, fixtures y handlers, con 47 casos nuevos. El siguiente paso es guardar la actualización documental en `feature/contratos-pedidos`, subir la rama y abrir su PR a `develop`, conservando los commits de TDD. Después del merge, volver a `develop` actualizado: H3 continúa si M2 está disponible; la extensión de pedidos con mesa espera a N1. Las tareas de confirmación y seguimiento siguen siendo N3.
 
 ### Comprobación de arranque y conexión real
 
@@ -476,7 +562,7 @@ Esta comprobación manual previa ejercitó servicios y cliente HTTP sin renderiz
 
 Vitest permanece fijado en **3.2.7**, conforme a la versión mayor exigida por el TP3. En `frontend/package.json`, un override limitado a `vitest@3.2.7` fija su dependencia `tinypool` en **2.1.2**. Esta versión contiene las correcciones de los dos avisos críticos: [opciones de workers](https://github.com/advisories/GHSA-5gmw-xhrv-c9v3) y [opciones de ejecución](https://github.com/tinylibs/tinypool/releases/tag/v2.1.2).
 
-Es una excepción al rango de tinypool declarado por Vitest 3. El cambio mayor de [tinypool 2](https://github.com/tinylibs/tinypool/releases/tag/v2.0.0) elimina soporte para Node 18; su requisito de Node 20 o >=22 es compatible con el del proyecto. Antes del PR #24 se verificaron los 93 tests de esa etapa con procesos (`forks`) y con hilos (`threads`), y el arranque, repetición de los seis tests del menú y cierre en modo watch. La suite actual de 109 casos pasó con la configuración predeterminada. Al cambiar la versión de Vitest se debe revisar este override y retirar o ajustar la excepción. `api: false` se mantiene en la configuración de Vitest; no elimina por sí solo los avisos de seguridad restantes.
+Es una excepción al rango de tinypool declarado por Vitest 3. El cambio mayor de [tinypool 2](https://github.com/tinylibs/tinypool/releases/tag/v2.0.0) elimina soporte para Node 18; su requisito de Node 20 o >=22 es compatible con el del proyecto. Antes del PR #24 se verificaron los 93 tests de esa etapa con procesos (`forks`) y con hilos (`threads`), y el arranque, repetición de los seis tests del menú y cierre en modo watch. La suite actual de 156 casos pasó con la configuración predeterminada. Al cambiar la versión de Vitest se debe revisar este override y retirar o ajustar la excepción. `api: false` se mantiene en la configuración de Vitest; no elimina por sí solo los avisos de seguridad restantes.
 
 En backend, el lockfile actualiza ts-jest de **29.4.14** a **29.4.15**, dentro del rango permitido por `package.json`.
 
@@ -486,7 +572,7 @@ En backend, el lockfile actualiza ts-jest de **29.4.14** a **29.4.15**, dentro d
 | Todas las dependencias | 20 afectados: 4 bajos y 16 moderados | 9 afectados, todos moderados |
 | Avisos altos o críticos | 0 | 0; antes había 2 críticos |
 
-Estos resultados conservan la auditoría previa del 6 de noviembre, anterior a incorporar Playwright. El PR #25 no cambió dependencias; F3 agrega `@playwright/test` 1.65.0 y sus dependencias en el lockfile. La verificación de esta integración volvió a ejecutar tests, build, lint y E2E.
+Estos resultados conservan la auditoría previa del 6 de noviembre, anterior a incorporar Playwright. El PR #25 no cambió dependencias; F3 agrega `@playwright/test` 1.65.0 y sus dependencias en el lockfile. H2 no cambia dependencias ni configuraciones. Su verificación ejecutó tests, build, lint y E2E; no constituye una auditoría nueva.
 
 Los avisos de desarrollo no se consideran resueltos: backend conserva las cadenas de `deepmerge`, `glob` y `minimatch`; frontend conserva `@vitest/mocker`/Vitest y `minimatch` mediante typescript-eslint. No hay versiones corregidas dentro de los rangos declarados actuales. `deepmerge` no tiene una versión corregida publicada en el [aviso vigente](https://github.com/advisories/GHSA-gcqx-w48m-w2h4). Las correcciones publicadas de mocker están en versiones mayores que Vitest 3, y las de glob/minimatch también requieren revisar cambios mayores de esas dependencias. Su migración o un parche mantenido siguen pendientes; no se aplicó `npm audit fix --force`.
 

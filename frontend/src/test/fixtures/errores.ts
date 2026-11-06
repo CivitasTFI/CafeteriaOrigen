@@ -4,6 +4,9 @@ export const erroresApi = {
   pedidoIdInvalido: {
     error: "El ID debe ser un número entero positivo",
   },
+  pedidoNoEncontrado: {
+    error: "No se encontró un pedido con ese ID",
+  },
   productoNoEncontrado: {
     error: "Producto no encontrado",
   },
