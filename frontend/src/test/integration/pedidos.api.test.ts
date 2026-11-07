@@ -38,43 +38,46 @@ function simularGetPedido(id: number, responder: () => Response): Request[] {
   return solicitudes;
 }
 
-test("envía los ítems por POST /pedidos y devuelve la respuesta de creación", async () => {
-  const solicitudes = simularPostPedidos(() =>
-    HttpResponse.json(respuestaCrearPedidoApi, { status: 201 }),
-  );
+test.each([
+  {
+    caso: "barra",
+    pedido: pedidoApi,
+    mesaId: undefined,
+    respuesta: respuestaCrearPedidoApi,
+    cuerpoEsperado: {
+      items: [
+        { productoId: 5, cantidad: 2 },
+        { productoId: 19, cantidad: 1 },
+      ],
+    },
+  },
+  {
+    caso: "mesa 4",
+    pedido: pedidoConMesaApi,
+    mesaId: pedidoConMesaApi.mesaId,
+    respuesta: respuestaCrearPedidoConMesaApi,
+    cuerpoEsperado: {
+      mesaId: 4,
+      items: [
+        { productoId: 5, cantidad: 2 },
+        { productoId: 19, cantidad: 1 },
+      ],
+    },
+  },
+])(
+  "envía el pedido para $caso por POST /pedidos y conserva la respuesta",
+  async ({ pedido, mesaId, respuesta, cuerpoEsperado }) => {
+    const solicitudes = simularPostPedidos(() =>
+      HttpResponse.json(respuesta, { status: 201 }),
+    );
 
-  expect(crearPedido).toBeDefined();
-  await expect(crearPedido(pedidoApi.items)).resolves.toEqual(respuestaCrearPedidoApi);
+    await expect(crearPedido(pedido.items, mesaId)).resolves.toEqual(respuesta);
 
-  expect(solicitudes).toHaveLength(1);
-  expect(solicitudes[0].headers.get("Content-Type")).toContain("application/json");
-  await expect(solicitudes[0].json()).resolves.toEqual({
-    items: [
-      { productoId: 5, cantidad: 2 },
-      { productoId: 19, cantidad: 1 },
-    ],
-  });
-});
-
-test("envía la mesa y los ítems por POST /pedidos y conserva la respuesta de creación", async () => {
-  const solicitudes = simularPostPedidos(() =>
-    HttpResponse.json(respuestaCrearPedidoConMesaApi, { status: 201 }),
-  );
-
-  await expect(
-    crearPedido(pedidoConMesaApi.items, pedidoConMesaApi.mesaId),
-  ).resolves.toEqual(respuestaCrearPedidoConMesaApi);
-
-  expect(solicitudes).toHaveLength(1);
-  expect(solicitudes[0].headers.get("Content-Type")).toContain("application/json");
-  await expect(solicitudes[0].json()).resolves.toEqual({
-    mesaId: 4,
-    items: [
-      { productoId: 5, cantidad: 2 },
-      { productoId: 19, cantidad: 1 },
-    ],
-  });
-});
+    expect(solicitudes).toHaveLength(1);
+    expect(solicitudes[0].headers.get("Content-Type")).toContain("application/json");
+    await expect(solicitudes[0].json()).resolves.toEqual(cuerpoEsperado);
+  },
+);
 
 test.each([
   { estado: 400, items: [], errorApi: erroresApi.pedidoSinItems },
