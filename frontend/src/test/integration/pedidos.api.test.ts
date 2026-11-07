@@ -185,6 +185,15 @@ test("consulta un pedido por su ID y conserva los datos recibidos", async () => 
   expect(solicitudes).toHaveLength(1);
 });
 
+test("consulta un pedido por su ID y conserva la mesa recibida", async () => {
+  const solicitudes = simularGetPedido(pedidoConMesaApi.id, () =>
+    HttpResponse.json(pedidoConMesaApi),
+  );
+
+  await expect(consultarPedido(pedidoConMesaApi.id)).resolves.toEqual(pedidoConMesaApi);
+  expect(solicitudes).toHaveLength(1);
+});
+
 test.each([
   { id: 0, estado: 400, errorApi: erroresApi.pedidoIdInvalido },
   { id: 999, estado: 404, errorApi: erroresApi.pedidoNoEncontrado },
@@ -214,6 +223,10 @@ test.each([
   {
     caso: "el pedido contiene un total textual",
     cuerpo: { ...pedidoApi, total: "17220" },
+  },
+  {
+    caso: "el pedido contiene una mesa inexistente",
+    cuerpo: { ...pedidoConMesaApi, mesaId: 9 },
   },
 ])("rechaza una consulta 200 si $caso", async ({ cuerpo }) => {
   simularGetPedido(pedidoApi.id, () => HttpResponse.json(cuerpo));
