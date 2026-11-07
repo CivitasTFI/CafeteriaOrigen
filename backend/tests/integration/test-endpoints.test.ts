@@ -37,5 +37,22 @@ describe("endpoints de test", () => {
         )
 
         expect(nuevoPedido.id).toBe(1);
-    })
+    });
+
+    it("POST/__test__/seed", async () => {
+        const response = await request(app);
+            .post("/__test__/seed");
+
+        expect(response.status).toBe(200);
+        expect(response.body).toHaveProperty(
+            "mensaje",
+            "los datos fueron cargados correctamente"
+        );
+
+        const pedidos = await request(app)
+            .get("pedidos");
+
+        expect(pedidos.status).toBe(200);
+        expect(pedidos.body).toHaveLength(7);
+    });
 });
