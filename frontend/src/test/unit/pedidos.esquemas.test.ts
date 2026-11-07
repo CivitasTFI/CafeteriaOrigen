@@ -17,17 +17,8 @@ test("acepta un pedido de la API actual y conserva sus datos", () => {
   });
 });
 
-test("acepta un pedido con mesa y conserva su identificador", () => {
-  const pedidoConMesa = { ...pedido, mesaId: 4 } satisfies Pedido;
-
-  expect(esquemaPedido.safeParse(pedidoConMesa)).toEqual({
-    success: true,
-    data: pedidoConMesa,
-  });
-});
-
-test.each([1, 8])(
-  "acepta la mesa %i como límite válido y conserva los datos del pedido",
+test.each([1, 4, 8])(
+  "acepta un pedido con mesa %i y conserva sus datos",
   (mesaId) => {
     const pedidoConMesa = { ...pedido, mesaId } satisfies Pedido;
 
