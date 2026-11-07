@@ -35,12 +35,6 @@ test("acepta la respuesta de creación y conserva su mensaje y pedido", () => {
 });
 
 describe("Validaciones del contrato de pedidos", () => {
-  test("rechaza un pedido con una mesa fuera del conjunto válido", () => {
-    const pedidoConMesaInexistente = { ...pedido, mesaId: 9 };
-
-    expect(esquemaPedido.safeParse(pedidoConMesaInexistente).success).toBe(false);
-  });
-
   test.each([
     { caso: "una respuesta nula", respuesta: null },
     { caso: "un ID de pedido cero", respuesta: { ...pedido, id: 0 } },
@@ -98,6 +92,10 @@ describe("Validaciones del contrato de pedidos", () => {
       respuesta: { ...pedido, estado: " \t\n " },
     },
     { caso: "un estado numérico", respuesta: { ...pedido, estado: 123 } },
+    {
+      caso: "una mesa fuera del conjunto válido",
+      respuesta: { ...pedido, mesaId: 9 },
+    },
     { caso: "un total textual", respuesta: { ...pedido, total: "17220" } },
     { caso: "un total negativo", respuesta: { ...pedido, total: -1 } },
     { caso: "un total decimal", respuesta: { ...pedido, total: 17220.5 } },
