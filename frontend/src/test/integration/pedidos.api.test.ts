@@ -118,40 +118,38 @@ test("informa un fallo de conexión al crear un pedido", async () => {
 test.each([
   {
     caso: "contiene un pedido directo sin el envoltorio de creación",
+    pedido: pedidoApi,
+    mesaId: undefined,
     cuerpo: pedidoApi,
   },
   {
     caso: "el pedido contiene un total textual",
+    pedido: pedidoApi,
+    mesaId: undefined,
     cuerpo: {
       ...respuestaCrearPedidoApi,
       pedido: { ...pedidoApi, total: "17220" },
     },
   },
-])("rechaza una respuesta 201 si $caso", async ({ cuerpo }) => {
-  simularPostPedidos(() => HttpResponse.json(cuerpo, { status: 201 }));
+  {
+    caso: "el pedido contiene una mesa inexistente",
+    pedido: pedidoConMesaApi,
+    mesaId: pedidoConMesaApi.mesaId,
+    cuerpo: {
+      ...respuestaCrearPedidoConMesaApi,
+      pedido: { ...pedidoConMesaApi, mesaId: 9 },
+    },
+  },
+])(
+  "rechaza una respuesta 201 si $caso",
+  async ({ pedido, mesaId, cuerpo }) => {
+    simularPostPedidos(() => HttpResponse.json(cuerpo, { status: 201 }));
 
-  await expect(crearPedido(pedidoApi.items)).rejects.toThrow(
-    new Error("La respuesta del servidor no tiene el formato esperado"),
-  );
-});
-
-test("rechaza una respuesta 201 con una mesa inexistente al crear un pedido", async () => {
-  simularPostPedidos(() =>
-    HttpResponse.json(
-      {
-        ...respuestaCrearPedidoConMesaApi,
-        pedido: { ...pedidoConMesaApi, mesaId: 9 },
-      },
-      { status: 201 },
-    ),
-  );
-
-  await expect(
-    crearPedido(pedidoConMesaApi.items, pedidoConMesaApi.mesaId),
-  ).rejects.toThrow(
-    new Error("La respuesta del servidor no tiene el formato esperado"),
-  );
-});
+    await expect(crearPedido(pedido.items, mesaId)).rejects.toThrow(
+      new Error("La respuesta del servidor no tiene el formato esperado"),
+    );
+  },
+);
 
 test("informa un JSON incompleto en la respuesta de creación", async () => {
   simularPostPedidos(() =>
