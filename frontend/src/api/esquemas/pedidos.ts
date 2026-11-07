@@ -9,7 +9,7 @@ export const esquemaPedido = z.object({
   id: z.number().int().positive(),
   items: z.array(esquemaItemPedido).min(1),
   estado: z.string().regex(/\S/),
-  mesaId: z.number().int().positive().optional(),
+  mesaId: z.number().int().positive().max(8).optional(),
   total: z.number().int().nonnegative(),
 });
 
