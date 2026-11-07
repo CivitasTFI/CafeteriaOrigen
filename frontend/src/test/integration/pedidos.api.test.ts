@@ -174,25 +174,26 @@ test("informa una respuesta 400 incompatible con el contrato de errores", async 
   );
 });
 
-test("consulta un pedido por su ID y conserva los datos recibidos", async () => {
-  const pedidoConsultado = { ...pedidoApi, id: 7, estado: "en preparación" };
-  const solicitudes = simularGetPedido(7, () =>
-    HttpResponse.json(pedidoConsultado),
-  );
+test.each([
+  {
+    caso: "barra",
+    pedido: { ...pedidoApi, id: 7, estado: "en preparación" },
+  },
+  {
+    caso: "mesa 4",
+    pedido: pedidoConMesaApi,
+  },
+])(
+  "consulta el pedido para $caso por su ID y conserva sus datos",
+  async ({ pedido }) => {
+    const solicitudes = simularGetPedido(pedido.id, () =>
+      HttpResponse.json(pedido),
+    );
 
-  expect(consultarPedido).toBeDefined();
-  await expect(consultarPedido(7)).resolves.toEqual(pedidoConsultado);
-  expect(solicitudes).toHaveLength(1);
-});
-
-test("consulta un pedido por su ID y conserva la mesa recibida", async () => {
-  const solicitudes = simularGetPedido(pedidoConMesaApi.id, () =>
-    HttpResponse.json(pedidoConMesaApi),
-  );
-
-  await expect(consultarPedido(pedidoConMesaApi.id)).resolves.toEqual(pedidoConMesaApi);
-  expect(solicitudes).toHaveLength(1);
-});
+    await expect(consultarPedido(pedido.id)).resolves.toEqual(pedido);
+    expect(solicitudes).toHaveLength(1);
+  },
+);
 
 test.each([
   { id: 0, estado: 400, errorApi: erroresApi.pedidoIdInvalido },
