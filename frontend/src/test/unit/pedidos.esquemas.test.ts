@@ -26,6 +26,18 @@ test("acepta un pedido con mesa y conserva su identificador", () => {
   });
 });
 
+test.each([1, 8])(
+  "acepta la mesa %i como límite válido y conserva los datos del pedido",
+  (mesaId) => {
+    const pedidoConMesa = { ...pedido, mesaId } satisfies Pedido;
+
+    expect(esquemaPedido.safeParse(pedidoConMesa)).toEqual({
+      success: true,
+      data: pedidoConMesa,
+    });
+  },
+);
+
 test("acepta la respuesta de creación y conserva su mensaje y pedido", () => {
   expect(esquemaRespuestaCrearPedido).toBeDefined();
   expect(esquemaRespuestaCrearPedido.safeParse(respuestaCrearPedidoApi)).toEqual({
@@ -96,6 +108,14 @@ describe("Validaciones del contrato de pedidos", () => {
       caso: "una mesa fuera del conjunto válido",
       respuesta: { ...pedido, mesaId: 9 },
     },
+    { caso: "una mesa cero", respuesta: { ...pedido, mesaId: 0 } },
+    { caso: "una mesa negativa", respuesta: { ...pedido, mesaId: -1 } },
+    { caso: "una mesa decimal", respuesta: { ...pedido, mesaId: 4.5 } },
+    { caso: "una mesa textual", respuesta: { ...pedido, mesaId: "4" } },
+    { caso: "una mesa nula", respuesta: { ...pedido, mesaId: null } },
+    { caso: "una mesa como objeto", respuesta: { ...pedido, mesaId: {} } },
+    { caso: "una mesa como arreglo", respuesta: { ...pedido, mesaId: [] } },
+    { caso: "una mesa booleana", respuesta: { ...pedido, mesaId: true } },
     { caso: "un total textual", respuesta: { ...pedido, total: "17220" } },
     { caso: "un total negativo", respuesta: { ...pedido, total: -1 } },
     { caso: "un total decimal", respuesta: { ...pedido, total: 17220.5 } },
