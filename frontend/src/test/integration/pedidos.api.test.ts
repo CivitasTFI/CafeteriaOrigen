@@ -2,7 +2,12 @@ import { http, HttpResponse } from "msw";
 import { expect, test } from "vitest";
 import { crearPedido, consultarPedido } from "../../api/pedidos";
 import { erroresApi } from "../fixtures/errores";
-import { pedidoApi, respuestaCrearPedidoApi } from "../fixtures/pedidos";
+import {
+  pedidoApi,
+  pedidoConMesaApi,
+  respuestaCrearPedidoApi,
+  respuestaCrearPedidoConMesaApi,
+} from "../fixtures/pedidos";
 import { server } from "../mocks/server";
 
 function simularPostPedidos(responder: () => Response): Request[] {
@@ -44,6 +49,26 @@ test("envía los ítems por POST /pedidos y devuelve la respuesta de creación",
   expect(solicitudes).toHaveLength(1);
   expect(solicitudes[0].headers.get("Content-Type")).toContain("application/json");
   await expect(solicitudes[0].json()).resolves.toEqual({
+    items: [
+      { productoId: 5, cantidad: 2 },
+      { productoId: 19, cantidad: 1 },
+    ],
+  });
+});
+
+test("envía la mesa y los ítems por POST /pedidos y conserva la respuesta de creación", async () => {
+  const solicitudes = simularPostPedidos(() =>
+    HttpResponse.json(respuestaCrearPedidoConMesaApi, { status: 201 }),
+  );
+
+  await expect(
+    crearPedido(pedidoConMesaApi.items, pedidoConMesaApi.mesaId),
+  ).resolves.toEqual(respuestaCrearPedidoConMesaApi);
+
+  expect(solicitudes).toHaveLength(1);
+  expect(solicitudes[0].headers.get("Content-Type")).toContain("application/json");
+  await expect(solicitudes[0].json()).resolves.toEqual({
+    mesaId: 4,
     items: [
       { productoId: 5, cantidad: 2 },
       { productoId: 19, cantidad: 1 },
