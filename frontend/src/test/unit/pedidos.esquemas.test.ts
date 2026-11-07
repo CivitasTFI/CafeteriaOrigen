@@ -2,10 +2,13 @@ import { describe, expect, test } from "vitest";
 import {
   esquemaPedido,
   esquemaRespuestaCrearPedido,
+  type Pedido,
 } from "../../api/esquemas/pedidos";
 import {
   pedidoApi as pedido,
+  pedidoConMesaApi,
   respuestaCrearPedidoApi,
+  respuestaCrearPedidoConMesaApi,
 } from "../fixtures/pedidos";
 
 test("acepta un pedido de la API actual y conserva sus datos", () => {
@@ -16,11 +19,32 @@ test("acepta un pedido de la API actual y conserva sus datos", () => {
   });
 });
 
+test.each([1, 4, 8])(
+  "acepta un pedido con mesa %i y conserva sus datos",
+  (mesaId) => {
+    const pedidoConMesa = { ...pedidoConMesaApi, mesaId } satisfies Pedido;
+
+    expect(esquemaPedido.safeParse(pedidoConMesa)).toEqual({
+      success: true,
+      data: pedidoConMesa,
+    });
+  },
+);
+
 test("acepta la respuesta de creación y conserva su mensaje y pedido", () => {
   expect(esquemaRespuestaCrearPedido).toBeDefined();
   expect(esquemaRespuestaCrearPedido.safeParse(respuestaCrearPedidoApi)).toEqual({
     success: true,
     data: respuestaCrearPedidoApi,
+  });
+});
+
+test("acepta la respuesta de creación con mesa y conserva su mensaje y pedido", () => {
+  expect(
+    esquemaRespuestaCrearPedido.safeParse(respuestaCrearPedidoConMesaApi),
+  ).toEqual({
+    success: true,
+    data: respuestaCrearPedidoConMesaApi,
   });
 });
 
@@ -82,6 +106,18 @@ describe("Validaciones del contrato de pedidos", () => {
       respuesta: { ...pedido, estado: " \t\n " },
     },
     { caso: "un estado numérico", respuesta: { ...pedido, estado: 123 } },
+    {
+      caso: "una mesa fuera del conjunto válido",
+      respuesta: { ...pedido, mesaId: 9 },
+    },
+    { caso: "una mesa cero", respuesta: { ...pedido, mesaId: 0 } },
+    { caso: "una mesa negativa", respuesta: { ...pedido, mesaId: -1 } },
+    { caso: "una mesa decimal", respuesta: { ...pedido, mesaId: 4.5 } },
+    { caso: "una mesa textual", respuesta: { ...pedido, mesaId: "4" } },
+    { caso: "una mesa nula", respuesta: { ...pedido, mesaId: null } },
+    { caso: "una mesa como objeto", respuesta: { ...pedido, mesaId: {} } },
+    { caso: "una mesa como arreglo", respuesta: { ...pedido, mesaId: [] } },
+    { caso: "una mesa booleana", respuesta: { ...pedido, mesaId: true } },
     { caso: "un total textual", respuesta: { ...pedido, total: "17220" } },
     { caso: "un total negativo", respuesta: { ...pedido, total: -1 } },
     { caso: "un total decimal", respuesta: { ...pedido, total: 17220.5 } },
@@ -124,6 +160,13 @@ describe("Validaciones de la respuesta de creación de pedidos", () => {
       respuesta: {
         ...respuestaCrearPedidoApi,
         pedido: { ...pedido, total: "17220" },
+      },
+    },
+    {
+      caso: "un pedido interno con una mesa fuera del conjunto válido",
+      respuesta: {
+        ...respuestaCrearPedidoApi,
+        pedido: { ...pedido, mesaId: 9 },
       },
     },
     {
