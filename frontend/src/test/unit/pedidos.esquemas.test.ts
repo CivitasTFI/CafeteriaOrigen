@@ -3,11 +3,12 @@ import {
   esquemaPedido,
   esquemaRespuestaCrearPedido,
   type Pedido,
-  type RespuestaCrearPedido,
 } from "../../api/esquemas/pedidos";
 import {
   pedidoApi as pedido,
+  pedidoConMesaApi,
   respuestaCrearPedidoApi,
+  respuestaCrearPedidoConMesaApi,
 } from "../fixtures/pedidos";
 
 test("acepta un pedido de la API actual y conserva sus datos", () => {
@@ -21,7 +22,7 @@ test("acepta un pedido de la API actual y conserva sus datos", () => {
 test.each([1, 4, 8])(
   "acepta un pedido con mesa %i y conserva sus datos",
   (mesaId) => {
-    const pedidoConMesa = { ...pedido, mesaId } satisfies Pedido;
+    const pedidoConMesa = { ...pedidoConMesaApi, mesaId } satisfies Pedido;
 
     expect(esquemaPedido.safeParse(pedidoConMesa)).toEqual({
       success: true,
@@ -39,14 +40,11 @@ test("acepta la respuesta de creación y conserva su mensaje y pedido", () => {
 });
 
 test("acepta la respuesta de creación con mesa y conserva su mensaje y pedido", () => {
-  const respuestaConMesa = {
-    ...respuestaCrearPedidoApi,
-    pedido: { ...pedido, mesaId: 4 },
-  } satisfies RespuestaCrearPedido;
-
-  expect(esquemaRespuestaCrearPedido.safeParse(respuestaConMesa)).toEqual({
+  expect(
+    esquemaRespuestaCrearPedido.safeParse(respuestaCrearPedidoConMesaApi),
+  ).toEqual({
     success: true,
-    data: respuestaConMesa,
+    data: respuestaCrearPedidoConMesaApi,
   });
 });
 
