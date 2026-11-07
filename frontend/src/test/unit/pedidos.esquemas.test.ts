@@ -3,6 +3,7 @@ import {
   esquemaPedido,
   esquemaRespuestaCrearPedido,
   type Pedido,
+  type RespuestaCrearPedido,
 } from "../../api/esquemas/pedidos";
 import {
   pedidoApi as pedido,
@@ -34,6 +35,18 @@ test("acepta la respuesta de creación y conserva su mensaje y pedido", () => {
   expect(esquemaRespuestaCrearPedido.safeParse(respuestaCrearPedidoApi)).toEqual({
     success: true,
     data: respuestaCrearPedidoApi,
+  });
+});
+
+test("acepta la respuesta de creación con mesa y conserva su mensaje y pedido", () => {
+  const respuestaConMesa = {
+    ...respuestaCrearPedidoApi,
+    pedido: { ...pedido, mesaId: 4 },
+  } satisfies RespuestaCrearPedido;
+
+  expect(esquemaRespuestaCrearPedido.safeParse(respuestaConMesa)).toEqual({
+    success: true,
+    data: respuestaConMesa,
   });
 });
 
@@ -149,6 +162,13 @@ describe("Validaciones de la respuesta de creación de pedidos", () => {
       respuesta: {
         ...respuestaCrearPedidoApi,
         pedido: { ...pedido, total: "17220" },
+      },
+    },
+    {
+      caso: "un pedido interno con una mesa fuera del conjunto válido",
+      respuesta: {
+        ...respuestaCrearPedidoApi,
+        pedido: { ...pedido, mesaId: 9 },
       },
     },
     {
