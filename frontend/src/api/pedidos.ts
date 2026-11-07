@@ -7,11 +7,14 @@ import {
   type RespuestaCrearPedido,
 } from "./esquemas/pedidos";
 
-export async function crearPedido(items: ItemPedido[]): Promise<RespuestaCrearPedido> {
+export async function crearPedido(
+  items: ItemPedido[],
+  mesaId?: number,
+): Promise<RespuestaCrearPedido> {
   return solicitarValidado("/pedidos", esquemaRespuestaCrearPedido, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ items }),
+    body: JSON.stringify({ items, mesaId }),
   });
 }
 
