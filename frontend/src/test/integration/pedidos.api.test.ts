@@ -91,6 +91,22 @@ test.each([
   },
 );
 
+test("conserva el mensaje de la API al rechazar una mesa inexistente con 400", async () => {
+  const solicitudes = simularPostPedidos(() =>
+    HttpResponse.json(erroresApi.mesaInexistente, { status: 400 }),
+  );
+
+  await expect(crearPedido(pedidoConMesaApi.items, 9)).rejects.toThrow(
+    new Error(erroresApi.mesaInexistente.error),
+  );
+
+  expect(solicitudes).toHaveLength(1);
+  await expect(solicitudes[0].json()).resolves.toEqual({
+    items: pedidoConMesaApi.items,
+    mesaId: 9,
+  });
+});
+
 test("informa un fallo de conexión al crear un pedido", async () => {
   simularPostPedidos(() => HttpResponse.error());
 
@@ -115,6 +131,24 @@ test.each([
   simularPostPedidos(() => HttpResponse.json(cuerpo, { status: 201 }));
 
   await expect(crearPedido(pedidoApi.items)).rejects.toThrow(
+    new Error("La respuesta del servidor no tiene el formato esperado"),
+  );
+});
+
+test("rechaza una respuesta 201 con una mesa inexistente al crear un pedido", async () => {
+  simularPostPedidos(() =>
+    HttpResponse.json(
+      {
+        ...respuestaCrearPedidoConMesaApi,
+        pedido: { ...pedidoConMesaApi, mesaId: 9 },
+      },
+      { status: 201 },
+    ),
+  );
+
+  await expect(
+    crearPedido(pedidoConMesaApi.items, pedidoConMesaApi.mesaId),
+  ).rejects.toThrow(
     new Error("La respuesta del servidor no tiene el formato esperado"),
   );
 });
