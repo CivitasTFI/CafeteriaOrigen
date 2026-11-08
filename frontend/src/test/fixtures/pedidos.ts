@@ -14,3 +14,13 @@ export const respuestaCrearPedidoApi = {
   mensaje: "El pedido se guardó correctamente",
   pedido: pedidoApi,
 } satisfies RespuestaCrearPedido;
+
+export const pedidoConMesaApi = {
+  ...pedidoApi,
+  mesaId: 4,
+} satisfies Pedido;
+
+export const respuestaCrearPedidoConMesaApi = {
+  ...respuestaCrearPedidoApi,
+  pedido: pedidoConMesaApi,
+} satisfies RespuestaCrearPedido;

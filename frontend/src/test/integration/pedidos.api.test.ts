@@ -2,7 +2,12 @@ import { http, HttpResponse } from "msw";
 import { expect, test } from "vitest";
 import { crearPedido, consultarPedido } from "../../api/pedidos";
 import { erroresApi } from "../fixtures/errores";
-import { pedidoApi, respuestaCrearPedidoApi } from "../fixtures/pedidos";
+import {
+  pedidoApi,
+  pedidoConMesaApi,
+  respuestaCrearPedidoApi,
+  respuestaCrearPedidoConMesaApi,
+} from "../fixtures/pedidos";
 import { server } from "../mocks/server";
 
 function simularPostPedidos(responder: () => Response): Request[] {
@@ -33,23 +38,46 @@ function simularGetPedido(id: number, responder: () => Response): Request[] {
   return solicitudes;
 }
 
-test("envía los ítems por POST /pedidos y devuelve la respuesta de creación", async () => {
-  const solicitudes = simularPostPedidos(() =>
-    HttpResponse.json(respuestaCrearPedidoApi, { status: 201 }),
-  );
+test.each([
+  {
+    caso: "barra",
+    pedido: pedidoApi,
+    mesaId: undefined,
+    respuesta: respuestaCrearPedidoApi,
+    cuerpoEsperado: {
+      items: [
+        { productoId: 5, cantidad: 2 },
+        { productoId: 19, cantidad: 1 },
+      ],
+    },
+  },
+  {
+    caso: "mesa 4",
+    pedido: pedidoConMesaApi,
+    mesaId: pedidoConMesaApi.mesaId,
+    respuesta: respuestaCrearPedidoConMesaApi,
+    cuerpoEsperado: {
+      mesaId: 4,
+      items: [
+        { productoId: 5, cantidad: 2 },
+        { productoId: 19, cantidad: 1 },
+      ],
+    },
+  },
+])(
+  "envía el pedido para $caso por POST /pedidos y conserva la respuesta",
+  async ({ pedido, mesaId, respuesta, cuerpoEsperado }) => {
+    const solicitudes = simularPostPedidos(() =>
+      HttpResponse.json(respuesta, { status: 201 }),
+    );
 
-  expect(crearPedido).toBeDefined();
-  await expect(crearPedido(pedidoApi.items)).resolves.toEqual(respuestaCrearPedidoApi);
+    await expect(crearPedido(pedido.items, mesaId)).resolves.toEqual(respuesta);
 
-  expect(solicitudes).toHaveLength(1);
-  expect(solicitudes[0].headers.get("Content-Type")).toContain("application/json");
-  await expect(solicitudes[0].json()).resolves.toEqual({
-    items: [
-      { productoId: 5, cantidad: 2 },
-      { productoId: 19, cantidad: 1 },
-    ],
-  });
-});
+    expect(solicitudes).toHaveLength(1);
+    expect(solicitudes[0].headers.get("Content-Type")).toContain("application/json");
+    await expect(solicitudes[0].json()).resolves.toEqual(cuerpoEsperado);
+  },
+);
 
 test.each([
   { estado: 400, items: [], errorApi: erroresApi.pedidoSinItems },
@@ -63,6 +91,22 @@ test.each([
   },
 );
 
+test("conserva el mensaje de la API al rechazar una mesa inexistente con 400", async () => {
+  const solicitudes = simularPostPedidos(() =>
+    HttpResponse.json(erroresApi.mesaInexistente, { status: 400 }),
+  );
+
+  await expect(crearPedido(pedidoConMesaApi.items, 9)).rejects.toThrow(
+    new Error(erroresApi.mesaInexistente.error),
+  );
+
+  expect(solicitudes).toHaveLength(1);
+  await expect(solicitudes[0].json()).resolves.toEqual({
+    items: pedidoConMesaApi.items,
+    mesaId: 9,
+  });
+});
+
 test("informa un fallo de conexión al crear un pedido", async () => {
   simularPostPedidos(() => HttpResponse.error());
 
@@ -74,22 +118,38 @@ test("informa un fallo de conexión al crear un pedido", async () => {
 test.each([
   {
     caso: "contiene un pedido directo sin el envoltorio de creación",
+    pedido: pedidoApi,
+    mesaId: undefined,
     cuerpo: pedidoApi,
   },
   {
     caso: "el pedido contiene un total textual",
+    pedido: pedidoApi,
+    mesaId: undefined,
     cuerpo: {
       ...respuestaCrearPedidoApi,
       pedido: { ...pedidoApi, total: "17220" },
     },
   },
-])("rechaza una respuesta 201 si $caso", async ({ cuerpo }) => {
-  simularPostPedidos(() => HttpResponse.json(cuerpo, { status: 201 }));
+  {
+    caso: "el pedido contiene una mesa inexistente",
+    pedido: pedidoConMesaApi,
+    mesaId: pedidoConMesaApi.mesaId,
+    cuerpo: {
+      ...respuestaCrearPedidoConMesaApi,
+      pedido: { ...pedidoConMesaApi, mesaId: 9 },
+    },
+  },
+])(
+  "rechaza una respuesta 201 si $caso",
+  async ({ pedido, mesaId, cuerpo }) => {
+    simularPostPedidos(() => HttpResponse.json(cuerpo, { status: 201 }));
 
-  await expect(crearPedido(pedidoApi.items)).rejects.toThrow(
-    new Error("La respuesta del servidor no tiene el formato esperado"),
-  );
-});
+    await expect(crearPedido(pedido.items, mesaId)).rejects.toThrow(
+      new Error("La respuesta del servidor no tiene el formato esperado"),
+    );
+  },
+);
 
 test("informa un JSON incompleto en la respuesta de creación", async () => {
   simularPostPedidos(() =>
@@ -114,16 +174,26 @@ test("informa una respuesta 400 incompatible con el contrato de errores", async 
   );
 });
 
-test("consulta un pedido por su ID y conserva los datos recibidos", async () => {
-  const pedidoConsultado = { ...pedidoApi, id: 7, estado: "en preparación" };
-  const solicitudes = simularGetPedido(7, () =>
-    HttpResponse.json(pedidoConsultado),
-  );
+test.each([
+  {
+    caso: "barra",
+    pedido: { ...pedidoApi, id: 7, estado: "en preparación" },
+  },
+  {
+    caso: "mesa 4",
+    pedido: pedidoConMesaApi,
+  },
+])(
+  "consulta el pedido para $caso por su ID y conserva sus datos",
+  async ({ pedido }) => {
+    const solicitudes = simularGetPedido(pedido.id, () =>
+      HttpResponse.json(pedido),
+    );
 
-  expect(consultarPedido).toBeDefined();
-  await expect(consultarPedido(7)).resolves.toEqual(pedidoConsultado);
-  expect(solicitudes).toHaveLength(1);
-});
+    await expect(consultarPedido(pedido.id)).resolves.toEqual(pedido);
+    expect(solicitudes).toHaveLength(1);
+  },
+);
 
 test.each([
   { id: 0, estado: 400, errorApi: erroresApi.pedidoIdInvalido },
@@ -154,6 +224,10 @@ test.each([
   {
     caso: "el pedido contiene un total textual",
     cuerpo: { ...pedidoApi, total: "17220" },
+  },
+  {
+    caso: "el pedido contiene una mesa inexistente",
+    cuerpo: { ...pedidoConMesaApi, mesaId: 9 },
   },
 ])("rechaza una consulta 200 si $caso", async ({ cuerpo }) => {
   simularGetPedido(pedidoApi.id, () => HttpResponse.json(cuerpo));

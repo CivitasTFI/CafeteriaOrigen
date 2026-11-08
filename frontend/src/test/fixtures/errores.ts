@@ -13,6 +13,9 @@ export const erroresApi = {
   pedidoSinItems: {
     error: "El pedido debe contener al menos un producto",
   },
+  mesaInexistente: {
+    error: "Mesa inexistente",
+  },
   errorInterno: {
     error: "Error interno del servidor",
   },
