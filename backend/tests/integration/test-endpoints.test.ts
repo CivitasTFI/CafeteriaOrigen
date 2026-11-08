@@ -40,19 +40,19 @@ describe("endpoints de test", () => {
     });
 
     it("POST/__test__/seed", async () => {
-        const response = await request(app);
-            .post("/__test__/seed");
+        const response = await request(app)
+            .post("/__test__/seed")
 
         expect(response.status).toBe(200);
         expect(response.body).toHaveProperty(
             "mensaje",
-            "los datos fueron cargados correctamente"
+            "Los datos fueron cargados correctamente"
         );
 
         const pedidos = await request(app)
-            .get("pedidos");
+            .get("/pedidos");
 
         expect(pedidos.status).toBe(200);
-        expect(pedidos.body).toHaveLength(7);
+        expect(pedidos.body).toHaveLength(8);
     });
 });
