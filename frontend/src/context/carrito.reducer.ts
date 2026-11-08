@@ -1,0 +1,68 @@
+import type { ProductoBase } from "../api/esquemas/productos";
+
+export type AccionCarrito = | { type: "AGREGAR"; producto: ProductoBase }
+                     | { type: "RESTAR"; producto: ProductoBase }
+                     | { type: "ELIMINAR"; producto: ProductoBase }
+                     | { type: "VACIAR" };
+
+export type ItemCarrito = {
+    productoId: number;
+    nombre: string;
+    precio: number;
+    cantidad: number;
+}; 
+/**
+ * Reducer para gestionar el carrito de compras.
+ * 
+ * Recibe el estado actual del carrito y una acción (contiene el tipo de accion y el producto)
+ * Devuelve el nuevo estado del carrito después de aplicar la acción.
+ * 
+ * @param estadoCarrito 
+ * @param accion 
+ */
+export function carritoReducer(estadoCarrito: ItemCarrito[], accion: AccionCarrito): ItemCarrito[] {
+    if (accion.type === "VACIAR") {
+        return [];
+    }
+    if (accion.type === "AGREGAR") {
+        const productoId = accion.producto.id;
+        const nuevoItem: ItemCarrito = {
+            productoId,
+            nombre: accion.producto.nombre,
+            precio: accion.producto.precio,
+            cantidad: 1,
+        };
+        const itemExistente = estadoCarrito.find((item) => item.productoId === productoId);
+        if (itemExistente) {
+            return estadoCarrito.map((item) => item.productoId === productoId
+                ? { ...item, cantidad: item.cantidad + 1 }
+                : item);
+        }
+        return [...estadoCarrito, nuevoItem];
+    }
+
+    if (accion.type === "RESTAR") {
+        const productoId = accion.producto.id;
+        const itemExistente = estadoCarrito.find((item) => item.productoId === productoId);
+
+        if (!itemExistente) {
+            return estadoCarrito;
+        }
+        
+        if (itemExistente.cantidad === 1) {
+            return estadoCarrito.filter(
+                (item) => item.productoId !== productoId
+            );
+        }
+
+        return estadoCarrito.map((item) => item.productoId === productoId
+            ? { ...item, cantidad: item.cantidad - 1 }
+            : item);
+    }
+
+    if (accion.type === "ELIMINAR") {
+        return estadoCarrito.filter( (item) => item.productoId !== accion.producto.id);
+    }
+
+    return estadoCarrito;
+}
