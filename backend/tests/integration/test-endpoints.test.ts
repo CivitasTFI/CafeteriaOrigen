@@ -43,7 +43,7 @@ describe("endpoints de test", () => {
         const response = await request(app)
             .post("/__test__/seed")
 
-        expect(response.status).toBe(200);
+        expect(response.status).toBe(201);
         expect(response.body).toHaveProperty(
             "mensaje",
             "Los datos fueron cargados correctamente"
