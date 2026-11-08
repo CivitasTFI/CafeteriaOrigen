@@ -1,25 +1,23 @@
 import { expect, test } from "@playwright/test";
 
-test("muestra los 20 productos de la API real", async ({ page }) => {
+test("muestra el selector de café y la pastelería", async ({ page }) => {
   await page.goto("/");
 
-  const menu = page.getByRole("list", {
-    name: "Productos del menú",
-  });
-
-  await expect(menu.getByRole("listitem")).toHaveCount(20);
-  await expect(menu.getByText("Expreso Pocillo Brasil", {
-    exact: true,
-  })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Café", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Pastelería", exact: true }),
+  ).toBeVisible();
 });
+
 test("el menú no tiene scroll horizontal a 375 px", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 667 });
   await page.goto("/");
 
-  const menu = page.getByRole("list", {
-    name: "Productos del menú",
-  });
-
-  await expect(menu.getByRole("listitem")).toHaveCount(20);
+  await expect(
+    page.getByRole("heading", { name: "Café", exact: true }),
+  ).toBeVisible();
 
   const medidas = await page.evaluate(() => ({
     contenido: document.documentElement.scrollWidth,
@@ -28,6 +26,7 @@ test("el menú no tiene scroll horizontal a 375 px", async ({ page }) => {
 
   expect(medidas.contenido).toBeLessThanOrEqual(medidas.visible);
 });
+
 test("impide confirmar un pedido con el carrito vacío", async ({ page }) => {
   await page.goto("/");
 
