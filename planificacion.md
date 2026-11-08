@@ -393,10 +393,10 @@ Los 13 casos HTTP son tres de mesas válidas (1, 4 y 8), uno para barra con esta
 
 ### N2. Exponer reset y seed para E2E
 
-- [ ] Crear `POST /__test__/reset` y `POST /__test__/seed`, registradas únicamente cuando `NODE_ENV=test`.
-- [ ] Reutilizar `reiniciarPedidos()` para vaciar los pedidos y reiniciar IDs; definir un seed determinista con mesas y datos necesarios para el recorrido.
-- [ ] Probar los efectos de reset y seed y la ausencia de ambas rutas fuera del entorno de test.
-- [ ] Entregar a Federico las rutas y datos de preparación antes de completar los E2E con reset/seed.
+- [x] Crear `POST /__test__/reset` y `POST /__test__/seed`, registradas únicamente cuando `NODE_ENV=test`.
+- [x] Reutilizar `reiniciarPedidos()` para vaciar los pedidos y reiniciar IDs; definir un seed determinista con mesas y datos necesarios para el recorrido.
+- [x] Probar los efectos de reset y seed y la ausencia de ambas rutas fuera del entorno de test.
+- [x] Entregar a Federico las rutas y datos de preparación antes de completar los E2E con reset/seed.
 
 ### N3. Implementar mesa, confirmación y seguimiento en el frontend
 
