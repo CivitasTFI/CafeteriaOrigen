@@ -180,6 +180,22 @@ describe("endpoints de test", () => {
         const segundosPedidos = await request(app).get("/pedidos");
 
         expect(primerosPedidos.body).toEqual(segundosPedidos.body);
+    });
+
+    it("verificar regularidad en los ids", async () => {
+
+        await request(app).post("/__test__/seed");
+
+        crearPedido(
+            [{
+                productoId:9,
+                cantidad:1
+            }]
+        )
+
+        const pedidos = await request(app).get("/pedidos");
+
+        expect(pedidos.body[8].id).toBe(9);
     })
 });
 
