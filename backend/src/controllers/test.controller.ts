@@ -4,7 +4,7 @@ import { crearPedido } from "../services/pedidos.service";
 import { cargarDatosIniciales } from "../services/test.service";
 
 //POST
-export const postTest = (req: Request, res: Response, next:NextFunction) => {
+export const postReset = (req: Request, res: Response, next:NextFunction) => {
     try{
         reiniciarPedidos();
 

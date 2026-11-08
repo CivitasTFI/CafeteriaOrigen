@@ -14,7 +14,7 @@ app.use("/productos", productosRouter);
 app.use("/pedidos", pedidosRouter);
 app.use("/reportes", reportesRouter);
 
-if(process.env.NODE_ENV == "test"){
+if(process.env.NODE_ENV === "test"){
     app.use("/__test__", testRouter);
 }
 

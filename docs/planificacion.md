@@ -111,10 +111,10 @@ El trabajo se organiza según [TP3.pdf](TP3.pdf). Los ticks indican tareas imple
 
 ### N2. Reset y seed — pendiente
 
-- [ ] Crear `POST /__test__/reset` y `POST /__test__/seed`, disponibles únicamente con `NODE_ENV=test`.
-- [ ] Reutilizar `reiniciarPedidos()` para vaciar pedidos y reiniciar IDs; definir datos iniciales deterministas.
-- [ ] Probar sus efectos y que las rutas no existan fuera del entorno de test.
-- [ ] Documentar el contrato y coordinar su uso con Federico.
+- [x] Crear `POST /__test__/reset` y `POST /__test__/seed`, disponibles únicamente con `NODE_ENV=test`.
+- [x] Reutilizar `reiniciarPedidos()` para vaciar pedidos y reiniciar IDs; definir datos iniciales deterministas.
+- [x] Probar sus efectos y que las rutas no existan fuera del entorno de test.
+- [x] Documentar el contrato y coordinar su uso con Federico.
 
 ### N3. Mesa, confirmación y seguimiento — pendiente
 

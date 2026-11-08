@@ -114,7 +114,12 @@ TP3.pdf
 | GET | `/pedidos/:id` | Pedido directo. |
 | GET | `/reportes/facturacion` | `{ facturacion: number }`. |
 | GET | `/reportes/mas-vendido` | `{ productosMasVendidos }`. |
+-------------------------------------------------------
+| POST | `/__test__/seed` | 200 con `{ mensaje }` |
+| POST | `/__test__/reset` |  201 con `{ mensaje }` |
+Requisito: configurar la variable de entorno NODE_ENV=test para habilitar estas rutas. Fuera de este entorno no estarán disponibles y responderán con 404.
 
+Datos cargados: el seed genera los datos iniciales necesarios para realizar pruebas, incluyendo los pedidos de ejemplo y sus respectivos datos asociados.
 ### Productos
 
 El catálogo tiene 20 productos: nueve expresos, nueve filtrados y dos opciones de pastelería. Listado y detalle usan el mismo contrato; los precios provienen de `calcularPrecio()` del dominio.
