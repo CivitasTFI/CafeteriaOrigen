@@ -56,3 +56,22 @@ describe("endpoints de test", () => {
         expect(pedidos.body).toHaveLength(8);
     });
 });
+
+describe("rutas de testing deshabilitadas", () => {
+  it("responde 404 fuera de entorno test", async () => {
+  jest.resetModules();
+
+  process.env.NODE_ENV = "development";
+
+  const app = require("../../src/app").default;
+
+  const response = await request(app)
+    .post("/__test__/reset");
+
+  const response2 = await request(app)
+    .post("/__test__/seed");
+
+  expect(response.status).toBe(404);
+  expect(response2.status).toBe(404);
+});
+});
