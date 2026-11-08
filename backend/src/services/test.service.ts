@@ -2,8 +2,7 @@ import { reiniciarPedidos } from "../data/pedidos";
 import { crearPedido } from "./pedidos.service";
 
 export const cargarDatosIniciales = () => {
-    reiniciarPedidos ();
-
+    reiniciarPedidos();
     crearPedido(
             [{
                 productoId:3,

@@ -170,9 +170,21 @@ describe("endpoints de test", () => {
             }
         ]);
     });
+
+    it("verificar el resultado de ejecutar dos veces el seed", async() => {
+        
+        await request(app).post("/__test__/seed");
+        const primerosPedidos = await request(app).get("/pedidos");
+
+        await request(app).post("/__test__/seed");
+        const segundosPedidos = await request(app).get("/pedidos");
+
+        expect(primerosPedidos.body).toEqual(segundosPedidos.body);
+    })
 });
 
-describe("rutas de testing deshabilitadas", () => {
+
+describe("rutas de testing deshabilitadas",() => {
   it("responde 404 fuera de entorno test", async () => {
   jest.resetModules();
 
