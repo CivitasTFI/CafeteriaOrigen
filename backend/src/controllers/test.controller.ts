@@ -1,6 +1,5 @@
 import {Request, Response, NextFunction} from "express";
 import { reiniciarPedidos } from "../data/pedidos";
-import { crearPedido } from "../services/pedidos.service";
 import { cargarDatosIniciales } from "../services/test.service";
 
 //POST
