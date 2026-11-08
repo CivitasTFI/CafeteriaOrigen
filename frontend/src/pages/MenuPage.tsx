@@ -1,5 +1,7 @@
 import IndicadorCarga from "../components/comunes/IndicadorCarga";
 import MensajeError from "../components/comunes/MensajeError";
+import SelectorCafe from "../components/cafe/SelectorCafe";
+import Pasteleria from "../components/pasteleria/Pasteleria";
 import { useMenu } from "../hooks/useMenu";
 
 export default function MenuPage() {
@@ -16,10 +18,9 @@ export default function MenuPage() {
   }
 
   return (
-    <ul aria-label="Productos del menú">
-      {estado.productos.map((producto) => (
-        <li key={producto.id}>{producto.nombre}</li>
-      ))}
-    </ul>
+    <div className="menu-pagina">
+      <SelectorCafe />
+      <Pasteleria />
+    </div>
   );
 }
