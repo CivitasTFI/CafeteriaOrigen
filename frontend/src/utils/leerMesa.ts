@@ -8,11 +8,14 @@ export function leerMesa (parametros: URLSearchParams): number | undefined {
         return undefined;
     }
 
+
     const mesaId = Number(valor);
 
+    
     if (!Number.isInteger(mesaId)){
         throw new Error("ingresar un número entero")
     }
+
     if(!MESA_VALIDAS.includes(mesaId)){
         throw new Error("mesa inválida");
     }

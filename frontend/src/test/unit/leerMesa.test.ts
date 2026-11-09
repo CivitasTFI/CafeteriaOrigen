@@ -22,4 +22,11 @@ describe("leer mesa", () => {
         expect(() => leerMesa(parametros))
             .toThrow("ingresar un número entero");
     })
+
+    it("parámetro vacío", () => {
+        const parametros = new URLSearchParams("mesaId=");
+
+        expect(() => leerMesa(parametros))
+            .toThrow("El parámetro no debe estar vacío");
+    })
 })
