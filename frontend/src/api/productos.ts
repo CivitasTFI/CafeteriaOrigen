@@ -1,5 +1,10 @@
 import { solicitarValidado } from "./cliente";
-import { esquemaProductos, type Productos } from "./esquemas/productos";
+import {
+  esquemaProducto,
+  esquemaProductos,
+  type Producto,
+  type Productos,
+} from "./esquemas/productos";
 
 export type CriteriosBusquedaProducto = {
   tipo?: "cafe" | "pasteleria";
@@ -32,4 +37,8 @@ export async function buscarProductos(
 ): Promise<Productos> {
   const query = armarQueryBusqueda(criterios);
   return solicitarValidado(`/productos/buscar?${query}`, esquemaProductos);
+}
+
+export async function obtenerProducto(id: number): Promise<Producto> {
+  return solicitarValidado(`/productos/${id}`, esquemaProducto);
 }
