@@ -12,6 +12,8 @@ export default function ConfirmarPedido({ mesaId }: ConfirmarPedidoProps) {
     const { items , vaciarCarrito} = useCarrito();
     const { enviarPedido } = usePedido();
 
+    const [error, setError] = useState<string | null>(null);
+
     const [enviando, setEnviando] = useState(false);
 
     const [pedidoCreado, setPedidoCreado] = useState<Pedido | null>(null);
@@ -20,6 +22,7 @@ export default function ConfirmarPedido({ mesaId }: ConfirmarPedidoProps) {
         if (enviando) return;
 
         setEnviando(true);
+        setError(null);
 
         const itemsPedido = items.map(({ productoId, cantidad }) => ({
             productoId,
@@ -27,10 +30,19 @@ export default function ConfirmarPedido({ mesaId }: ConfirmarPedidoProps) {
         }));
 
         try {
+
             const respuesta = await enviarPedido(itemsPedido, mesaId);
             setPedidoCreado(respuesta.pedido);
             vaciarCarrito()
-        } finally {
+
+        } catch (error) {
+            setError(
+                error instanceof Error
+                    ? error.message
+                    : "Ocurrió un error al crear el pedido"
+            );
+
+        }finally {
             setEnviando(false);
         }
     }
@@ -49,6 +61,13 @@ export default function ConfirmarPedido({ mesaId }: ConfirmarPedidoProps) {
         {pedidoCreado && (
             <ConfirmacionPedido pedido={pedidoCreado} />
         )}
+
+        {error && (
+            <p role="alert">
+                {error}
+            </p>
+        )}
+        
         </>
     );
 }
