@@ -7,9 +7,13 @@ export default function Encabezado ({mesaId}: EncabezadoProps){
         <header>
             <h1>Cafeteria Origen</h1>
 
-            if(mesaId){
-                <p>{`mesa ${mesaId}`}</p>
-            }
+            <p>
+                {mesaId !== undefined
+                    ?  `mesa ${mesaId}`
+                    : "retiro en barra"   
+                }
+            </p>
+
         </header>
     )
 }
