@@ -9,7 +9,7 @@ El trabajo se organiza según [TP3.pdf](TP3.pdf). Los ticks indican tareas imple
 | Homero | Herramientas, cliente HTTP, Zod, carga del menú y documentación. | H1 y H2 completos; H3 espera componentes de M2 y H4 acompaña el cierre del sistema. |
 | Federico | Lógica/interfaz del carrito y E2E con API real. | F1 completo; F2 espera integración con pedidos y revisión móvil; F3 tiene infraestructura y casos iniciales. |
 | Matias | Productos de API, selector de café, pastelería y estilos. | M1 completo; M2 y M3 pendientes. |
-| Nicolas | Mesas/pedidos de API, reset/seed, URL, confirmación y seguimiento. | N1 completo; N2 y N3 pendientes. |
+| Nicolas | Mesas/pedidos de API, reset/seed, URL, confirmación y seguimiento. | N1 y N2 completos en esta rama; falta integrar N2 en develop. N3 pendiente. |
 
 ## Acuerdos compartidos
 
@@ -47,7 +47,7 @@ El trabajo se organiza según [TP3.pdf](TP3.pdf). Los ticks indican tareas imple
 
 - [x] Documentar instalación, comandos, arquitectura y contratos implementados.
 - [x] Mantener el reparto y las tareas completadas/pendientes.
-- [ ] Documentar reset/seed y el recorrido E2E completo cuando estén implementados.
+- [ ] Documentar el recorrido E2E completo cuando esté implementado; el contrato de reset/seed ya está documentado en README.
 - [ ] Coordinar la verificación final de comandos, configuraciones y documentación del sistema completo.
 
 ## Tareas de Federico
@@ -109,12 +109,14 @@ El trabajo se organiza según [TP3.pdf](TP3.pdf). Los ticks indican tareas imple
 - [x] Validar cuerpo, ítems, productos, cantidades, estados e importes; centralizar errores sin guardar pedidos inválidos.
 - [x] Probar mesa/barra, rechazos, conservación de pedidos/facturación/IDs y el ejemplo del PDF con total 17220.
 
-### N2. Reset y seed — pendiente
+### N2. Reset y seed — completo en esta rama; pendiente de integración en develop
 
-- [ ] Crear `POST /__test__/reset` y `POST /__test__/seed`, disponibles únicamente con `NODE_ENV=test`.
-- [ ] Reutilizar `reiniciarPedidos()` para vaciar pedidos y reiniciar IDs; definir datos iniciales deterministas.
-- [ ] Probar sus efectos y que las rutas no existan fuera del entorno de test.
-- [ ] Documentar el contrato y coordinar su uso con Federico.
+- [x] Crear `POST /__test__/reset` y `POST /__test__/seed`, disponibles únicamente con `NODE_ENV=test`.
+- [x] Reutilizar `reiniciarPedidos()` para vaciar pedidos y reiniciar IDs; definir datos iniciales deterministas.
+- [x] Probar sus efectos y que las rutas no existan fuera del entorno de test.
+- [x] Documentar el contrato y coordinar su uso con Federico.
+
+El [contrato de reset/seed](../README.md#datos-de-prueba-reset-y-seed) detalla respuestas, datos iniciales y preparación para F3. Reset responde 200 y deja el próximo ID en 1; seed responde 201, reemplaza los pedidos por ocho casos deterministas y deja el próximo ID en 9. F3 todavía debe invocarlos por HTTP antes de cada E2E.
 
 ### N3. Mesa, confirmación y seguimiento — pendiente
 
@@ -131,11 +133,11 @@ El trabajo se organiza según [TP3.pdf](TP3.pdf). Los ticks indican tareas imple
 | Trabajo | Qué necesita |
 | --- | --- |
 | H3: conectar selección | Componentes de M2. |
-| N2: reset/seed | Puede avanzar con la API disponible. |
+| N2: reset/seed | Implementado y probado en esta rama; falta integrarlo en develop para su uso en F3. |
 | N3: confirmación y seguimiento | Cliente H2 y Context disponibles; puede desarrollarse con MSW mientras se termina la selección. |
 | F2: vaciado y conservación ante fallos | Integración con la confirmación de N3. |
 | F3: recorrido completo | N2, N3 y M2; revisión visual con M3. |
-| H4: cierre documental | Contratos de N2 y recorrido final de F3. |
+| H4: cierre documental | Recorrido final de F3; el contrato de N2 ya está documentado. |
 
 **Para Homero:** H2 está terminado. La siguiente implementación es conectar M2 en H3 cuando esos componentes estén listos; el cierre de H4 depende de las funcionalidades restantes.
 
