@@ -10,5 +10,9 @@ export function leerMesa (parametros: URLSearchParams): number | undefined {
 
     const mesaId = Number(valor);
 
+    if(!Number.isInteger(mesaId) || !MESA_VALIDAS.includes(mesaId)){
+        throw new Error("mesa inválida");
+    }
+
     return mesaId;
 }
