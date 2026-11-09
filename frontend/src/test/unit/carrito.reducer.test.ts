@@ -10,7 +10,7 @@
 */
 
 import { describe, expect, it } from "vitest";
-import { carritoReducer } from "../../context/carrito.reducer";
+import { carritoReducer, type AccionCarrito, type ItemCarrito } from "../../context/carrito.reducer";
 import {
   cafeApi as productoMock,
   pasteleriaApi as productoMock2,
@@ -159,3 +159,38 @@ describe("carritoReducer", () => {
       ]);
     })
   });
+
+describe("Vaciado e inmutabilidad del carrito", () => {
+  const productoAdicional = { id: 99, nombre: "Producto adicional", precio: 1000 };
+  const casos: { caso: string; accion: AccionCarrito }[] = [
+    { caso: "agregar un producto existente", accion: { type: "AGREGAR", producto: productoMock } },
+    { caso: "agregar un producto nuevo", accion: { type: "AGREGAR", producto: productoAdicional } },
+    { caso: "restar una unidad", accion: { type: "RESTAR", producto: productoMock } },
+    { caso: "restar la última unidad", accion: { type: "RESTAR", producto: productoMock2 } },
+    { caso: "eliminar un producto", accion: { type: "ELIMINAR", producto: productoMock } },
+    { caso: "vaciar el carrito", accion: { type: "VACIAR" } },
+  ];
+
+  function prepararEstado(): ItemCarrito[] {
+    return [
+      { productoId: productoMock.id, nombre: productoMock.nombre, precio: productoMock.precio, cantidad: 2 },
+      { productoId: productoMock2.id, nombre: productoMock2.nombre, precio: productoMock2.precio, cantidad: 1 },
+    ];
+  }
+
+  it("vacía todos los productos mediante VACIAR", () => {
+    expect(carritoReducer(prepararEstado(), { type: "VACIAR" })).toEqual([]);
+  });
+
+  it.each(casos)("conserva el estado anterior al $caso", ({ accion }) => {
+    const estado = prepararEstado();
+    const anterior = estado.map((item) => ({ ...item }));
+    estado.forEach((item) => Object.freeze(item));
+    Object.freeze(estado);
+
+    const resultado = carritoReducer(estado, accion);
+
+    expect(estado).toEqual(anterior);
+    expect(resultado).not.toBe(estado);
+  });
+});

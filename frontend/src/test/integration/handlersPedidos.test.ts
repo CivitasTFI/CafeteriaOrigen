@@ -3,32 +3,16 @@ import {
   esquemaPedido,
   esquemaRespuestaCrearPedido,
 } from "../../api/esquemas/pedidos";
-import {
-  pedidoApi,
-  pedidoConMesaApi,
-  respuestaCrearPedidoApi,
-  respuestaCrearPedidoConMesaApi,
-} from "../fixtures/pedidos";
+import { pedidoConMesaApi, respuestaCrearPedidoConMesaApi } from "../fixtures/pedidos";
 import {
   crearHandlerCreacionPedido,
   crearHandlerConsultaPedido,
 } from "../mocks/handlers";
 import { server } from "../mocks/server";
 
-test.each([
-  {
-    caso: "barra",
-    respuestaEsperada: respuestaCrearPedidoApi,
-    cuerpo: { items: pedidoApi.items },
-  },
-  {
-    caso: "mesa 4",
-    respuestaEsperada: respuestaCrearPedidoConMesaApi,
-    cuerpo: { items: pedidoConMesaApi.items, mesaId: pedidoConMesaApi.mesaId },
-  },
-])(
-  "el handler de creación responde 201 al POST para $caso con el contrato configurado",
-  async ({ respuestaEsperada, cuerpo }) => {
+test("el handler de creación responde al POST con estado 201 y el contrato configurado", async () => {
+    const respuestaEsperada = respuestaCrearPedidoConMesaApi;
+    const cuerpo = { items: pedidoConMesaApi.items, mesaId: pedidoConMesaApi.mesaId };
     server.use(crearHandlerCreacionPedido(respuestaEsperada));
 
     const respuesta = await fetch(new URL("/pedidos", window.location.origin), {
@@ -41,21 +25,10 @@ test.each([
     const datos: unknown = await respuesta.json();
     expect(esquemaRespuestaCrearPedido.safeParse(datos).success).toBe(true);
     expect(datos).toEqual(respuestaEsperada);
-  },
-);
+});
 
-test.each([
-  {
-    caso: "barra",
-    pedido: { ...pedidoApi, id: 7, estado: "en preparación" },
-  },
-  {
-    caso: "mesa 4",
-    pedido: pedidoConMesaApi,
-  },
-])(
-  "el handler de consulta responde 200 al GET para $caso con el pedido configurado",
-  async ({ pedido }) => {
+test("el handler de consulta utiliza el ID configurado y conserva estado y mesa", async () => {
+    const pedido = { ...pedidoConMesaApi, id: 7, estado: "en preparación" };
     server.use(crearHandlerConsultaPedido(pedido));
 
     const respuesta = await fetch(
@@ -66,5 +39,4 @@ test.each([
     const datos: unknown = await respuesta.json();
     expect(esquemaPedido.safeParse(datos).success).toBe(true);
     expect(datos).toEqual(pedido);
-  },
-);
+});

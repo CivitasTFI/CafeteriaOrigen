@@ -18,10 +18,7 @@ beforeEach(() => {
   );
 });
 
-test.each([
-  "permite montar App en el DOM y consultar su encabezado",
-  "mantiene el DOM aislado al montar App en otra prueba",
-])("%s", () => {
+test("monta App con un único encabezado principal accesible", () => {
   render(<App />);
 
   const encabezado = screen.getByRole("heading", {

@@ -7,7 +7,7 @@ describe("Endpoints de pedidos", () => {
         reiniciarPedidos();
     });
 
-    it("POST /pedidos crea un pedido válido", async () => {
+    it("POST /pedidos crea un pedido con ID, ítems, estado y total calculado", async () => {
         const response = await request(app)
             .post("/pedidos")
             .send({
@@ -21,37 +21,20 @@ describe("Endpoints de pedidos", () => {
             });
 
         expect(response.status).toBe(201);
-        expect(response.body).toHaveProperty(
-            "mensaje",
-            "El pedido se guardó correctamente"
-        );
-        expect(response.body.pedido).toMatchObject({
-            items: [
-                {
-                    productoId: 1,
-                    cantidad: 2
-                }
-            ],
-            estado: "pendiente"
+        expect(response.body).toEqual({
+            mensaje: "El pedido se guardó correctamente",
+            pedido: {
+                id: 1,
+                items: [
+                    {
+                        productoId: 1,
+                        cantidad: 2
+                    }
+                ],
+                estado: "pendiente",
+                total: 10040
+            }
         });
-        expect(response.body.pedido).toHaveProperty("id");
-    });
-
-    it("POST /pedidos devuelve el total calculado", async () => {
-        const response = await request(app)
-            .post("/pedidos")
-            .send({
-                items: [
-                    {
-                        productoId: 1,
-                        cantidad: 2
-                    }
-                ],
-                estado: "pendiente"
-            });
-
-        expect(response.status).toBe(201);
-        expect(response.body.pedido.total).toBe(10040);
     });
 
     it("POST /pedidos rechaza un pedido sin items", async () => {

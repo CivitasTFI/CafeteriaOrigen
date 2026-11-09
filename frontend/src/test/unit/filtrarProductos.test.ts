@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { filtrarProductos } from "../../utils/filtrarProductos";
-import { catalogoCompleto, cafeApi } from "../fixtures/productos";
+import { catalogoCompleto } from "../fixtures/productos";
 
 describe("filtrarProductos", () => {
   it("devuelve los tres orígenes para expreso mediano", () => {
@@ -9,8 +9,7 @@ describe("filtrarProductos", () => {
       tamaño: "mediano",
     });
 
-    expect(resultados).toHaveLength(3);
-    expect(resultados.every((p) => p.tipo === "cafe")).toBe(true);
+    expect(resultados.map((producto) => producto.id)).toEqual([4, 5, 6]);
   });
 
   it("devuelve las dos opciones de pastelería por tipo", () => {
@@ -18,18 +17,21 @@ describe("filtrarProductos", () => {
       tipo: "pasteleria",
     });
 
-    expect(resultados).toHaveLength(2);
+    expect(resultados.map((producto) => producto.id)).toEqual([19, 20]);
   });
 
-  it("reduce a un producto con todos los criterios de café", () => {
-    const resultados = filtrarProductos(catalogoCompleto, {
-      tipoCafe: cafeApi.tipoCafe,
-      tamaño: cafeApi.tamaño,
-      variedad: cafeApi.variedad.nombre,
-    });
+  it.each(catalogoCompleto.filter((producto) => producto.tipo === "cafe"))(
+    "encuentra únicamente $nombre (ID $id) con los tres criterios",
+    (cafe) => {
+      const resultados = filtrarProductos(catalogoCompleto, {
+        tipoCafe: cafe.tipoCafe,
+        tamaño: cafe.tamaño,
+        variedad: cafe.variedad.nombre,
+      });
 
-    expect(resultados).toEqual([cafeApi]);
-  });
+      expect(resultados).toEqual([cafe]);
+    },
+  );
 
   it("devuelve lista vacía si no hay coincidencias", () => {
     const resultados = filtrarProductos(catalogoCompleto, {

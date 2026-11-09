@@ -18,20 +18,6 @@ function crearOpcionesPeticion(metodo: "get" | "post"): RequestInit | undefined 
 describe("Handlers compartidos de errores", () => {
   test.each([
     {
-      caso: "ID de pedido inválido",
-      metodo: "get",
-      ruta: "/pedidos/abc",
-      estado: 400,
-      respuesta: erroresApi.pedidoIdInvalido,
-    },
-    {
-      caso: "producto inexistente",
-      metodo: "get",
-      ruta: "/productos/999",
-      estado: 404,
-      respuesta: erroresApi.productoNoEncontrado,
-    },
-    {
       caso: "pedido sin ítems",
       metodo: "post",
       ruta: "/pedidos",

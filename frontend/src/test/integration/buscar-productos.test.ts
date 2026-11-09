@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { http, HttpResponse } from "msw";
 import { buscarProductos } from "../../api/productos";
 import { erroresApi } from "../fixtures/errores";
 import { catalogoPrueba, cafeApi } from "../fixtures/productos";
@@ -17,8 +18,7 @@ describe("Consulta de búsqueda de productos", () => {
       tamaño: "mediano",
     });
 
-    expect(resultados).toHaveLength(3);
-    expect(resultados.every((p) => p.tipo === "cafe")).toBe(true);
+    expect(resultados.map((producto) => producto.id)).toEqual([4, 5, 6]);
   });
 
   test("devuelve pastelería por tipo", async () => {
@@ -26,8 +26,7 @@ describe("Consulta de búsqueda de productos", () => {
 
     const resultados = await buscarProductos({ tipo: "pasteleria" });
 
-    expect(resultados).toHaveLength(2);
-    expect(resultados.every((p) => p.tipo === "pasteleria")).toBe(true);
+    expect(resultados.map((producto) => producto.id)).toEqual([19, 20]);
   });
 
   test("rechaza criterios inválidos con 400", async () => {
@@ -76,7 +75,7 @@ describe("Consulta de búsqueda de productos", () => {
     ).rejects.toThrow(erroresApi.errorInterno.error);
   });
 
-  test("valida el formato de cada ítem devuelto", async () => {
+  test("combina bebida, tamaño y origen y conserva el producto encontrado", async () => {
     server.use(crearHandlerBuscarProductos(catalogoPrueba));
 
     const resultados = await buscarProductos({
@@ -86,5 +85,18 @@ describe("Consulta de búsqueda de productos", () => {
     });
 
     expect(resultados).toEqual([cafeApi]);
+  });
+
+  test.each([
+    { caso: "un objeto en lugar de una lista", cuerpo: cafeApi },
+    { caso: "un precio textual", cuerpo: [{ ...cafeApi, precio: "7360" }] },
+    { caso: "un producto sin tipo", cuerpo: [{ id: 5, nombre: cafeApi.nombre, precio: 7360 }] },
+  ])("rechaza una respuesta 200 con $caso", async ({ cuerpo }) => {
+    server.use(http.get(new URL("/productos/buscar", window.location.origin).href,
+      () => HttpResponse.json(cuerpo)));
+
+    await expect(buscarProductos({ tipoCafe: "expreso" })).rejects.toThrow(
+      "La respuesta del servidor no tiene el formato esperado",
+    );
   });
 });
