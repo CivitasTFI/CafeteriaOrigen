@@ -12,5 +12,11 @@ describe("encabezado", () => {
         })).toBeInTheDocument();
 
         expect(screen.getByText("mesa 4")).toBeInTheDocument();
-    })
+    });
+
+    it("muestra retiro en barra cuando no hay mesa", () => {
+        render(<Encabezado/>);
+
+        expect(screen.getByText("retiro en barra")).toBeInTheDocument();
+    });
 });
