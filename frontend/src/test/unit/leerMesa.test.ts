@@ -1,7 +1,13 @@
-import {describe, expect, it, test} from "vitest";
+import {describe, expect, it} from "vitest";
 import {leerMesa} from "../../utils/leerMesa";
 
 describe("leer mesa", () => {
+
+    it("parámetro ausente", () => {
+        const parametros = new URLSearchParams();
+
+        expect(leerMesa(parametros)).toBeUndefined();
+    })
 
     it("leer mesa válida", () => {
         const parametros = new URLSearchParams("mesaId=4");
