@@ -8,4 +8,11 @@ describe("leer mesa", () => {
 
         expect(leerMesa(parametros)).toBe(4);
     })
+
+    it("leer mesa inválida", () => {
+        const parametros = new URLSearchParams("mesaId=9");
+
+        expect(() => leerMesa(parametros))
+            .toThrow("mesa inválida");
+    })
 })
