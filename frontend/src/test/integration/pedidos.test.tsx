@@ -29,11 +29,22 @@ function PrepararCarrito(){
     );
 }
 
+function EstadoCarrito() {
+    const { items } = useCarrito();
+
+    return (
+        <span data-testid="items-carrito">
+            {items.length}
+        </span>
+    );
+}
+
 function renderizarConfirmacion(mesaId?: number){
     render(
         <CarritoProvider>
             <PrepararCarrito />
             <ConfirmarPedido mesaId={mesaId} />
+            <EstadoCarrito />
         </CarritoProvider>
     );
 }
@@ -173,4 +184,35 @@ test("muestra la información del pedido creado", async () => {
     expect(
         screen.getByText(/total:\s*17220/i)
     ).toBeInTheDocument();
+});
+
+test("vacía el carrito después de crear correctamente el pedido", async () => {
+    const usuario = userEvent.setup();
+
+    server.use(
+        http.post(URLpedidos, () => {
+            return HttpResponse.json(
+                respuestaCrearPedidoApi,
+                { status: 201 }
+            );
+        })
+    );
+
+    renderizarConfirmacion();
+
+    await cargarCarrito(usuario);
+
+    expect(screen.getByTestId("items-carrito"))
+        .toHaveTextContent("2");
+
+    await usuario.click(
+        screen.getByRole("button", {
+            name: "Confirmar pedido",
+        })
+    );
+
+    await screen.findByText(/id:\s*1/);
+
+    expect(screen.getByTestId("items-carrito"))
+        .toHaveTextContent("0");
 });
