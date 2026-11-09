@@ -138,12 +138,14 @@ Mientras se envía el pedido, `ConfirmarPedido` comunica el estado a App mediant
 
 | Nivel | Herramientas y alcance |
 | --- | --- |
-| Unitarias | Vitest: esquemas Zod, filtro puro de productos, reducer, subtotales, formato y configuración. |
-| Componentes | Testing Library y user-event: selector, pastelería, carrito y navegación de App. |
+| Unitarias | Vitest: esquemas Zod, las 18 combinaciones del filtro de café, acciones e inmutabilidad del reducer, subtotales, formato y configuración. |
+| Componentes | Testing Library y user-event: precios/descripciones de los tres orígenes, producto exacto agregado por selector/pastelería, carrito y navegación de App. |
 | Integración | MSW: cliente HTTP, proxy, búsquedas, catálogo/detalle vacío, pedidos, mesa desde URL, envío desde App, bloqueo de edición, seguimiento, errores/reintentos, Context y handlers compartidos. |
 | E2E | Playwright: navegador con frontend y API reales. |
 
 `src/test/setup.ts` registra jest-dom, inicia MSW, limpia DOM/handlers después de cada test y cierra el servidor al terminar. Cada prueba importa las funciones de Vitest y registra sus escenarios con `server.use(...)`. Las solicitudes sin handler producen error. Los tests de configuración y proxy usan entorno Node; el resto usa jsdom.
+
+Las matrices de campos válidos e inválidos pertenecen a los tests unitarios de contratos. El cliente HTTP concentra los errores de conexión, JSON y formato de error; los adaptadores comprueban rutas, cuerpos y respuestas representativas. La interfaz verifica el producto agregado, los mensajes visibles y la conservación del carrito. Los tests de handlers cubren rutas, métodos y configuraciones representativas, incluida la convivencia entre búsqueda y detalle.
 
 ### Fixtures y handlers
 
@@ -199,6 +201,12 @@ Para comprobar la selección y su integración con el menú:
 
 ```powershell
 npm run test:frontend -- src/test/unit/filtrarProductos.test.ts src/test/components/SelectorCafe.test.tsx src/test/components/Pasteleria.test.tsx src/test/integration/menu.test.tsx src/test/components/App.test.tsx
+```
+
+Para comprobar los adaptadores de productos, incluido el detalle por ID y las respuestas incompatibles:
+
+```powershell
+npm run test:frontend -- src/test/integration/productos.test.ts src/test/integration/buscar-productos.test.ts src/test/integration/producto.detalle.test.ts
 ```
 
 Para comprobar mesa, confirmación y seguimiento, incluidos los componentes conectados a App:

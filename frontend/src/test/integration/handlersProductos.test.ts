@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { esquemaProductosBase } from "../../api/esquemas/productos";
+import { esquemaProductos } from "../../api/esquemas/productos";
 import { buscarProductos } from "../../api/productos";
 import { cafeApi, pasteleriaApi, productosApi } from "../fixtures/productos";
 import {
@@ -10,21 +10,15 @@ import {
 import { server } from "../mocks/server";
 
 describe("Handler compartido del listado de productos", () => {
-  test.each([
-    {
-      caso: "los productos configurados y sus precios de la API",
-      productos: productosApi,
-    },
-    { caso: "una lista vacía cuando no hay productos configurados", productos: [] },
-  ])("responde 200 con $caso", async ({ productos }) => {
-    server.use(crearHandlerProductos(productos));
+  test("responde 200 con los productos configurados y su contrato completo", async () => {
+    server.use(crearHandlerProductos(productosApi));
 
     const response = await fetch(new URL("/productos", window.location.origin));
 
     expect(response.status).toBe(200);
     const datos: unknown = await response.json();
-    expect(esquemaProductosBase.safeParse(datos).success).toBe(true);
-    expect(datos).toEqual(productos);
+    expect(esquemaProductos.safeParse(datos).success).toBe(true);
+    expect(datos).toEqual(productosApi);
   });
 });
 

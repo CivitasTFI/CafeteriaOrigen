@@ -97,17 +97,6 @@ test("no consulta un ID inventado ni muestra detalle cuando el catálogo está v
   expect(solicitudesDetalle).toEqual([]);
 });
 
-test("muestra el error de la API y deja de mostrar la carga ante un 500", async () => {
-  server.use(crearHandlerError("/productos", erroresApi.errorInterno, 500));
-
-  renderMenu();
-
-  expect(await screen.findByRole("alert")).toHaveTextContent(
-    erroresApi.errorInterno.error,
-  );
-  expect(screen.queryByRole("status")).not.toBeInTheDocument();
-});
-
 test.each([
   {
     caso: "un error 500",
