@@ -6,10 +6,10 @@ El trabajo se organiza según [TP3.pdf](TP3.pdf). Los ticks indican tareas imple
 
 | Integrante | Responsabilidad | Estado |
 | --- | --- | --- |
-| Homero | Herramientas, cliente HTTP, Zod, carga del menú y documentación. | H1 y H2 completos; H3 espera componentes de M2 y H4 acompaña el cierre del sistema. |
-| Federico | Lógica/interfaz del carrito y E2E con API real. | F1 completo; F2 espera integración con pedidos y revisión móvil; F3 tiene preparación de datos y cuatro E2E, con el recorrido completo pendiente. |
-| Matias | Productos de API, selector de café, pastelería y estilos. | M1 completo; M2 y M3 pendientes. |
-| Nicolas | Mesas/pedidos de API, reset/seed, URL, confirmación y seguimiento. | N1 y N2 completos e integrados en develop; N3 pendiente. |
+| Homero | Herramientas, cliente HTTP, Zod, carga del menú y documentación. | H1, H2 y H3 completos; H4 espera el cierre del sistema. |
+| Federico | Lógica/interfaz del carrito y E2E con API real. | F1 completo; F2 espera integración con pedidos. F3 prepara datos y cubre selección/carrito móvil; falta confirmación y seguimiento. |
+| Matias | Productos de API, selector de café, pastelería y estilos. | M1 y M2 completos. M3 tiene estilos y menú/carrito móvil listos; falta revisar las futuras pantallas de pedidos. |
+| Nicolas | Mesas/pedidos de API, reset/seed, URL, confirmación y seguimiento. | N1 y N2 completos; N3 pendiente. |
 
 ## Acuerdos compartidos
 
@@ -18,6 +18,7 @@ El trabajo se organiza según [TP3.pdf](TP3.pdf). Los ticks indican tareas imple
 - Las mesas válidas son los enteros del 1 al 8, por decisión del grupo. Omitir la mesa significa barra. En la URL, una mesa ausente o inválida debe interpretarse como barra.
 - El frontend usa `crearPedido(items, mesaId?)` y `consultarPedido(id)`. Antes de enviar, transforma el carrito a `{ productoId, cantidad }`. No envía estado; la API asigna `pendiente`.
 - Los componentes consultan mediante el cliente HTTP y validan respuestas con Zod. Los tipos se derivan con `z.infer` y se mantiene TypeScript estricto sin `any` explícito.
+- Pedir y Ver productos reciben el catálogo validado mediante `ContenedorCatalogo`. El selector y la pastelería lo filtran en memoria; la vista Buscar productos consulta `/productos/buscar`, que rechaza filtros repetidos.
 
 ## Tareas de Homero
 
@@ -32,21 +33,22 @@ El trabajo se organiza según [TP3.pdf](TP3.pdf). Los ticks indican tareas imple
 
 - [x] Implementar el cliente común con errores HTTP/JSON/red y validación Zod de respuestas exitosas.
 - [x] Definir contratos y tipos inferidos de errores, productos, ítems, pedidos y respuesta de creación.
-- [x] Entregar `listarProductos()`, `crearPedido(items, mesaId?)` y `consultarPedido(id)`.
+- [x] Entregar `listarProductos()`, `buscarProductos(criterios)`, `obtenerProducto(id)`, `crearPedido(items, mesaId?)` y `consultarPedido(id)`.
 - [x] Admitir mesa opcional del 1 al 8, conservarla en respuestas y omitirla para barra.
 - [x] Compartir fixtures tipados y handlers MSW de productos, pedidos para mesa/barra y errores.
 - [x] Probar cuerpos y rutas, respuestas válidas/incompatibles, límites y errores; completar los refactores correspondientes.
 
-### H3. Menú y errores — parcial
+### H3. Menú y errores — completo
 
-- [x] Implementar `MenuPage` y `useMenu` con estados de carga, error, reintento y productos disponibles.
+- [x] Implementar `MenuPage`, `useMenu` y `ContenedorCatalogo` con estados de carga, error, reintento y productos disponibles.
 - [x] Probar carga y recuperación ante errores HTTP, de conexión y de contrato.
-- [ ] Conectar el menú con el selector de café y la pastelería cuando M2 esté disponible.
+- [x] Conectar el catálogo recibido con el selector de café y la pastelería, compartiendo el carrito y la recuperación ante errores.
 
 ### H4. Documentación e integración — parcial
 
 - [x] Documentar instalación, comandos, arquitectura y contratos implementados.
 - [x] Mantener el reparto y las tareas completadas/pendientes.
+- [x] Documentar las vistas Pedir/Ver/Buscar, el filtro puro, la búsqueda HTTP, los estilos y la cobertura móvil con carrito cargado.
 - [ ] Documentar el recorrido E2E completo cuando esté implementado; el contrato de reset/seed ya está documentado en README.
 - [ ] Coordinar la verificación final de comandos, configuraciones y documentación del sistema completo.
 
@@ -65,12 +67,13 @@ El trabajo se organiza según [TP3.pdf](TP3.pdf). Los ticks indican tareas imple
 - [x] Incorporar controles accesibles y bloquear confirmación con carrito vacío.
 - [x] Montar el carrito en App y probar controles, última unidad y productos con precios distintos.
 - [ ] Integrar con Nicolas el vaciado solo después del éxito y la conservación del carrito ante fallos.
-- [ ] Revisar el carrito cargado a 375 px con Matias.
+- [x] Revisar el selector, la pastelería y el carrito cargado a 375 px, sin controles recortados ni scroll horizontal.
 
 ### F3. E2E con API real — parcial
 
 - [x] Configurar Playwright, Chromium, servidores reales y `NODE_ENV=test` para la API.
-- [x] Probar menú real, ancho móvil de la pantalla actual y confirmación bloqueada en vacío.
+- [x] Probar el catálogo real, navegación, selector y carrito cargado a 375 px; mantener la confirmación bloqueada en vacío.
+- [x] Verificar el agregado de dos expresos medianos de Colombia y un muffin, con subtotal orientativo de $17.220.
 - [x] Preparar los datos antes de cada E2E mediante seed, que reinicia los pedidos y carga ocho casos conocidos; comprobar la respuesta 201.
 - [ ] Probar el recorrido `/?mesa=4`: elegir café, agregar pastelería, revisar carrito y confirmar ID, estado y total recibidos.
 - [ ] Consultar el estado sin recargar y comprobar el recorrido completo a 375 px sin scroll horizontal.
@@ -81,24 +84,27 @@ El trabajo se organiza según [TP3.pdf](TP3.pdf). Los ticks indican tareas imple
 
 - [x] Mantener los 20 productos, sus IDs y las fórmulas de `calcularPrecio()`.
 - [x] Incorporar clasificación, bebida, tamaño y origen según el tipo, y búsqueda interna con filtros opcionales.
+- [x] Exponer `/productos/buscar` con filtros opcionales, rechazo 400 de criterios inválidos/repetidos y 404 sin coincidencias; mantener MSW consistente con la API.
 - [x] Exponer representaciones coherentes de café/pastelería en ambos GET, con descripciones de acidez, cuerpo y notas.
 - [x] Probar búsqueda, armado de respuestas, catálogo completo, detalles, precios y producto inexistente.
 - [x] Entregar el contrato público documentado y consumido por Zod y MSW.
 
-### M2. Selector de café y pastelería — pendiente
+### M2. Selector de café y pastelería — completo
 
-- [ ] Implementar y probar una función pura de búsqueda por bebida, tamaño y origen entre los productos recibidos.
-- [ ] Ofrecer selección en tres pasos: expreso/filtrado; pocillo/mediano/taza grande; Colombia/Etiopía/Brasil.
-- [ ] Mostrar descripciones y, al elegir bebida y tamaño, el precio de API de cada origen.
-- [ ] Bloquear agregar hasta completar una combinación válida; evitar selecciones incompatibles al cambiar opciones.
-- [ ] Agregar al Context el café elegido y ambas opciones de pastelería, mostrando sus precios.
-- [ ] Probar selección, cambios, bloqueo del botón, precios y agregado al carrito.
+- [x] Implementar y probar `filtrarProductos()` para buscar por bebida, tamaño y origen en el catálogo recibido.
+- [x] Ofrecer selección en tres pasos: expreso/filtrado; pocillo/mediano/taza grande; Colombia/Etiopía/Brasil.
+- [x] Mostrar descripciones y, al elegir bebida y tamaño, el precio de API de cada origen.
+- [x] Bloquear agregar hasta completar una combinación válida; limpiar el origen al cambiar bebida o tamaño.
+- [x] Agregar al Context el café elegido y ambas opciones de pastelería, mostrando sus precios.
+- [x] Probar selección, cambios, bloqueo del botón, precios y agregado al carrito.
+- [x] Ofrecer navegación entre Pedir, Ver productos y Buscar productos, conservando el carrito; mostrar el detalle desde el catálogo y manejar su ausencia.
 
-### M3. Estilos y accesibilidad — pendiente
+### M3. Estilos y accesibilidad — parcial
 
-- [ ] Incorporar Bootstrap personalizado con variables SASS declaradas antes de importarlo.
-- [ ] Definir estilos compartidos y controles etiquetados con nombres accesibles.
-- [ ] Revisar selector, pastelería, carrito y pantallas de pedidos a 375 px sin scroll horizontal.
+- [x] Incorporar Bootstrap personalizado con variables SASS declaradas antes de importarlo.
+- [x] Definir estilos compartidos y controles etiquetados con nombres accesibles.
+- [x] Revisar selector, pastelería y carrito cargado a 375 px sin recortes ni scroll horizontal.
+- [ ] Revisar las pantallas de confirmación y seguimiento a 375 px cuando N3 esté disponible.
 
 ## Tareas de Nicolas
 
@@ -116,7 +122,7 @@ El trabajo se organiza según [TP3.pdf](TP3.pdf). Los ticks indican tareas imple
 - [x] Probar sus efectos y que las rutas no existan fuera del entorno de test.
 - [x] Documentar el contrato y coordinar su uso con Federico.
 
-El [contrato de reset/seed](../README.md#datos-de-prueba-reset-y-seed) detalla respuestas y datos iniciales. Reset responde 200 y deja el próximo ID en 1; seed responde 201, reemplaza los pedidos por ocho casos conocidos y deja el próximo ID en 9. N2 está integrado en develop. F3 utiliza seed antes de cada E2E mediante la función compartida `prepararApi`.
+El [contrato de reset/seed](../README.md#datos-de-prueba-reset-y-seed) detalla respuestas y datos iniciales. Reset responde 200 y deja el próximo ID en 1; seed responde 201, reemplaza los pedidos por ocho casos conocidos y deja el próximo ID en 9. F3 utiliza seed antes de cada E2E mediante la función compartida `prepararApi`.
 
 ### N3. Mesa, confirmación y seguimiento — pendiente
 
@@ -132,14 +138,13 @@ El [contrato de reset/seed](../README.md#datos-de-prueba-reset-y-seed) detalla r
 
 | Trabajo | Qué necesita |
 | --- | --- |
-| H3: conectar selección | Componentes de M2. |
-| N2: reset/seed | Completado e integrado en develop; F3 ya utiliza seed para preparar los datos. |
-| N3: confirmación y seguimiento | Cliente H2 y Context disponibles; puede desarrollarse con MSW mientras se termina la selección. |
+| N3: confirmación y seguimiento | Cliente HTTP, Context, selector y pastelería disponibles para conectar el envío. |
 | F2: vaciado y conservación ante fallos | Integración con la confirmación de N3. |
-| F3: recorrido completo | N3 y M2; revisión visual con M3. La preparación de datos con N2 ya está implementada. |
-| H4: cierre documental | Recorrido final de F3; el contrato de N2 ya está documentado. |
+| M3: revisión móvil restante | Pantallas de confirmación y seguimiento de N3. |
+| F3: recorrido completo | Confirmación y seguimiento de N3; revisión visual con M3. La selección y la preparación de datos ya están implementadas. |
+| H4: cierre documental | Contratos y pantallas finales de N3 y recorrido completo de F3. |
 
-**Para Homero:** H2 está terminado. La siguiente implementación es conectar M2 en H3 cuando esos componentes estén listos; el cierre de H4 depende de las funcionalidades restantes.
+**Para Homero:** H1, H2 y H3 están terminados. De H4 quedan la documentación y la verificación del flujo completo cuando N3/F3 estén disponibles; no hace falta repetir la integración del selector y la pastelería.
 
 ## Funcionalidades del PDF
 
@@ -147,13 +152,13 @@ El [contrato de reset/seed](../README.md#datos-de-prueba-reset-y-seed) detalla r
 | --- | --- | --- |
 | 1 | Mesa desde QR/URL o barra. | API y cliente listos; lectura de URL y encabezado pendientes. |
 | 2 | Menú desde API, carga, error y reintento. | Implementado y probado. |
-| 3 | Café en tres pasos, descripciones y precios por origen. | Pendiente de M2. |
-| 4 | Pastelería con precio y agregado. | Pendiente de M2. |
-| 5 | Carrito, cantidades, subtotales, quitar y bloqueo en vacío. | Componente probado; falta conectarlo al agregado real de M2. |
+| 3 | Café en tres pasos, descripciones y precios por origen. | Implementado y probado. |
+| 4 | Pastelería con precio y agregado. | Implementado y conectado al carrito. |
+| 5 | Carrito, cantidades, subtotales, quitar y bloqueo en vacío. | Implementado y conectado al agregado real de café/pastelería. |
 | 6 | Confirmación con ID, estado y total de API. | API y cliente listos; pantalla pendiente de N3. |
 | 7 | Consulta de estado sin recargar. | Cliente listo; interfaz pendiente de N3. |
 | 8 | Rechazo visible y carrito conservado. | Cliente y Context disponibles; integración pendiente de N3/F2. |
-| 9 | Uso a 375 px sin scroll horizontal. | Pantalla actual verificada; faltan carrito cargado y recorrido completo. |
+| 9 | Uso a 375 px sin scroll horizontal. | Selector y carrito cargado verificados sin recortes; faltan pantallas de pedidos y recorrido completo. |
 
 ## Metodología y entrega
 
@@ -170,7 +175,8 @@ El [contrato de reset/seed](../README.md#datos-de-prueba-reset-y-seed) detalla r
 
 - [x] Backend y frontend conviven en el repositorio con comandos de instalación, desarrollo y pruebas.
 - [x] API de productos y pedidos, proxy, cliente HTTP validado y carrito implementados con sus pruebas.
-- [ ] Completar las nueve funcionalidades y Bootstrap personalizado con SASS.
+- [x] Incorporar Bootstrap personalizado con SASS y controles del menú accesibles a 375 px.
+- [ ] Completar las nueve funcionalidades, incluida la mesa desde URL, confirmación y seguimiento.
 - [x] Habilitar reset/seed solo en test y preparar los datos de cada E2E mediante seed.
 - [ ] Aprobar el recorrido completo de compra y seguimiento a 375 px.
 - [ ] Ejecutar tests, build y lint sobre el sistema completo, y actualizar sus instrucciones finales.
