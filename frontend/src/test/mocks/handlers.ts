@@ -1,4 +1,4 @@
-import { http, HttpResponse, passthrough, type HttpHandler } from "msw";
+import { http, HttpResponse, type HttpHandler } from "msw";
 import type { ErrorApi } from "../../api/esquemas/errores";
 import type { Pedido, RespuestaCrearPedido } from "../../api/esquemas/pedidos";
 import type { Productos } from "../../api/esquemas/productos";
@@ -25,6 +25,12 @@ export function crearHandlerProductos(productos: Productos): HttpHandler {
 function leerCriteriosBusqueda(
   parametros: URLSearchParams,
 ): CriteriosBusquedaProducto | null {
+  if (["tipo", "tipoCafe", "tamaño", "variedad"].some(
+    (criterio) => parametros.getAll(criterio).length > 1,
+  )) {
+    return null;
+  }
+
   const criterios: CriteriosBusquedaProducto = {};
   const tipo = parametros.get("tipo");
   const tipoCafe = parametros.get("tipoCafe");
@@ -101,8 +107,8 @@ export function crearHandlerProductoPorId(catalogo: Productos): HttpHandler {
 
   return http.get(url, ({ params }) => {
     const idTexto = String(params.id);
-    if (!/^\d+$/.test(idTexto)) {
-      return passthrough();
+    if (idTexto === "buscar") {
+      return;
     }
 
     const id = Number(idTexto);

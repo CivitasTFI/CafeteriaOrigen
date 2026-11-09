@@ -50,6 +50,23 @@ describe('Endpoints de productos', () => {
 
             expect(response.status).toBe(400);
         });
+
+        it.each([
+            { criterio: 'tipo', primero: 'cafe', segundo: 'pasteleria' },
+            { criterio: 'tipoCafe', primero: 'expreso', segundo: 'filtrado' },
+            { criterio: 'tamaño', primero: 'pocillo', segundo: 'mediano' },
+            { criterio: 'variedad', primero: 'colombia', segundo: 'brasil' },
+        ])('rechaza el criterio repetido $criterio aunque haya otros filtros válidos', async ({ criterio, primero, segundo }) => {
+            const parametros = new URLSearchParams();
+            parametros.set(criterio === 'tipo' ? 'tipoCafe' : 'tipo', criterio === 'tipo' ? 'expreso' : 'cafe');
+            parametros.append(criterio, primero);
+            parametros.append(criterio, segundo);
+
+            const response = await request(app).get(`/productos/buscar?${parametros}`);
+
+            expect(response.status).toBe(400);
+            expect(response.body).toEqual({ error: 'Criterios de búsqueda inválidos o vacíos' });
+        });
     });
 
     describe('GET /productos/:id', () => {

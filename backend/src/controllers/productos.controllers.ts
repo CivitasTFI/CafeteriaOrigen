@@ -22,20 +22,20 @@ function leerQueryBusqueda(query: Request["query"]): InterfazBusquedaProducto | 
     const tamaño = query.tamaño;
     const variedad = query.variedad;
 
-    if (typeof tipo === "string") {
-        if (!TIPOS.has(tipo)) return null;
+    if (tipo !== undefined) {
+        if (typeof tipo !== "string" || !TIPOS.has(tipo)) return null;
         criterios.tipo = tipo as InterfazBusquedaProducto["tipo"];
     }
-    if (typeof tipoCafe === "string") {
-        if (!TIPOS_CAFE.has(tipoCafe)) return null;
+    if (tipoCafe !== undefined) {
+        if (typeof tipoCafe !== "string" || !TIPOS_CAFE.has(tipoCafe)) return null;
         criterios.tipoCafe = tipoCafe as InterfazBusquedaProducto["tipoCafe"];
     }
-    if (typeof tamaño === "string") {
-        if (!TAMANOS.has(tamaño)) return null;
+    if (tamaño !== undefined) {
+        if (typeof tamaño !== "string" || !TAMANOS.has(tamaño)) return null;
         criterios.tamaño = tamaño as InterfazBusquedaProducto["tamaño"];
     }
-    if (typeof variedad === "string") {
-        if (!VARIEDADES.has(variedad)) return null;
+    if (variedad !== undefined) {
+        if (typeof variedad !== "string" || !VARIEDADES.has(variedad)) return null;
         criterios.variedad = variedad as InterfazBusquedaProducto["variedad"];
     }
 

@@ -38,6 +38,26 @@ describe("Consulta de búsqueda de productos", () => {
     );
   });
 
+  test.each([
+    { criterio: "tipo", primero: "cafe", segundo: "pasteleria" },
+    { criterio: "tipoCafe", primero: "expreso", segundo: "filtrado" },
+    { criterio: "tamaño", primero: "pocillo", segundo: "mediano" },
+    { criterio: "variedad", primero: "colombia", segundo: "brasil" },
+  ])("el mock rechaza el criterio repetido $criterio con 400", async ({ criterio, primero, segundo }) => {
+    server.use(crearHandlerBuscarProductos(catalogoPrueba));
+    const url = new URL("/productos/buscar", window.location.origin);
+    url.searchParams.set(criterio === "tipo" ? "tipoCafe" : "tipo", criterio === "tipo" ? "expreso" : "cafe");
+    url.searchParams.append(criterio, primero);
+    url.searchParams.append(criterio, segundo);
+
+    const respuesta = await fetch(url);
+
+    expect(respuesta.status).toBe(400);
+    await expect(respuesta.json()).resolves.toEqual({
+      error: "Criterios de búsqueda inválidos o vacíos",
+    });
+  });
+
   test("propaga el mensaje de error cuando no hay coincidencias", async () => {
     server.use(crearHandlerBuscarProductos(catalogoPrueba));
 

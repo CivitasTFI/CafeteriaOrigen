@@ -114,6 +114,62 @@ TP3.pdf
 | GET | `/pedidos/:id` | Pedido directo. |
 | GET | `/reportes/facturacion` | `{ facturacion: number }`. |
 | GET | `/reportes/mas-vendido` | `{ productosMasVendidos }`. |
+| POST | `/__test__/reset` | 200 con `{ mensaje }`. Solo en test. |
+| POST | `/__test__/seed` | 201 con `{ mensaje }`. Solo en test. |
+
+### Datos de prueba: reset y seed
+
+Estas rutas se habilitan únicamente si `NODE_ENV=test` al iniciar la API. En cualquier otro entorno responden 404. Ambas se invocan sin cuerpo y usan el catálogo existente de 20 productos; no lo modifican.
+
+`POST /__test__/reset` elimina todos los pedidos y reinicia la secuencia de IDs. El siguiente pedido creado recibe ID **1**. Responde HTTP **200**:
+
+```json
+{ "mensaje": "Los tests fueron reiniciados correctamente" }
+```
+
+`POST /__test__/seed` primero reinicia los pedidos y luego crea los ocho pedidos de la tabla. Reemplaza los datos anteriores: ejecutarlo dos veces deja el mismo resultado, sin acumular pedidos. Todos quedan con estado `"pendiente"`; el siguiente pedido creado recibe ID **9**. Responde HTTP **201**:
+
+```json
+{ "mensaje": "Los datos fueron cargados correctamente" }
+```
+
+Los ítems se indican como `productoId × cantidad`. Los totales son los calculados por la API con el catálogo actual.
+
+| ID de pedido | Mesa | Ítems (`productoId × cantidad`) | Total |
+| --- | --- | --- | --- |
+| 1 | 1 | 3 × 1 | 6820 |
+| 2 | 2 | 2 × 4; 19 × 4 | 32960 |
+| 3 | 3 | 5 × 2 | 14720 |
+| 4 | 4 | 8 × 2; 20 × 2 | 26360 |
+| 5 | 5 | 18 × 1; 19 × 1 | 11700 |
+| 6 | 6 | 13 × 2; 16 × 2; 20 × 1; 19 × 3 | 35700 |
+| 7 | 7 | 5 × 1; 2 × 1; 13 × 1; 19 × 3 | 25900 |
+| 8 | 8 | 14 × 2; 9 × 1; 20 × 1; 19 × 1 | 29640 |
+
+Los pedidos cargados se consultan con `GET /pedidos` o `GET /pedidos/:id`; la respuesta del seed solo contiene el mensaje.
+
+Para probarlo manualmente, iniciar la API en una terminal PowerShell:
+
+```powershell
+$env:NODE_ENV = "test"
+npm run dev:backend
+```
+
+En otra terminal:
+
+```powershell
+Invoke-RestMethod -Uri "http://localhost:3000/__test__/reset" -Method Post
+Invoke-RestMethod -Uri "http://localhost:3000/__test__/seed" -Method Post
+Invoke-RestMethod -Uri "http://localhost:3000/pedidos" -Method Get
+```
+
+Los E2E preparan sus datos mediante `prepararApi`, que ejecuta seed y comprueba la respuesta 201 antes de cada prueba. Seed ya reinicia los pedidos, por lo que no se llama a reset por separado. Las peticiones se envían directamente a `http://localhost:3000`, porque el proxy de Vite no incluye `/__test__`. Playwright inicia la API con `NODE_ENV=test`. Esta preparación deja ocho pedidos iniciales; el siguiente pedido creado recibe ID 9.
+
+Para verificar el contrato y los efectos de ambas rutas desde la raíz:
+
+```powershell
+npm run test:backend -- --runTestsByPath tests/integration/test-endpoints.test.ts
+```
 
 ### Productos
 

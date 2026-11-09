@@ -59,6 +59,7 @@ test("muestra selector y pastelería cuando el menú está listo", async () => {
 });
 
 test("muestra el catálogo y el detalle en la vista Ver productos", async () => {
+  const usuario = userEvent.setup();
   renderVerProductos();
 
   const listado = await screen.findByRole("list", {
@@ -68,6 +69,32 @@ test("muestra el catálogo y el detalle en la vista Ver productos", async () => 
   expect(
     screen.getByRole("heading", { name: "Detalle de producto" }),
   ).toBeInTheDocument();
+
+  await usuario.selectOptions(screen.getByRole("combobox", {
+    name: "Elegir producto por ID",
+  }), "20");
+
+  const detalle = screen.getByRole("region", { name: "Detalle de producto" });
+  expect(within(detalle).getByText("Torta Selva Negra")).toBeInTheDocument();
+  expect(within(detalle).getByText("$4.200")).toBeInTheDocument();
+});
+
+test("no consulta un ID inventado ni muestra detalle cuando el catálogo está vacío", async () => {
+  const solicitudesDetalle: string[] = [];
+  server.use(
+    crearHandlerProductos([]),
+    http.get(new URL("/productos/:id", window.location.origin).href, ({ request }) => {
+      solicitudesDetalle.push(request.url);
+      return HttpResponse.json(catalogoCompleto[0]);
+    }),
+  );
+
+  renderVerProductos();
+
+  expect(await screen.findByText("No hay productos disponibles en el catálogo.")).toBeInTheDocument();
+  expect(screen.queryByRole("combobox", { name: "Elegir producto por ID" })).not.toBeInTheDocument();
+  expect(screen.queryByText("Expreso Pocillo Brasil")).not.toBeInTheDocument();
+  expect(solicitudesDetalle).toEqual([]);
 });
 
 test("muestra el error de la API y deja de mostrar la carga ante un 500", async () => {

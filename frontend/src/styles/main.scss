@@ -16,14 +16,9 @@
 @import "bootstrap/scss/utilities/api";
 
 html,
-body {
-  overflow-x: hidden;
-  max-width: 100%;
-}
-
+body,
 #root {
   max-width: 100%;
-  overflow-x: hidden;
 }
 
 main {
@@ -36,6 +31,23 @@ main {
 .menu-pagina {
   width: 100%;
   max-width: 100%;
+}
+
+.selector-cafe .form-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-left: 0;
+}
+
+.selector-cafe .form-check-input {
+  flex-shrink: 0;
+  float: none;
+  margin: 0;
+}
+
+.selector-cafe .form-check-label {
+  min-width: 0;
 }
 
 .selector-cafe .form-check-input,

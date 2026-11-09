@@ -185,6 +185,10 @@ npm run test:e2e
 
 Los puertos 3000 y 5173 deben estar libres. Playwright inicia y cierra ambos servidores, sin reutilizar otros existentes, y configura la API con `NODE_ENV=test`; no necesita un archivo `.env` para hacerlo.
 
-Los casos disponibles verifican el menú con 20 productos reales, la ausencia de scroll horizontal a 375 × 812 y la confirmación deshabilitada con carrito vacío. El recorrido completo de compra/seguimiento y la preparación HTTP con reset/seed siguen pendientes. Estos E2E se ejecutan por separado de `npm test`.
+Antes de cada E2E, `beforeEach` ejecuta `prepararApi(request)`, definida en `e2e/fixtures/api.ts`. Esta función envía un POST a `http://localhost:3000/__test__/seed` y comprueba que responda 201. Las peticiones van directamente a la API porque el proxy de Vite no incluye `/__test__`.
+
+Seed elimina los pedidos anteriores, reinicia los IDs y carga ocho pedidos conocidos. Así, cada prueba comienza con los mismos datos. No hace falta llamar a reset por separado, porque seed ya realiza esa limpieza. El siguiente pedido creado recibe ID 9. El [contrato y los datos del seed](../README.md#datos-de-prueba-reset-y-seed) están en README.
+
+Las cuatro pruebas actuales comprueban la carga del menú con 20 productos reales, la ausencia de scroll horizontal a 375 × 812, la confirmación bloqueada con carrito vacío y la existencia de los ocho pedidos iniciales. Los E2E se ejecutan por separado de las pruebas unitarias y de integración. El recorrido completo de compra y seguimiento sigue pendiente.
 
 El flujo TDD y los criterios de entrega están en [planificacion.md](planificacion.md#metodología-y-entrega).

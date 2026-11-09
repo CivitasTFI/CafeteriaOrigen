@@ -7,9 +7,9 @@ El trabajo se organiza según [TP3.pdf](TP3.pdf). Los ticks indican tareas imple
 | Integrante | Responsabilidad | Estado |
 | --- | --- | --- |
 | Homero | Herramientas, cliente HTTP, Zod, carga del menú y documentación. | H1 y H2 completos; H3 espera componentes de M2 y H4 acompaña el cierre del sistema. |
-| Federico | Lógica/interfaz del carrito y E2E con API real. | F1 completo; F2 espera integración con pedidos y revisión móvil; F3 tiene infraestructura y casos iniciales. |
+| Federico | Lógica/interfaz del carrito y E2E con API real. | F1 completo; F2 espera integración con pedidos y revisión móvil; F3 tiene preparación de datos y cuatro E2E, con el recorrido completo pendiente. |
 | Matias | Productos de API, selector de café, pastelería y estilos. | M1 completo; M2 y M3 pendientes. |
-| Nicolas | Mesas/pedidos de API, reset/seed, URL, confirmación y seguimiento. | N1 completo; N2 y N3 pendientes. |
+| Nicolas | Mesas/pedidos de API, reset/seed, URL, confirmación y seguimiento. | N1 y N2 completos e integrados en develop; N3 pendiente. |
 
 ## Acuerdos compartidos
 
@@ -47,7 +47,7 @@ El trabajo se organiza según [TP3.pdf](TP3.pdf). Los ticks indican tareas imple
 
 - [x] Documentar instalación, comandos, arquitectura y contratos implementados.
 - [x] Mantener el reparto y las tareas completadas/pendientes.
-- [ ] Documentar reset/seed y el recorrido E2E completo cuando estén implementados.
+- [ ] Documentar el recorrido E2E completo cuando esté implementado; el contrato de reset/seed ya está documentado en README.
 - [ ] Coordinar la verificación final de comandos, configuraciones y documentación del sistema completo.
 
 ## Tareas de Federico
@@ -71,7 +71,7 @@ El trabajo se organiza según [TP3.pdf](TP3.pdf). Los ticks indican tareas imple
 
 - [x] Configurar Playwright, Chromium, servidores reales y `NODE_ENV=test` para la API.
 - [x] Probar menú real, ancho móvil de la pantalla actual y confirmación bloqueada en vacío.
-- [ ] Ejecutar reset y seed por HTTP antes de cada E2E, coordinando datos con Nicolas.
+- [x] Preparar los datos antes de cada E2E mediante seed, que reinicia los pedidos y carga ocho casos conocidos; comprobar la respuesta 201.
 - [ ] Probar el recorrido `/?mesa=4`: elegir café, agregar pastelería, revisar carrito y confirmar ID, estado y total recibidos.
 - [ ] Consultar el estado sin recargar y comprobar el recorrido completo a 375 px sin scroll horizontal.
 
@@ -109,12 +109,14 @@ El trabajo se organiza según [TP3.pdf](TP3.pdf). Los ticks indican tareas imple
 - [x] Validar cuerpo, ítems, productos, cantidades, estados e importes; centralizar errores sin guardar pedidos inválidos.
 - [x] Probar mesa/barra, rechazos, conservación de pedidos/facturación/IDs y el ejemplo del PDF con total 17220.
 
-### N2. Reset y seed — pendiente
+### N2. Reset y seed — completo
 
-- [ ] Crear `POST /__test__/reset` y `POST /__test__/seed`, disponibles únicamente con `NODE_ENV=test`.
-- [ ] Reutilizar `reiniciarPedidos()` para vaciar pedidos y reiniciar IDs; definir datos iniciales deterministas.
-- [ ] Probar sus efectos y que las rutas no existan fuera del entorno de test.
-- [ ] Documentar el contrato y coordinar su uso con Federico.
+- [x] Crear `POST /__test__/reset` y `POST /__test__/seed`, disponibles únicamente con `NODE_ENV=test`.
+- [x] Reutilizar `reiniciarPedidos()` para vaciar pedidos y reiniciar IDs; definir datos iniciales deterministas.
+- [x] Probar sus efectos y que las rutas no existan fuera del entorno de test.
+- [x] Documentar el contrato y coordinar su uso con Federico.
+
+El [contrato de reset/seed](../README.md#datos-de-prueba-reset-y-seed) detalla respuestas y datos iniciales. Reset responde 200 y deja el próximo ID en 1; seed responde 201, reemplaza los pedidos por ocho casos conocidos y deja el próximo ID en 9. N2 está integrado en develop. F3 utiliza seed antes de cada E2E mediante la función compartida `prepararApi`.
 
 ### N3. Mesa, confirmación y seguimiento — pendiente
 
@@ -131,11 +133,11 @@ El trabajo se organiza según [TP3.pdf](TP3.pdf). Los ticks indican tareas imple
 | Trabajo | Qué necesita |
 | --- | --- |
 | H3: conectar selección | Componentes de M2. |
-| N2: reset/seed | Puede avanzar con la API disponible. |
+| N2: reset/seed | Completado e integrado en develop; F3 ya utiliza seed para preparar los datos. |
 | N3: confirmación y seguimiento | Cliente H2 y Context disponibles; puede desarrollarse con MSW mientras se termina la selección. |
 | F2: vaciado y conservación ante fallos | Integración con la confirmación de N3. |
-| F3: recorrido completo | N2, N3 y M2; revisión visual con M3. |
-| H4: cierre documental | Contratos de N2 y recorrido final de F3. |
+| F3: recorrido completo | N3 y M2; revisión visual con M3. La preparación de datos con N2 ya está implementada. |
+| H4: cierre documental | Recorrido final de F3; el contrato de N2 ya está documentado. |
 
 **Para Homero:** H2 está terminado. La siguiente implementación es conectar M2 en H3 cuando esos componentes estén listos; el cierre de H4 depende de las funcionalidades restantes.
 
@@ -158,7 +160,7 @@ El trabajo se organiza según [TP3.pdf](TP3.pdf). Los ticks indican tareas imple
 - Trabajar un comportamiento por vez mediante **RED → GREEN → REFACTOR**, verificando el resultado de cada etapa. En el trabajo asistido se espera autorización antes de avanzar a la siguiente.
 - Usar commits separados: `RED: descripción`, `GREEN: descripción` y `REFACTOR: descripción`. El refactor debe tener una mejora justificable y conservar los tests verdes.
 - Si una prueba nueva ya pasa, registrarla como regresión sin romper código para fabricar un RED. Documentación y cobertura existente usan `docs:` y `test:`.
-- Mantener tests de API con Jest/Supertest; unitarios, componentes e integración de frontend con Vitest/Testing Library/MSW; pocos E2E con Playwright y API real, incluyendo un recorrido completo con reset/seed antes de cada test.
+- Mantener tests de API con Jest/Supertest; unitarios, componentes e integración de frontend con Vitest/Testing Library/MSW; pocos E2E con Playwright y API real, incluyendo un recorrido completo y la preparación de datos mediante seed antes de cada test.
 - Consultar la interfaz por rol, etiqueta o texto. Usar `getByTestId` cuando no haya una alternativa adecuada.
 - Cada integrante guarda sus commits y trabaja en sus tareas. El asistente entrega comandos y no ejecuta `git add`, `git commit` ni `git push`; cambiar ramas requiere autorización.
 - Integrar por PR con revisión cruzada y preservar la evidencia TDD. Homero revisa a Federico; Federico a Homero; Matias a Nicolas; Nicolas a Matias. La entrega final debe quedar en `main`.
@@ -169,7 +171,7 @@ El trabajo se organiza según [TP3.pdf](TP3.pdf). Los ticks indican tareas imple
 - [x] Backend y frontend conviven en el repositorio con comandos de instalación, desarrollo y pruebas.
 - [x] API de productos y pedidos, proxy, cliente HTTP validado y carrito implementados con sus pruebas.
 - [ ] Completar las nueve funcionalidades y Bootstrap personalizado con SASS.
-- [ ] Habilitar reset/seed solo en test y usarlos en cada E2E.
+- [x] Habilitar reset/seed solo en test y preparar los datos de cada E2E mediante seed.
 - [ ] Aprobar el recorrido completo de compra y seguimiento a 375 px.
 - [ ] Ejecutar tests, build y lint sobre el sistema completo, y actualizar sus instrucciones finales.
 - [ ] Completar revisiones cruzadas e integrar la entrega en `main`, con participación de los cuatro integrantes y TDD visible.
