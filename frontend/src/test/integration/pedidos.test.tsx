@@ -216,3 +216,31 @@ test("vacía el carrito después de crear correctamente el pedido", async () => 
     expect(screen.getByTestId("items-carrito"))
         .toHaveTextContent("0");
 });
+
+test("muestra un error HTTP y conserva el carrito", async () => {
+    const usuario = userEvent.setup();
+
+    server.use(
+        http.post(URLpedidos, () => {
+            return HttpResponse.json(
+                { error: "Error interno del servidor" },
+                { status: 500 }
+            );
+        })
+    );
+
+    renderizarConfirmacion();
+
+    await cargarCarrito(usuario);
+
+    await usuario.click(
+        screen.getByRole("button", { name: "Confirmar pedido" })
+    );
+
+    expect(
+        await screen.findByRole("alert")
+    ).toHaveTextContent("Error interno del servidor");
+
+    expect(screen.getByTestId("items-carrito"))
+        .toHaveTextContent("2");
+});
