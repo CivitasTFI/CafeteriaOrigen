@@ -8,7 +8,10 @@ export function leerMesa (parametros: URLSearchParams): number | undefined {
         return undefined;
     }
 
-
+    if (valor.trim() === ""){
+        throw new Error("El parámetro no debe estar vacío");
+    }
+    
     const mesaId = Number(valor);
 
     
