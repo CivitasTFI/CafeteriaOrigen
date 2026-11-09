@@ -1,8 +1,8 @@
 import { expect, test } from "@playwright/test";
+import { prepararApi } from "./fixtures/api";
 
 test.beforeEach( async ({ request }) => {
-  const respuesta = await request.post("http://localhost:3000/__test__/seed");
-  expect(respuesta.status()).toBe(201);
+  await prepararApi(request);
 });
 
 test("muestra los 20 productos de la API real", async ({ page }) => {
