@@ -13,6 +13,62 @@ describe('Endpoints de productos', () => {
         });
     });
 
+    describe('GET /productos/buscar', () => {
+        it('devuelve los cafés que coinciden con tipoCafe y tamaño', async () => {
+            const response = await request(app).get('/productos/buscar').query({
+                tipoCafe: 'expreso',
+                tamaño: 'taza grande',
+            });
+
+            expect(response.status).toBe(200);
+            expect(response.body).toHaveLength(3);
+            expect(response.body.every((p: { tipoCafe: string }) => p.tipoCafe === 'expreso')).toBe(true);
+        });
+
+        it('devuelve pastelería por tipo y variedad', async () => {
+            const response = await request(app).get('/productos/buscar').query({
+                tipo: 'pasteleria',
+                variedad: 'muffin de chocolate',
+            });
+
+            expect(response.status).toBe(200);
+            expect(response.body).toHaveLength(1);
+            expect(response.body[0].id).toBe(19);
+        });
+
+        it('devuelve 404 si no hay coincidencias', async () => {
+            const response = await request(app).get('/productos/buscar').query({
+                tipo: 'cafe',
+                variedad: 'torta selva negra',
+            });
+
+            expect(response.status).toBe(404);
+        });
+
+        it('devuelve 400 sin criterios', async () => {
+            const response = await request(app).get('/productos/buscar');
+
+            expect(response.status).toBe(400);
+        });
+
+        it.each([
+            { criterio: 'tipo', primero: 'cafe', segundo: 'pasteleria' },
+            { criterio: 'tipoCafe', primero: 'expreso', segundo: 'filtrado' },
+            { criterio: 'tamaño', primero: 'pocillo', segundo: 'mediano' },
+            { criterio: 'variedad', primero: 'colombia', segundo: 'brasil' },
+        ])('rechaza el criterio repetido $criterio aunque haya otros filtros válidos', async ({ criterio, primero, segundo }) => {
+            const parametros = new URLSearchParams();
+            parametros.set(criterio === 'tipo' ? 'tipoCafe' : 'tipo', criterio === 'tipo' ? 'expreso' : 'cafe');
+            parametros.append(criterio, primero);
+            parametros.append(criterio, segundo);
+
+            const response = await request(app).get(`/productos/buscar?${parametros}`);
+
+            expect(response.status).toBe(400);
+            expect(response.body).toEqual({ error: 'Criterios de búsqueda inválidos o vacíos' });
+        });
+    });
+
     describe('GET /productos/:id', () => {
         it.each(catalogoEsperado)('devuelve el contrato completo de $nombre (ID $id)', async (productoEsperado) => {
             const response = await request(app).get(`/productos/${productoEsperado.id}`);
