@@ -9,7 +9,7 @@ interface ConfirmarPedidoProps {
 }
 
 export default function ConfirmarPedido({ mesaId }: ConfirmarPedidoProps) {
-    const { items } = useCarrito();
+    const { items , vaciarCarrito} = useCarrito();
     const { enviarPedido } = usePedido();
 
     const [enviando, setEnviando] = useState(false);
@@ -29,6 +29,7 @@ export default function ConfirmarPedido({ mesaId }: ConfirmarPedidoProps) {
         try {
             const respuesta = await enviarPedido(itemsPedido, mesaId);
             setPedidoCreado(respuesta.pedido);
+            vaciarCarrito()
         } finally {
             setEnviando(false);
         }
