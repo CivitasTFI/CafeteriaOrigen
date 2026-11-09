@@ -136,3 +136,38 @@ test("muestra la carga y bloquea confirmaciones repetidas durante el envío", as
 
     expect(cantidadSolicitudes).toBe(1);
 })
+
+test("muestra la información del pedido creado", async () => {
+    const usuario = userEvent.setup();
+
+    server.use(
+        http.post(URLpedidos, async () => {
+            return HttpResponse.json(
+                respuestaCrearPedidoApi,
+                { status: 201 }
+            );
+        })
+    );
+
+    renderizarConfirmacion();
+
+    await cargarCarrito(usuario);
+
+    await usuario.click(
+        screen.getByRole("button", {
+            name: "Confirmar pedido",
+        })
+    );
+
+    expect(
+        await screen.findByText("id:1")
+    ).toBeInTheDocument();
+
+    expect(
+        screen.getByText("estado: pendiente")
+    ).toBeInTheDocument();
+
+    expect(
+        screen.getByText("total: 17220")
+    ).toBeInTheDocument();
+});
