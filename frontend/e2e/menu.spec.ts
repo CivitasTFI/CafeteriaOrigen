@@ -1,7 +1,16 @@
 import { expect, test } from "@playwright/test";
 
-test("muestra el selector de café y la pastelería", async ({ page }) => {
+test("muestra el catálogo, selector de café y pastelería", async ({ page }) => {
   await page.goto("/");
+
+  await page.getByRole("button", { name: "Ver productos" }).click();
+
+  const menu = page.getByRole("list", {
+    name: "Productos del menú",
+  });
+  await expect(menu.getByRole("listitem")).toHaveCount(20);
+
+  await page.getByRole("button", { name: "Pedir" }).click();
 
   await expect(
     page.getByRole("heading", { name: "Café", exact: true }),
@@ -15,8 +24,10 @@ test("el menú no tiene scroll horizontal a 375 px", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 667 });
   await page.goto("/");
 
+  await page.getByRole("button", { name: "Ver productos" }).click();
+
   await expect(
-    page.getByRole("heading", { name: "Café", exact: true }),
+    page.getByRole("list", { name: "Productos del menú" }),
   ).toBeVisible();
 
   const medidas = await page.evaluate(() => ({
