@@ -1,19 +1,12 @@
 interface EncabezadoProps {
-    mesaId?:number;
+  mesaId?: number;
 }
 
-export default function Encabezado ({mesaId}: EncabezadoProps){
-    return (
-        <header>
-            <h1>Cafeteria Origen</h1>
-
-            <p>
-                {mesaId !== undefined
-                    ?  `mesa ${mesaId}`
-                    : "retiro en barra"   
-                }
-            </p>
-
-        </header>
-    )
+export default function Encabezado({ mesaId }: EncabezadoProps) {
+  return (
+    <header>
+      <h1>Cafetería Origen</h1>
+      <p>{mesaId === undefined ? "retiro en barra" : `mesa ${mesaId}`}</p>
+    </header>
+  );
 }

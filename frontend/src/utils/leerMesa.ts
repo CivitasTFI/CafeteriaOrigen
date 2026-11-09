@@ -1,32 +1,13 @@
-const MESA_VALIDAS = [1,2,3,4,5,6,7,8];
+import { esquemaPedido } from "../api/esquemas/pedidos";
 
-export function leerMesa (parametros: URLSearchParams): number | undefined {
-    
-    const valor = parametros.get("mesaId");
-
-    if (valor === null) {
-        return undefined;
-    }
-
-    return validarMesa(valor);
+export function leerMesa(parametros: URLSearchParams): number | undefined {
+  const valores = parametros.getAll("mesa");
+  if (valores.length !== 1) return undefined;
+  return validarMesa(valores[0] ?? "");
 }
 
-function validarMesa (valor:string): number {
-
-    if (valor.trim() === ""){
-        throw new Error("El parámetro no debe estar vacío");
-    }
-
-    const mesaId = Number(valor);
-
-    
-    if (!Number.isInteger(mesaId)){
-        throw new Error("ingresar un número entero")
-    }
-
-    if(!MESA_VALIDAS.includes(mesaId)){
-        throw new Error("mesa inválida");
-    }
-
-    return mesaId;
+function validarMesa(valor: string): number | undefined {
+  if (!/^\d+$/.test(valor)) return undefined;
+  const resultado = esquemaPedido.shape.mesaId.safeParse(Number(valor));
+  return resultado.success ? resultado.data : undefined;
 }
