@@ -1,14 +1,15 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { beforeEach, expect, test } from "vitest";
 import MenuPage from "../../pages/MenuPage";
+import VerProductosPage from "../../pages/VerProductosPage";
 import { CarritoProvider } from "../../context/CarritoContext";
 import { erroresApi } from "../fixtures/errores";
-import { catalogoPrueba, productosApi } from "../fixtures/productos";
+import { catalogoCompleto } from "../fixtures/productos";
 import {
-  crearHandlerBuscarProductos,
   crearHandlerError,
+  crearHandlerProductoPorId,
   crearHandlerProductos,
 } from "../mocks/handlers";
 import { server } from "../mocks/server";
@@ -23,27 +24,50 @@ function renderMenu() {
   );
 }
 
+function renderVerProductos() {
+  return render(
+    <CarritoProvider>
+      <VerProductosPage />
+    </CarritoProvider>,
+  );
+}
+
 beforeEach(() => {
   server.use(
-    crearHandlerProductos(productosApi),
-    crearHandlerBuscarProductos(catalogoPrueba),
+    crearHandlerProductos(catalogoCompleto),
+    crearHandlerProductoPorId(catalogoCompleto),
   );
 });
 
 test("muestra un indicador accesible al iniciar la carga del menú", () => {
-  server.use(crearHandlerProductos(productosApi));
+  server.use(crearHandlerProductos(catalogoCompleto));
 
   renderMenu();
 
   expect(screen.getByRole("status")).toHaveTextContent("Cargando menú");
 });
 
-test("muestra el selector de café y pastelería cuando el menú está listo", async () => {
+test("muestra selector y pastelería cuando el menú está listo", async () => {
   renderMenu();
 
   expect(await screen.findByRole("heading", { name: "Café" })).toBeInTheDocument();
   expect(screen.getByRole("heading", { name: "Pastelería" })).toBeInTheDocument();
-  expect(await screen.findByText("$2.500")).toBeInTheDocument();
+  const pasteleria = screen.getByRole("heading", { name: "Pastelería" });
+  const seccionPasteleria = pasteleria.closest("section") ?? pasteleria.parentElement;
+  expect(seccionPasteleria).not.toBeNull();
+  expect(within(seccionPasteleria as HTMLElement).getByText("Torta Selva Negra")).toBeInTheDocument();
+});
+
+test("muestra el catálogo y el detalle en la vista Ver productos", async () => {
+  renderVerProductos();
+
+  const listado = await screen.findByRole("list", {
+    name: "Productos del menú",
+  });
+  expect(within(listado).getAllByRole("listitem")).toHaveLength(20);
+  expect(
+    screen.getByRole("heading", { name: "Detalle de producto" }),
+  ).toBeInTheDocument();
 });
 
 test("muestra el error de la API y deja de mostrar la carga ante un 500", async () => {
@@ -72,8 +96,8 @@ test.each([
     caso: "un precio textual en la respuesta",
     handler: http.get(urlProductos, () =>
       HttpResponse.json([
-        productosApi[0],
-        { ...productosApi[1], precio: "2500" },
+        catalogoCompleto[0],
+        { ...catalogoCompleto[18], precio: "2500" },
       ]),
     ),
     mensaje: "La respuesta del servidor no tiene el formato esperado",
@@ -93,8 +117,8 @@ test.each([
     ).not.toBeInTheDocument();
 
     server.use(
-      crearHandlerProductos(productosApi),
-      crearHandlerBuscarProductos(catalogoPrueba),
+      crearHandlerProductos(catalogoCompleto),
+      crearHandlerProductoPorId(catalogoCompleto),
     );
     await usuario.click(screen.getByRole("button", { name: "Reintentar" }));
 
