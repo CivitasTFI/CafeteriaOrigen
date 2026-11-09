@@ -97,3 +97,42 @@ test.each([
         expect(solicitudes[0]).toEqual(cuerpoEsperado);
     }    
 );
+
+test("muestra la carga y bloquea confirmaciones repetidas durante el envío", async () => {
+    const usuario = userEvent.setup();
+    let cantidadSolicitudes = 0;
+
+    server.use(
+        http.post(URLpedidos, async () => {
+            cantidadSolicitudes++;
+
+            await delay(150);
+
+            return HttpResponse.json(respuestaCrearPedidoApi, {
+                status: 201,
+            });
+        })
+    )
+
+    renderizarConfirmacion();
+
+    await cargarCarrito(usuario);
+
+    await usuario.click(
+        screen.getByRole("button", { name: "Confirmar pedido" })
+    );
+
+    const botonEnviado = await screen.findByRole("button", { name: "Enviando pedido...", });
+
+    expect(botonEnviado).toBeDisabled();
+
+    await usuario.click(botonEnviado);
+
+    await waitFor(() => {
+        expect(
+            screen.getByRole("button", { name: "Confirmar pedido" })
+        ).toBeEnabled();
+    });
+
+    expect(cantidadSolicitudes).toBe(1);
+})
