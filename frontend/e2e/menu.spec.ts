@@ -1,5 +1,9 @@
 import { expect, test } from "@playwright/test";
 
+test.beforeEach( async ({ request }) => {
+  await request.post("http://localhost:3000/__test__/seed");
+});
+
 test("muestra los 20 productos de la API real", async ({ page }) => {
   await page.goto("/");
 
