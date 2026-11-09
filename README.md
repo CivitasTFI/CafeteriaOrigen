@@ -53,7 +53,7 @@ El proxy de Vite envía `/productos` y `/pedidos`, incluidas sus subrutas, a la 
 
 Los pedidos se guardan en memoria y se pierden al reiniciar el servidor.
 
-El frontend ofrece las secciones **Pedir**, **Ver productos** y **Buscar productos**. Permite elegir cafés, agregar pastelería y modificar el carrito. El envío del pedido, la mesa desde URL y el seguimiento siguen pendientes; su estado está en [planificacion.md](docs/planificacion.md).
+El frontend ofrece las secciones **Pedir**, **Ver productos** y **Buscar productos**. Permite elegir cafés, agregar pastelería, modificar el carrito y confirmar el pedido. Al abrir `http://localhost:5173/?mesa=4`, el encabezado muestra la mesa y el pedido la conserva; sin una mesa válida, corresponde retiro en barra. La confirmación muestra el número, estado y total recibidos de la API, y permite consultar el estado sin recargar. Ante un rechazo se conserva el carrito y se puede reintentar.
 
 ## Comandos
 

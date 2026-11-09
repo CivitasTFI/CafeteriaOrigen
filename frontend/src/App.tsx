@@ -7,19 +7,29 @@ import NavegacionPrincipal, {
   type VistaApp,
 } from "./components/layout/NavegacionPrincipal";
 import Carrito from "./components/carrito/Carrito";
+import Encabezado from "./components/layout/Encabezado";
+import { leerMesa } from "./utils/leerMesa";
 
 function App() {
   const [vista, setVista] = useState<VistaApp>("pedido");
+  const [enviandoPedido, setEnviandoPedido] = useState(false);
+  const mesaId = leerMesa(new URLSearchParams(window.location.search));
 
   return (
     <CarritoProvider>
+      <Encabezado mesaId={mesaId} />
       <main>
-        <h1>Cafetería Origen</h1>
-        <NavegacionPrincipal vista={vista} onCambiar={setVista} />
-        {vista === "pedido" && <MenuPage />}
-        {vista === "ver" && <VerProductosPage />}
-        {vista === "buscar" && <BuscarProductosPage />}
-        <Carrito />
+        <fieldset
+          className="border-0 p-0 m-0"
+          aria-label="Preparar pedido"
+          disabled={enviandoPedido}
+        >
+          <NavegacionPrincipal vista={vista} onCambiar={setVista} />
+          {vista === "pedido" && <MenuPage />}
+          {vista === "ver" && <VerProductosPage />}
+          {vista === "buscar" && <BuscarProductosPage />}
+          <Carrito mesaId={mesaId} onCambiarEnvio={setEnviandoPedido} />
+        </fieldset>
       </main>
     </CarritoProvider>
   );

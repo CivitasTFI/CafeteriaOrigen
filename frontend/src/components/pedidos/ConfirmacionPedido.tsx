@@ -1,6 +1,7 @@
 import { useId } from "react";
 import type { Pedido } from "../../api/esquemas/pedidos";
 import { formatoPrecio } from "../../utils/formatoPrecio";
+import SeguimientoPedido from "./SeguimientoPedido";
 
 interface ConfirmacionPedidoProps {
   pedido: Pedido;
@@ -14,6 +15,7 @@ export default function ConfirmacionPedido({ pedido }: ConfirmacionPedidoProps) 
       <p>Número de pedido: {pedido.id}</p>
       <p>Estado: {pedido.estado}</p>
       <p>Total: {formatoPrecio(pedido.total)}</p>
+      <SeguimientoPedido key={pedido.id} pedidoId={pedido.id} />
     </section>
   );
 }

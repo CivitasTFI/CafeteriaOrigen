@@ -6,9 +6,10 @@ import type { Pedido } from "../../api/esquemas/pedidos";
 
 interface ConfirmarPedidoProps {
   mesaId?: number;
+  onCambiarEnvio?: (enviando: boolean) => void;
 }
 
-export default function ConfirmarPedido({ mesaId }: ConfirmarPedidoProps) {
+export default function ConfirmarPedido({ mesaId, onCambiarEnvio }: ConfirmarPedidoProps) {
   const { items, vaciarCarrito } = useCarrito();
   const { enviarPedido } = usePedido();
   const solicitudEnCurso = useRef(false);
@@ -20,6 +21,7 @@ export default function ConfirmarPedido({ mesaId }: ConfirmarPedidoProps) {
     if (solicitudEnCurso.current || items.length === 0) return;
     solicitudEnCurso.current = true;
     setEnviando(true);
+    onCambiarEnvio?.(true);
     setError(null);
     setPedidoCreado(null);
     const itemsPedido = items.map(({ productoId, cantidad }) => ({ productoId, cantidad }));
@@ -33,6 +35,7 @@ export default function ConfirmarPedido({ mesaId }: ConfirmarPedidoProps) {
     } finally {
       solicitudEnCurso.current = false;
       setEnviando(false);
+      onCambiarEnvio?.(false);
     }
   }
 

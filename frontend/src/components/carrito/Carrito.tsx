@@ -3,6 +3,12 @@ import { ItemCarrito } from "./ItemCarrito";
 import type { ItemCarrito as ItemCarritoDatos } from "../../context/carrito.reducer";
 import { calcularSubtotalCarrito } from "../../utils/subtotalCarrito";
 import { formatoPrecio } from "../../utils/formatoPrecio";
+import ConfirmarPedido from "../pedidos/ConfirmarPedido";
+
+type CarritoProps = {
+    mesaId?: number;
+    onCambiarEnvio?: (enviando: boolean) => void;
+};
 
 type ListaItemsCarritoProps = {
     items: ItemCarritoDatos[];
@@ -22,7 +28,7 @@ function CarritoVacio() {
     return <p>Tu carrito está vacio</p>;
 }
 
-export default function Carrito() {
+export default function Carrito({ mesaId, onCambiarEnvio }: CarritoProps) {
     const { items } = useCarrito();
     const estaVacio = items.length === 0;
 
@@ -34,7 +40,7 @@ export default function Carrito() {
                     <p>Subtotal orientativo: {formatoPrecio(calcularSubtotalCarrito(items))}</p>
                 </>
             )}
-            <button type="button" aria-label="Confirmar pedido" disabled={estaVacio}>Confirmar pedido</button>
+            <ConfirmarPedido mesaId={mesaId} onCambiarEnvio={onCambiarEnvio} />
         </>
     );
 }

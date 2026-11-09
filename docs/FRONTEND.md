@@ -124,13 +124,15 @@ El carrito usa un reducer puro con `AGREGAR`, `RESTAR`, `ELIMINAR` y `VACIAR`. A
 
 `Carrito` e `ItemCarrito` muestran cantidades, controles accesibles y subtotales. `calcularSubtotalItem()` y `calcularSubtotalCarrito()` usan los precios recibidos; `formatoPrecio()` aplica formato `es-AR`. El subtotal se identifica como orientativo y confirmar queda deshabilitado cuando el carrito está vacío.
 
-El botón de confirmar de App todavía no envía pedidos. Para su integración están disponibles `leerMesa`, `Encabezado`, `ConfirmarPedido` y `ConfirmacionPedido`.
+`App` conecta `leerMesa`, `Encabezado` y `Carrito`, que contiene una única instancia de `ConfirmarPedido`. La confirmación y su seguimiento permanecen disponibles al navegar entre Pedir, Ver productos y Buscar productos.
 
 `leerMesa(new URLSearchParams(window.location.search))` lee `?mesa=N`; acepta las mesas 1–8 y devuelve `undefined` para barra cuando falta o es inválida, sin lanzar errores. El parámetro de URL es `mesa`; el campo enviado a la API es `mesaId`.
 
 `ConfirmarPedido` recibe `mesaId` opcional y usa el Context para enviar solo IDs/cantidades mediante el cliente H2. Bloquea el carrito vacío y las confirmaciones repetidas, muestra los datos devueltos por API y vacía el carrito tras el éxito. Los errores HTTP, de red y de contrato se muestran sin perder el contenido; se puede reintentar. `ConfirmacionPedido` presenta el ID, estado y total formateado con la utilidad compartida.
 
-Nicolas debe conectar estos componentes a App y coordinar el estado de envío con la edición del carrito. La consulta de seguimiento aún no está implementada.
+Mientras se envía el pedido, `ConfirmarPedido` comunica el estado a App mediante `onCambiarEnvio`. Un fieldset deshabilita la selección, navegación y edición del carrito hasta recibir la respuesta; así no se pierden cambios agregados durante un envío. Ante éxito o error, los controles vuelven a habilitarse.
+
+`ConfirmacionPedido` incorpora `SeguimientoPedido` con el ID recibido de la API. El botón Consultar estado usa `consultarPedido(id)` sin pedir que el cliente vuelva a escribir ese número. Muestra carga, estado actual o error y permite repetir la consulta. Cada nueva confirmación inicia su propio seguimiento, sin conservar resultados del pedido anterior. El componente también admite una consulta manual por ID al montarlo sin `pedidoId`; rechaza valores fuera del rango de enteros seguros y bloquea solicitudes simultáneas.
 
 ## Pruebas
 
@@ -138,7 +140,7 @@ Nicolas debe conectar estos componentes a App y coordinar el estado de envío co
 | --- | --- |
 | Unitarias | Vitest: esquemas Zod, filtro puro de productos, reducer, subtotales, formato y configuración. |
 | Componentes | Testing Library y user-event: selector, pastelería, carrito y navegación de App. |
-| Integración | MSW: cliente HTTP, proxy, búsquedas, catálogo/detalle vacío, pedidos, carga/reintento, Context y handlers compartidos. |
+| Integración | MSW: cliente HTTP, proxy, búsquedas, catálogo/detalle vacío, pedidos, mesa desde URL, envío desde App, bloqueo de edición, seguimiento, errores/reintentos, Context y handlers compartidos. |
 | E2E | Playwright: navegador con frontend y API reales. |
 
 `src/test/setup.ts` registra jest-dom, inicia MSW, limpia DOM/handlers después de cada test y cierra el servidor al terminar. Cada prueba importa las funciones de Vitest y registra sus escenarios con `server.use(...)`. Las solicitudes sin handler producen error. Los tests de configuración y proxy usan entorno Node; el resto usa jsdom.
@@ -199,7 +201,13 @@ Para comprobar la selección y su integración con el menú:
 npm run test:frontend -- src/test/unit/filtrarProductos.test.ts src/test/components/SelectorCafe.test.tsx src/test/components/Pasteleria.test.tsx src/test/integration/menu.test.tsx src/test/components/App.test.tsx
 ```
 
-Los archivos `.pending` reservan pruebas todavía no implementadas y no cuentan como cobertura. Al comenzar su funcionalidad se cambia la extensión y se escribe el RED. Los tests de interfaz de pedidos/seguimiento son independientes de los del cliente HTTP.
+Para comprobar mesa, confirmación y seguimiento, incluidos los componentes conectados a App:
+
+```powershell
+npm run test:frontend -- src/test/unit/leerMesa.test.ts src/test/components/Encabezado.test.tsx src/test/integration/pedidos.test.tsx src/test/integration/app.pedidos.test.tsx src/test/integration/seguimiento.test.tsx
+```
+
+Los tests de interfaz de pedidos y seguimiento son independientes de los del cliente HTTP. Las respuestas pendientes se controlan con promesas para verificar carga y bloqueo sin depender de demoras arbitrarias.
 
 ### Pruebas E2E
 
@@ -218,8 +226,8 @@ Antes de cada E2E, `beforeEach` ejecuta `prepararApi(request)`, definida en `e2e
 
 Seed elimina los pedidos anteriores, reinicia los IDs y carga ocho pedidos conocidos. Así, cada prueba comienza con los mismos datos. No hace falta llamar a reset por separado, porque seed ya realiza esa limpieza. El siguiente pedido creado recibe ID 9. El [contrato y los datos del seed](../README.md#datos-de-prueba-reset-y-seed) están en README.
 
-Los E2E comprueban el catálogo de 20 productos, la navegación a Pedir, el bloqueo de confirmación en vacío y los ocho pedidos iniciales. La prueba móvil elige un expreso mediano de Colombia, agrega dos unidades y un muffin, verifica el subtotal orientativo de $17.220 y comprueba que los controles y el carrito entren en 375 px sin recortes ni scroll horizontal.
+Los E2E comprueban el catálogo, la navegación, el bloqueo de confirmación en vacío y los pedidos iniciales. El recorrido completo elige dos expresos medianos de Colombia y un muffin, confirma el pedido y consulta su estado desde la confirmación. Se ejecuta para mesa 4 y para barra con una mesa inválida; verifica el cuerpo del POST, ID 9, estado pendiente y total de $17.220, el vaciado del carrito y la consulta sin navegación de página. Los controles, el carrito, la confirmación y el seguimiento se comprueban a 375 px sin recortes ni scroll horizontal.
 
-Los E2E se ejecutan por separado de las pruebas unitarias y de integración. El recorrido completo de confirmación y seguimiento sigue pendiente de N3/F3.
+Otra prueba envía primero una mesa inexistente a la API real, comprueba el rechazo 400 sin perder ítems ni cantidades y reintenta con la mesa correcta. Los E2E se ejecutan por separado de las pruebas unitarias y de integración, en una misma suite secuencial para que la preparación de datos no interfiera entre recorridos.
 
 El flujo TDD y los criterios de entrega están en [planificacion.md](planificacion.md#metodología-y-entrega).
