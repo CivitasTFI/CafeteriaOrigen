@@ -6,5 +6,6 @@ export function usePedido() {
         return await crearPedido(items, mesaId);
     }
 
+
     return { enviarPedido };
 }
