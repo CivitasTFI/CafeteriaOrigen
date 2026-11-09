@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import encabezado from "../../components/layout/Encabezado";
+import Encabezado from "../../components/layout/Encabezado";
 
 describe("encabezado", () => {
 
