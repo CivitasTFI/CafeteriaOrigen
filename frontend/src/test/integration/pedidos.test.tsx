@@ -7,8 +7,8 @@ import { useCarrito } from "../../hooks/useCarrito";
 import ConfirmarPedido from "../../components/pedidos/ConfirmarPedido";
 import { cafeApi, pasteleriaApi } from "../fixtures/productos";
 import {
-    respuestasCrearPedidoApi,
-    respuestasCrearPedidoConMesaApi
+    respuestaCrearPedidoApi,
+    respuestaCrearPedidoConMesaApi
 } from "../fixtures/pedidos";
 import {server} from "../mocks/server";
 
@@ -40,6 +40,7 @@ function renderizarConfirmacion(mesaId?: number){
 
 async function cargarCarrito(usuario: ReturnType<typeof userEvent.setup>){
     await usuario.click(screen.getByRole("button", {name: "Agregar café"}));
+    await usuario.click(screen.getByRole("button", {name: "Agregar café"}));
     await usuario.click(screen.getByRole("button", {name: "Agregar pastelería"}));
 }
 
@@ -47,7 +48,7 @@ test.each([
     {
         caso: "barra",
         mesaId: undefined,
-        respuesta: respuestasCrearPedidoApi,
+        respuesta: respuestaCrearPedidoApi,
         cuerpoEsperado: {
             items: [
                 { productoId: 5, cantidad: 2 },
@@ -58,7 +59,7 @@ test.each([
     {
         caso: "mesa 4",
         mesaId: 4,
-        respuesta: respuestasCrearPedidoConMesaApi,
+        respuesta: respuestaCrearPedidoConMesaApi,
         cuerpoEsperado: {
             mesaId: 4,
             items: [
@@ -71,7 +72,7 @@ test.each([
     "envía los items y la mesa para confirmar un pedido para $caso",
     async ({mesaId, respuesta, cuerpoEsperado}) => {
         const usuario = userEvent.setup();
-        const solicitudes: unknow[] = [];
+        const solicitudes: unknown[] = [];
 
         server.use(
             http.post(URLpedidos, async ({ request }) => {
