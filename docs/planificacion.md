@@ -120,10 +120,10 @@ El [contrato de reset/seed](../README.md#datos-de-prueba-reset-y-seed) detalla r
 
 ### N3. Mesa, confirmación y seguimiento — pendiente
 
-- [ ] Leer `?mesa=N` con una función pura; probar valores válidos, ausencia, tipos y números inválidos o fuera de rango.
-- [ ] Mostrar mesa o retiro en barra en el encabezado.
-- [ ] Enviar ítems y mesa mediante el cliente H2; indicar carga y bloquear confirmaciones repetidas durante el envío.
-- [ ] Mostrar ID, estado y total de API; vaciar el carrito únicamente después del éxito.
+- [x] Leer `?mesa=N` con una función pura; probar valores válidos, ausencia, tipos y números inválidos o fuera de rango.
+- [ x] Mostrar mesa o retiro en barra en el encabezado.
+- [x ] Enviar ítems y mesa mediante el cliente H2; indicar carga y bloquear confirmaciones repetidas durante el envío.
+- [x ] Mostrar ID, estado y total de API; vaciar el carrito únicamente después del éxito.
 - [ ] Mostrar errores HTTP, de conexión o contrato conservando el carrito.
 - [ ] Consultar el estado por ID sin recargar, con estados de carga y error.
 - [ ] Probar con MSW el pedido para mesa/barra, cuerpo del POST, rechazo con carrito conservado, contrato incompatible y seguimiento.
