@@ -1,5 +1,4 @@
-
-import { useState, type FormEvent } from "react";
+import { useId, useRef, useState } from "react";
 import { usePedido } from "../../hooks/usePedido";
 import type { Pedido } from "../../api/esquemas/pedidos";
 import IndicadorCarga from "../comunes/IndicadorCarga";
@@ -11,20 +10,29 @@ type EstadoSeguimiento =
     | { estado: "listo"; pedido: Pedido }
     | { estado: "error"; mensaje: string };
 
-export default function SeguimientoPedido() {
+interface SeguimientoPedidoProps {
+    pedidoId?: number;
+}
+
+export default function SeguimientoPedido({ pedidoId }: SeguimientoPedidoProps) {
     const { consultarEstadoPedido } = usePedido();
+    const tituloId = useId();
+    const entradaId = useId();
+    const solicitudEnCurso = useRef(false);
 
     const [id, setId] = useState("");
     const [estado, setEstado] = useState<EstadoSeguimiento>({
         estado: "inicial",
     });
+    const cargando = estado.estado === "cargando";
+    const Titulo = pedidoId === undefined ? "h2" : "h3";
 
-    async function consultar(event: FormEvent<HTMLFormElement>) {
-        event.preventDefault();
+    async function consultar() {
+        if (solicitudEnCurso.current) return;
 
-        const pedidoId = Number(id);
+        const idConsulta = pedidoId ?? Number(id);
 
-        if (!Number.isInteger(pedidoId) || pedidoId <= 0) {
+        if (!Number.isSafeInteger(idConsulta) || idConsulta <= 0) {
             setEstado({
                 estado: "error",
                 mensaje: "Ingresá un ID válido",
@@ -32,10 +40,11 @@ export default function SeguimientoPedido() {
             return;
         }
 
+        solicitudEnCurso.current = true;
         setEstado({ estado: "cargando" });
 
         try {
-            const pedido = await consultarEstadoPedido(pedidoId);
+            const pedido = await consultarEstadoPedido(idConsulta);
 
             setEstado({
                 estado: "listo",
@@ -48,38 +57,50 @@ export default function SeguimientoPedido() {
                     ? error.message
                     : "No se pudo consultar el pedido",
             });
+        } finally {
+            solicitudEnCurso.current = false;
         }
     }
 
     return (
-        <section>
-            <h2>Seguimiento de pedido</h2>
+        <section className="mt-3" aria-labelledby={tituloId}>
+            <Titulo id={tituloId} className="h5">Seguimiento de pedido</Titulo>
 
-            <form onSubmit={(event) => void consultar(event)}>
-                <label htmlFor="id-pedido">
-                    ID del pedido
-                </label>
-
-                <input
-                    id="id-pedido"
-                    type="number"
-                    min="1"
-                    step="1"
-                    required
-                    value={id}
-                    disabled={estado.estado === "cargando"}
-                    onChange={(event) => setId(event.target.value)}
-                />
+            <form
+                className="d-flex flex-column gap-2"
+                onSubmit={(event) => {
+                    event.preventDefault();
+                    void consultar();
+                }}
+            >
+                {pedidoId === undefined && (
+                    <>
+                        <label htmlFor={entradaId}>ID del pedido</label>
+                        <input
+                            id={entradaId}
+                            className="form-control"
+                            type="number"
+                            min="1"
+                            step="1"
+                            required
+                            value={id}
+                            disabled={cargando}
+                            onChange={(event) => setId(event.target.value)}
+                        />
+                    </>
+                )}
 
                 <button
                     type="submit"
-                    disabled={estado.estado === "cargando"}
+                    className="btn btn-outline-primary"
+                    aria-busy={cargando}
+                    disabled={cargando}
                 >
                     Consultar estado
                 </button>
             </form>
 
-            {estado.estado === "cargando" && (
+            {cargando && (
                 <IndicadorCarga mensaje="Consultando pedido..." />
             )}
 
@@ -88,9 +109,9 @@ export default function SeguimientoPedido() {
             )}
 
             {estado.estado === "listo" && (
-                <div>
+                <div aria-live="polite">
                     <p>Pedido: {estado.pedido.id}</p>
-                    <p>Estado: {estado.pedido.estado}</p>
+                    <p>{pedidoId === undefined ? "Estado" : "Estado actual"}: {estado.pedido.estado}</p>
                 </div>
             )}
         </section>

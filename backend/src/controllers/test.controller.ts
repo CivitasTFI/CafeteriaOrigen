@@ -17,7 +17,7 @@ export const postReset = (req: Request, res: Response, next:NextFunction) => {
 
 export const postSeed = (req: Request, res: Response, next:NextFunction) => {
     try{
-       
+
         cargarDatosIniciales();
 
         return res.status(201).json({

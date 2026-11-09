@@ -20,7 +20,7 @@ describe("endpoints de test", () => {
         )
         const response = await request(app)
             .post("/__test__/reset")
-            
+
         expect(response.status).toBe(200);
         expect(response.body).toHaveProperty(
             "mensaje",
@@ -172,7 +172,7 @@ describe("endpoints de test", () => {
     });
 
     it("verificar el resultado de ejecutar dos veces el seed", async() => {
-        
+
         await request(app).post("/__test__/seed");
         const primerosPedidos = await request(app).get("/pedidos");
 
