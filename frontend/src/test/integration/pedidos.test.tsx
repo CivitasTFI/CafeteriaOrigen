@@ -1,5 +1,5 @@
 import {render, screen, waitFor} from "@testing-library/react";
-import userEvent, { type UserEvent } from "@testing-library/user-event";
+import userEvent from "@testing-library/user-event";
 import {http, HttpResponse, delay} from "msw";
 import {expect, test} from "vitest";
 import { CarritoProvider } from "../../context/CarritoContext";
@@ -153,7 +153,6 @@ test("muestra la información del pedido creado", async () => {
 
     server.use(
         http.post(URLpedidos, async () => {
-            console.log("POST ejecutado");
             return HttpResponse.json(
                 respuestaCrearPedidoApi,
                 { status: 201 }
@@ -171,7 +170,7 @@ test("muestra la información del pedido creado", async () => {
         })
     );
 
-    screen.debug();
+    
 
     expect(
         await screen.findByText(/id:\s*1/)
@@ -240,6 +239,69 @@ test("muestra un error HTTP y conserva el carrito", async () => {
     expect(
         await screen.findByRole("alert")
     ).toHaveTextContent("Error interno del servidor");
+
+    expect(screen.getByTestId("items-carrito"))
+        .toHaveTextContent("2");
+});
+
+test("muestra un error de conexión y conserva el carrito", async () => {
+    const usuario = userEvent.setup();
+
+    server.use(
+        http.post(URLpedidos, () => {
+            return HttpResponse.error();
+        })
+    );
+
+    renderizarConfirmacion();
+
+    await cargarCarrito(usuario);
+
+    await usuario.click(
+        screen.getByRole("button", { name: "Confirmar pedido" })
+    );
+
+    expect(
+        await screen.findByRole("alert")
+    ).toHaveTextContent("No se pudo conectar con el servidor");
+
+    expect(screen.getByTestId("items-carrito"))
+        .toHaveTextContent("2");
+});
+
+test("muestra un error de contrato y conserva el carrito", async () => {
+    const usuario = userEvent.setup();
+
+    server.use(
+        http.post(URLpedidos, () => {
+            return HttpResponse.json(
+                {
+                    mensaje: "Pedido creado",
+                    pedido: {
+                        id: "incorrecto",
+                        items: [],
+                        estado: "pendiente",
+                        total: 17220,
+                    },
+                },
+                { status: 201 }
+            );
+        })
+    );
+
+    renderizarConfirmacion();
+
+    await cargarCarrito(usuario);
+
+    await usuario.click(
+        screen.getByRole("button", { name: "Confirmar pedido" })
+    );
+
+    expect(
+        await screen.findByRole("alert")
+    ).toHaveTextContent(
+        "La respuesta del servidor no tiene el formato esperado"
+    );
 
     expect(screen.getByTestId("items-carrito"))
         .toHaveTextContent("2");
