@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import Pasteleria from "../../components/pasteleria/Pasteleria";
 import { CarritoProvider } from "../../context/CarritoContext";
 import Carrito from "../../components/carrito/Carrito";
@@ -9,30 +9,17 @@ import {
   pasteleriaApi,
   tortaApi,
 } from "../fixtures/productos";
-import {
-  crearHandlerBuscarProductos,
-  crearHandlerProductos,
-} from "../mocks/handlers";
-import { server } from "../mocks/server";
-import { productosApi } from "../fixtures/productos";
-
-beforeEach(() => {
-  server.use(
-    crearHandlerProductos(productosApi),
-    crearHandlerBuscarProductos(catalogoPrueba),
-  );
-});
 
 describe("Pasteleria", () => {
-  it("muestra precios desde la API", async () => {
+  it("muestra precios desde el catálogo", () => {
     render(
       <CarritoProvider>
-        <Pasteleria />
+        <Pasteleria productos={catalogoPrueba} />
       </CarritoProvider>,
     );
 
-    expect(await screen.findByText("$2.500")).toBeInTheDocument();
-    expect(screen.getByText("$4.800")).toBeInTheDocument();
+    expect(screen.getByText("$2.500")).toBeInTheDocument();
+    expect(screen.getByText("$4.200")).toBeInTheDocument();
   });
 
   it("agrega un producto al carrito", async () => {
@@ -40,12 +27,11 @@ describe("Pasteleria", () => {
 
     render(
       <CarritoProvider>
-        <Pasteleria />
+        <Pasteleria productos={catalogoPrueba} />
         <Carrito />
       </CarritoProvider>,
     );
 
-    await screen.findByText(pasteleriaApi.nombre);
     await usuario.click(
       screen.getByRole("button", { name: `Agregar ${pasteleriaApi.nombre}` }),
     );
@@ -58,13 +44,13 @@ describe("Pasteleria", () => {
 
     render(
       <CarritoProvider>
-        <Pasteleria />
+        <Pasteleria productos={catalogoPrueba} />
         <Carrito />
       </CarritoProvider>,
     );
 
     await usuario.click(
-      await screen.findByRole("button", { name: `Agregar ${tortaApi.nombre}` }),
+      screen.getByRole("button", { name: `Agregar ${tortaApi.nombre}` }),
     );
 
     expect(screen.getByText("Cantidad: 1")).toBeInTheDocument();

@@ -30,6 +30,14 @@ describe("Consulta de búsqueda de productos", () => {
     expect(resultados.every((p) => p.tipo === "pasteleria")).toBe(true);
   });
 
+  test("rechaza criterios inválidos con 400", async () => {
+    server.use(crearHandlerBuscarProductos(catalogoPrueba));
+
+    await expect(buscarProductos({})).rejects.toThrow(
+      "Criterios de búsqueda inválidos o vacíos",
+    );
+  });
+
   test("propaga el mensaje de error cuando no hay coincidencias", async () => {
     server.use(crearHandlerBuscarProductos(catalogoPrueba));
 

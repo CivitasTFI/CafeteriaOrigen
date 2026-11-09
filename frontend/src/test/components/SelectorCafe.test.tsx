@@ -1,35 +1,19 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import SelectorCafe from "../../components/cafe/SelectorCafe";
 import Carrito from "../../components/carrito/Carrito";
 import { CarritoProvider } from "../../context/CarritoContext";
-import {
-  cafeApi,
-  catalogoPrueba,
-} from "../fixtures/productos";
-import {
-  crearHandlerBuscarProductos,
-  crearHandlerProductos,
-} from "../mocks/handlers";
-import { server } from "../mocks/server";
-import { productosApi } from "../fixtures/productos";
+import { cafeApi, catalogoPrueba } from "../fixtures/productos";
 
 function renderSelector() {
   return render(
     <CarritoProvider>
-      <SelectorCafe />
+      <SelectorCafe productos={catalogoPrueba} />
       <Carrito />
     </CarritoProvider>,
   );
 }
-
-beforeEach(() => {
-  server.use(
-    crearHandlerProductos(productosApi),
-    crearHandlerBuscarProductos(catalogoPrueba),
-  );
-});
 
 describe("SelectorCafe", () => {
   it("mantiene deshabilitado el botón agregar hasta elegir origen", async () => {
@@ -51,9 +35,7 @@ describe("SelectorCafe", () => {
     await usuario.click(screen.getByRole("radio", { name: "Expreso" }));
     await usuario.click(screen.getByRole("radio", { name: "Mediano" }));
 
-    expect(
-      await screen.findByText(cafeApi.variedad.descripcion),
-    ).toBeInTheDocument();
+    expect(screen.getByText((cafeApi).variedad.descripcion)).toBeInTheDocument();
     expect(screen.getByText("$7.360")).toBeInTheDocument();
   });
 
@@ -63,7 +45,7 @@ describe("SelectorCafe", () => {
 
     await usuario.click(screen.getByRole("radio", { name: "Expreso" }));
     await usuario.click(screen.getByRole("radio", { name: "Mediano" }));
-    await usuario.click(await screen.findByRole("radio", { name: /Colombia/ }));
+    await usuario.click(screen.getByRole("radio", { name: /Colombia/ }));
 
     const agregar = screen.getByRole("button", {
       name: "Agregar café al carrito",
@@ -80,11 +62,30 @@ describe("SelectorCafe", () => {
 
     await usuario.click(screen.getByRole("radio", { name: "Expreso" }));
     await usuario.click(screen.getByRole("radio", { name: "Mediano" }));
-    const origenColombia = await screen.findByRole("radio", { name: /Colombia/ });
+    const origenColombia = screen.getByRole("radio", { name: /Colombia/ });
     await usuario.click(origenColombia);
     expect(origenColombia).toBeChecked();
 
     await usuario.click(screen.getByRole("radio", { name: "Pocillo" }));
     expect(screen.getByRole("radio", { name: /Colombia/ })).not.toBeChecked();
+  });
+
+  it("no ofrece botón reintentar ante un catálogo vacío", async () => {
+    const usuario = userEvent.setup();
+    render(
+      <CarritoProvider>
+        <SelectorCafe productos={[]} />
+      </CarritoProvider>,
+    );
+
+    await usuario.click(screen.getByRole("radio", { name: "Expreso" }));
+    await usuario.click(screen.getByRole("radio", { name: "Mediano" }));
+
+    expect(
+      screen.getByText("No hay orígenes para esta combinación en el catálogo."),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Reintentar" }),
+    ).not.toBeInTheDocument();
   });
 });
