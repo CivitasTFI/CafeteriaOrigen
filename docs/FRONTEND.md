@@ -1,6 +1,6 @@
 # Frontend — Cafetería Origen
 
-Guía de arquitectura, contratos y pruebas. La instalación general está en [README.md](README.md); las tareas terminadas y pendientes están en [planificacion.md](planificacion.md).
+Guía de arquitectura, contratos y pruebas. La instalación general está en [README.md](../README.md); las tareas terminadas y pendientes están en [planificacion.md](planificacion.md).
 
 ## Arquitectura
 
@@ -64,7 +64,7 @@ Los esquemas están en `src/api/esquemas/`; los tipos se derivan con `z.infer`.
 | `Pedido` | ID positivo seguro, ítems no vacíos, estado textual no blanco, total entero seguro no negativo y mesa opcional entera del 1 al 8. |
 | `RespuestaCrearPedido` | `mensaje` textual y `pedido` validado con el mismo esquema del pedido directo. |
 
-El [contrato de productos](README.md#productos) documenta los campos públicos, incluido `tamaño` con ñ. `variedad` es un objeto en café y un texto en pastelería. El esquema de listado admite una lista vacía y rechaza miembros incompatibles.
+El [contrato de productos](../README.md#productos) documenta los campos públicos, incluido `tamaño` con ñ. `variedad` es un objeto en café y un texto en pastelería. El esquema de listado admite una lista vacía y rechaza miembros incompatibles.
 
 La mesa se conserva cuando está presente. Se rechazan `null`, textos y otros tipos incompatibles, sin convertirlos a números. El estado conserva sus espacios y no se restringe a un catálogo cerrado. El total confirmado se recibe de la API.
 

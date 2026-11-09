@@ -1,6 +1,6 @@
 # Planificación del TP3 — Cafetería Origen
 
-El trabajo se organiza según [TP3.pdf](TP3.pdf). Los ticks indican tareas implementadas y probadas; se actualizan al completar una tarea. La instalación y API están en [README.md](README.md) y la arquitectura y pruebas del frontend en [FRONTEND.md](FRONTEND.md).
+El trabajo se organiza según [TP3.pdf](TP3.pdf). Los ticks indican tareas implementadas y probadas; se actualizan al completar una tarea. La instalación y API están en [README.md](../README.md) y la arquitectura y pruebas del frontend en [FRONTEND.md](FRONTEND.md).
 
 ## Reparto y estado actual
 

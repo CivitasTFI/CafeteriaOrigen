@@ -13,10 +13,10 @@ Proyecto del Grupo 14 para Programación IV, Tecnicatura Universitaria en Progra
 
 | Documento | Contenido |
 | --- | --- |
-| [FRONTEND.md](FRONTEND.md) | Arquitectura, cliente HTTP, carrito y pruebas del frontend. |
-| [planificacion.md](planificacion.md) | Reparto del TP3, tareas completadas, pendientes y dependencias. |
-| [TP3.pdf](TP3.pdf) | Consigna académica. |
-| [Reparto del Parcial I](<Reparto del trabajo – Cafetería Origen (Parcial I).md>) | Referencia de la base de backend y del reparto del primer parcial. |
+| [FRONTEND.md](docs/FRONTEND.md) | Arquitectura, cliente HTTP, carrito y pruebas del frontend. |
+| [planificacion.md](docs/planificacion.md) | Reparto del TP3, tareas completadas, pendientes y dependencias. |
+| [TP3.pdf](docs/TP3.pdf) | Consigna académica. |
+| [Reparto del Parcial I](<docs/Reparto del trabajo – Cafetería Origen (Parcial I).md>) | Referencia de la base de backend y del reparto del primer parcial. |
 
 ## Requisitos e instalación
 
@@ -77,7 +77,7 @@ npm run build
 npm run lint
 ```
 
-Las pruebas de Jest/Vitest no requieren servidores externos. Los requisitos y comandos de Playwright están en [Pruebas E2E](FRONTEND.md#pruebas-e2e).
+Las pruebas de Jest/Vitest no requieren servidores externos. Los requisitos y comandos de Playwright están en [Pruebas E2E](docs/FRONTEND.md#pruebas-e2e).
 
 Para ejecutar un archivo específico:
 
@@ -97,10 +97,12 @@ backend/
 frontend/
   src/          # Aplicación React y pruebas con Vitest/MSW
   e2e/          # Pruebas Playwright
+docs/
+  FRONTEND.md
+  planificacion.md
+  TP3.pdf
+  Reparto del trabajo – Cafetería Origen (Parcial I).md
 README.md
-FRONTEND.md
-planificacion.md
-TP3.pdf
 ```
 
 ## API
@@ -251,7 +253,7 @@ Respuesta 201, suponiendo que es el primer pedido del servidor:
 }
 ```
 
-`GET /pedidos/:id` devuelve directamente el objeto `pedido`; el listado devuelve esos objetos en un arreglo. Las funciones para consumirlos desde React están en [Cliente HTTP](FRONTEND.md#cliente-http).
+`GET /pedidos/:id` devuelve directamente el objeto `pedido`; el listado devuelve esos objetos en un arreglo. Las funciones para consumirlos desde React están en [Cliente HTTP](docs/FRONTEND.md#cliente-http).
 
 ### Errores
 
