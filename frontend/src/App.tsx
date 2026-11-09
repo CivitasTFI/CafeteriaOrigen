@@ -1,6 +1,7 @@
 import { CarritoProvider } from "./context/CarritoContext";
 import MenuPage from "./pages/MenuPage";
 import Carrito from "./components/carrito/Carrito";
+import SeguimientoPedido from "./components/pedidos/SeguimientoPedido";
 
 function App() {
   return (
@@ -9,6 +10,7 @@ function App() {
         <h1>Cafetería Origen</h1>
         <MenuPage />
         <Carrito />
+        <SeguimientoPedido />
       </main>
     </CarritoProvider>
   );
