@@ -1,4 +1,9 @@
 import { expect, test } from "@playwright/test";
+import { prepararApi } from "./fixtures/api";
+
+test.beforeEach( async ({ request }) => {
+  await prepararApi(request);
+});
 
 test("muestra los 20 productos de la API real", async ({ page }) => {
   await page.goto("/");
@@ -38,4 +43,10 @@ test("impide confirmar un pedido con el carrito vacío", async ({ page }) => {
   await expect(
     page.getByRole("button", { name: "Confirmar pedido" }),
   ).toBeDisabled();
+});
+test("comienza con los ocho pedidos del seed", async ({ request }) => {
+  const respuesta = await request.get("http://localhost:3000/pedidos");
+
+  expect(respuesta.status()).toBe(200);
+  expect(await respuesta.json()).toHaveLength(8);
 });

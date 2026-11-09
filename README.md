@@ -163,7 +163,7 @@ Invoke-RestMethod -Uri "http://localhost:3000/__test__/seed" -Method Post
 Invoke-RestMethod -Uri "http://localhost:3000/pedidos" -Method Get
 ```
 
-Para F3, ejecutar y esperar reset (200) y seed (201) antes de cada E2E, mediante peticiones a la API en `http://localhost:3000`. El proxy de Vite no incluye `/__test__`. Después de esa preparación, la compra del recorrido genera el pedido 9 si no se crearon otros pedidos. Playwright ya inicia la API con `NODE_ENV=test`; incorporar estas peticiones a cada E2E sigue pendiente.
+Los E2E preparan sus datos mediante `prepararApi`, que ejecuta seed y comprueba la respuesta 201 antes de cada prueba. Seed ya reinicia los pedidos, por lo que no se llama a reset por separado. Las peticiones se envían directamente a `http://localhost:3000`, porque el proxy de Vite no incluye `/__test__`. Playwright inicia la API con `NODE_ENV=test`. Esta preparación deja ocho pedidos iniciales; el siguiente pedido creado recibe ID 9.
 
 Para verificar el contrato y los efectos de ambas rutas desde la raíz:
 
