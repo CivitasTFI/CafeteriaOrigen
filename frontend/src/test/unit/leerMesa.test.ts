@@ -15,4 +15,11 @@ describe("leer mesa", () => {
         expect(() => leerMesa(parametros))
             .toThrow("mesa inválida");
     })
+
+    it("texto", () => {
+        const parametros = new URLSearchParams("mesaId=abc");
+
+        expect(() => leerMesa(parametros))
+            .toThrow("ingresar un número entero");
+    })
 })
