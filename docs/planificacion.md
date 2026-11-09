@@ -9,7 +9,7 @@ El trabajo se organiza según [TP3.pdf](TP3.pdf). Los ticks indican tareas imple
 | Homero | Herramientas, cliente HTTP, Zod, carga del menú y documentación. | H1, H2 y H3 completos; H4 espera el cierre del sistema. |
 | Federico | Lógica/interfaz del carrito y E2E con API real. | F1 completo; F2 espera integración con pedidos. F3 prepara datos y cubre selección/carrito móvil; falta confirmación y seguimiento. |
 | Matias | Productos de API, selector de café, pastelería y estilos. | M1 y M2 completos. M3 tiene estilos y menú/carrito móvil listos; falta revisar las futuras pantallas de pedidos. |
-| Nicolas | Mesas/pedidos de API, reset/seed, URL, confirmación y seguimiento. | N1 y N2 completos; N3 pendiente. |
+| Nicolas | Mesas/pedidos de API, reset/seed, URL, confirmación y seguimiento. | N1 y N2 completos; N3 tiene componentes de mesa y confirmación preparados. Faltan su conexión a App y el seguimiento. |
 
 ## Acuerdos compartidos
 
@@ -124,21 +124,25 @@ El trabajo se organiza según [TP3.pdf](TP3.pdf). Los ticks indican tareas imple
 
 El [contrato de reset/seed](../README.md#datos-de-prueba-reset-y-seed) detalla respuestas y datos iniciales. Reset responde 200 y deja el próximo ID en 1; seed responde 201, reemplaza los pedidos por ocho casos conocidos y deja el próximo ID en 9. F3 utiliza seed antes de cada E2E mediante la función compartida `prepararApi`.
 
-### N3. Mesa, confirmación y seguimiento — pendiente
+### N3. Mesa, confirmación y seguimiento — parcial
 
-- [ ] Leer `?mesa=N` con una función pura; probar valores válidos, ausencia, tipos y números inválidos o fuera de rango.
-- [ ] Mostrar mesa o retiro en barra en el encabezado.
-- [ ] Enviar ítems y mesa mediante el cliente H2; indicar carga y bloquear confirmaciones repetidas durante el envío.
-- [ ] Mostrar ID, estado y total de API; vaciar el carrito únicamente después del éxito.
-- [ ] Mostrar errores HTTP, de conexión o contrato conservando el carrito.
+`leerMesa`, `Encabezado`, `ConfirmarPedido` y `ConfirmacionPedido` están disponibles como componentes y utilidades probados. Todavía no están conectados a App; el botón de confirmar de la pantalla actual conserva su comportamiento anterior.
+
+- [x] Leer `?mesa=N` con una función pura; probar valores válidos, ausencia, tipos y números inválidos o fuera de rango.
+- [x] Preparar el encabezado para mostrar mesa o retiro en barra.
+- [x] Preparar la confirmación con ítems y mesa mediante el cliente H2; bloquear carrito vacío y envíos repetidos.
+- [x] Mostrar ID, estado y total de API en el componente de confirmación; vaciar el carrito únicamente después del éxito.
+- [x] Mostrar errores HTTP, de conexión o contrato conservando el carrito y permitir reintentar.
+- [ ] Conectar los componentes a App y pasar la mesa leída de la URL, coordinando el estado de envío con la interfaz del carrito.
 - [ ] Consultar el estado por ID sin recargar, con estados de carga y error.
-- [ ] Probar con MSW el pedido para mesa/barra, cuerpo del POST, rechazo con carrito conservado, contrato incompatible y seguimiento.
+- [x] Probar con MSW los componentes de creación para mesa/barra, cuerpo del POST, bloqueo, rechazo con carrito conservado y contrato incompatible.
+- [ ] Probar la integración en App y el seguimiento con MSW.
 
 ## Dependencias y próximo trabajo
 
 | Trabajo | Qué necesita |
 | --- | --- |
-| N3: confirmación y seguimiento | Cliente HTTP, Context, selector y pastelería disponibles para conectar el envío. |
+| N3: conexión y seguimiento | Componentes de encabezado y confirmación, cliente HTTP, Context y selección disponibles; falta montar el flujo en App y completar el seguimiento. |
 | F2: vaciado y conservación ante fallos | Integración con la confirmación de N3. |
 | M3: revisión móvil restante | Pantallas de confirmación y seguimiento de N3. |
 | F3: recorrido completo | Confirmación y seguimiento de N3; revisión visual con M3. La selección y la preparación de datos ya están implementadas. |
@@ -150,14 +154,14 @@ El [contrato de reset/seed](../README.md#datos-de-prueba-reset-y-seed) detalla r
 
 | N.º | Funcionalidad | Estado actual |
 | --- | --- | --- |
-| 1 | Mesa desde QR/URL o barra. | API y cliente listos; lectura de URL y encabezado pendientes. |
+| 1 | Mesa desde QR/URL o barra. | API, lectura de URL y encabezado preparados; conexión a App pendiente. |
 | 2 | Menú desde API, carga, error y reintento. | Implementado y probado. |
 | 3 | Café en tres pasos, descripciones y precios por origen. | Implementado y probado. |
 | 4 | Pastelería con precio y agregado. | Implementado y conectado al carrito. |
 | 5 | Carrito, cantidades, subtotales, quitar y bloqueo en vacío. | Implementado y conectado al agregado real de café/pastelería. |
-| 6 | Confirmación con ID, estado y total de API. | API y cliente listos; pantalla pendiente de N3. |
+| 6 | Confirmación con ID, estado y total de API. | API, cliente y componentes listos; conexión a la pantalla pendiente de N3. |
 | 7 | Consulta de estado sin recargar. | Cliente listo; interfaz pendiente de N3. |
-| 8 | Rechazo visible y carrito conservado. | Cliente y Context disponibles; integración pendiente de N3/F2. |
+| 8 | Rechazo visible y carrito conservado. | Componente probado ante errores; integración en App pendiente de N3/F2. |
 | 9 | Uso a 375 px sin scroll horizontal. | Selector y carrito cargado verificados sin recortes; faltan pantallas de pedidos y recorrido completo. |
 
 ## Metodología y entrega

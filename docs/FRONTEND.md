@@ -26,7 +26,7 @@ frontend/
   e2e/            # Pruebas con frontend y API reales
 ```
 
-Los módulos de mesa desde URL, confirmación y seguimiento siguen reservados para tareas pendientes. El selector, la pastelería y los estilos compartidos están implementados.
+El selector, la pastelería y los estilos compartidos están implementados. Los componentes de mesa y confirmación están preparados para conectarlos a App; el seguimiento continúa pendiente.
 
 | Configuración | Responsabilidad |
 | --- | --- |
@@ -124,7 +124,13 @@ El carrito usa un reducer puro con `AGREGAR`, `RESTAR`, `ELIMINAR` y `VACIAR`. A
 
 `Carrito` e `ItemCarrito` muestran cantidades, controles accesibles y subtotales. `calcularSubtotalItem()` y `calcularSubtotalCarrito()` usan los precios recibidos; `formatoPrecio()` aplica formato `es-AR`. El subtotal se identifica como orientativo y confirmar queda deshabilitado cuando el carrito está vacío.
 
-El botón de confirmar todavía no envía pedidos. Al integrar esa pantalla, debe mostrar el total de API, vaciar el carrito después del éxito y conservarlo ante fallos. La mesa desde URL, confirmación y seguimiento corresponden a N3.
+El botón de confirmar de App todavía no envía pedidos. Para su integración están disponibles `leerMesa`, `Encabezado`, `ConfirmarPedido` y `ConfirmacionPedido`.
+
+`leerMesa(new URLSearchParams(window.location.search))` lee `?mesa=N`; acepta las mesas 1–8 y devuelve `undefined` para barra cuando falta o es inválida, sin lanzar errores. El parámetro de URL es `mesa`; el campo enviado a la API es `mesaId`.
+
+`ConfirmarPedido` recibe `mesaId` opcional y usa el Context para enviar solo IDs/cantidades mediante el cliente H2. Bloquea el carrito vacío y las confirmaciones repetidas, muestra los datos devueltos por API y vacía el carrito tras el éxito. Los errores HTTP, de red y de contrato se muestran sin perder el contenido; se puede reintentar. `ConfirmacionPedido` presenta el ID, estado y total formateado con la utilidad compartida.
+
+Nicolas debe conectar estos componentes a App y coordinar el estado de envío con la edición del carrito. La consulta de seguimiento aún no está implementada.
 
 ## Pruebas
 
