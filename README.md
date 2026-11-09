@@ -53,6 +53,8 @@ El proxy de Vite envía `/productos` y `/pedidos`, incluidas sus subrutas, a la 
 
 Los pedidos se guardan en memoria y se pierden al reiniciar el servidor.
 
+El frontend ofrece las secciones **Pedir**, **Ver productos** y **Buscar productos**. Permite elegir cafés, agregar pastelería y modificar el carrito. El envío del pedido, la mesa desde URL y el seguimiento siguen pendientes; su estado está en [planificacion.md](docs/planificacion.md).
+
 ## Comandos
 
 Todos se ejecutan desde la raíz.
@@ -110,6 +112,7 @@ README.md
 | Método | Ruta | Respuesta exitosa |
 | --- | --- | --- |
 | GET | `/productos` | Lista de productos. |
+| GET | `/productos/buscar` | Lista de productos que coinciden con los filtros. |
 | GET | `/productos/:id` | Un producto. |
 | POST | `/pedidos` | 201 con `{ mensaje, pedido }`. |
 | GET | `/pedidos` | Lista de pedidos. |
@@ -212,6 +215,18 @@ Ejemplos de productos:
 ```
 
 Las descripciones de acidez, cuerpo y notas están en `variedadesDescripcion`, dentro de `backend/src/services/formar-respuesta.service.ts`. El frontend selecciona por los campos del contrato, sin extraer información de `nombre` ni reproducir las fórmulas de precios.
+
+### Búsqueda de productos
+
+`GET /productos/buscar` acepta los filtros `tipo`, `tipoCafe`, `tamaño` y `variedad`, con los valores del contrato de productos. Debe enviarse al menos uno; cada filtro puede aparecer una sola vez. Los filtros se combinan y la respuesta 200 contiene una lista con las mismas representaciones del catálogo.
+
+Un filtro inválido, repetido o la ausencia de criterios devuelve 400 con `{ "error": "Criterios de búsqueda inválidos o vacíos" }`. Si no hay coincidencias, devuelve 404 con `{ "error": "Producto no encontrado" }`.
+
+Ejemplo para consultar los cafés de Colombia de tipo expreso:
+
+```powershell
+Invoke-RestMethod -Uri "http://localhost:3000/productos/buscar?tipoCafe=expreso&variedad=colombia" -Method Get
+```
 
 ### Pedidos y mesas
 
