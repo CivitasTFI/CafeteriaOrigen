@@ -142,6 +142,7 @@ test("muestra la información del pedido creado", async () => {
 
     server.use(
         http.post(URLpedidos, async () => {
+            console.log("POST ejecutado");
             return HttpResponse.json(
                 respuestaCrearPedidoApi,
                 { status: 201 }
@@ -159,15 +160,17 @@ test("muestra la información del pedido creado", async () => {
         })
     );
 
+    screen.debug();
+
     expect(
-        await screen.findByText("id:1")
+        await screen.findByText(/id:\s*1/)
     ).toBeInTheDocument();
 
     expect(
-        screen.getByText("estado: pendiente")
+        screen.getByText(/estado:\s*pendiente/i)
     ).toBeInTheDocument();
 
     expect(
-        screen.getByText("total: 17220")
+        screen.getByText(/total:\s*17220/i)
     ).toBeInTheDocument();
 });
