@@ -8,10 +8,15 @@ export function leerMesa (parametros: URLSearchParams): number | undefined {
         return undefined;
     }
 
+    return validarMesa(valor);
+}
+
+function validarMesa (valor:string): number {
+
     if (valor.trim() === ""){
         throw new Error("El parámetro no debe estar vacío");
     }
-    
+
     const mesaId = Number(valor);
 
     
@@ -22,8 +27,6 @@ export function leerMesa (parametros: URLSearchParams): number | undefined {
     if(!MESA_VALIDAS.includes(mesaId)){
         throw new Error("mesa inválida");
     }
-
-    
 
     return mesaId;
 }
