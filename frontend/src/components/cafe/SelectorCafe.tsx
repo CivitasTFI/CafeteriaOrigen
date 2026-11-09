@@ -1,12 +1,16 @@
 import { useEffect, useId, useState } from "react";
-import { buscarProductos } from "../../api/productos";
-import type { Producto } from "../../api/esquemas/productos";
+import type { Producto, Productos } from "../../api/esquemas/productos";
 import { useCarrito } from "../../hooks/useCarrito";
+import { filtrarProductos } from "../../utils/filtrarProductos";
 import { formatoPrecio } from "../../utils/formatoPrecio";
 
 type TipoCafe = "expreso" | "filtrado";
 type Tamano = "pocillo" | "mediano" | "taza grande";
 type Origen = "brasil" | "colombia" | "etiopia";
+
+type SelectorCafeProps = {
+  productos: Productos;
+};
 
 const BEBIDAS: { valor: TipoCafe; etiqueta: string }[] = [
   { valor: "expreso", etiqueta: "Expreso" },
@@ -29,51 +33,26 @@ function esCafe(producto: Producto): producto is Producto & { tipo: "cafe" } {
   return producto.tipo === "cafe";
 }
 
-export default function SelectorCafe() {
+export default function SelectorCafe({ productos }: SelectorCafeProps) {
   const tituloId = useId();
   const { agregarProducto } = useCarrito();
   const [tipoCafe, setTipoCafe] = useState<TipoCafe | null>(null);
   const [tamano, setTamano] = useState<Tamano | null>(null);
   const [variedad, setVariedad] = useState<Origen | null>(null);
   const [opcionesCafe, setOpcionesCafe] = useState<Producto[]>([]);
-  const [cargando, setCargando] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!tipoCafe || !tamano) {
       setOpcionesCafe([]);
+      setVariedad(null);
       return;
     }
 
-    let cancelado = false;
-
-    (async () => {
-      setCargando(true);
-      setError(null);
-      setVariedad(null);
-      try {
-        const resultados = await buscarProductos({ tipoCafe, tamaño: tamano });
-        if (!cancelado) {
-          setOpcionesCafe(resultados.filter(esCafe));
-        }
-      } catch (err) {
-        if (!cancelado) {
-          setOpcionesCafe([]);
-          setError(
-            err instanceof Error ? err.message : "No se pudieron cargar orígenes",
-          );
-        }
-      } finally {
-        if (!cancelado) {
-          setCargando(false);
-        }
-      }
-    })();
-
-    return () => {
-      cancelado = true;
-    };
-  }, [tipoCafe, tamano]);
+    setVariedad(null);
+    setOpcionesCafe(
+      filtrarProductos(productos, { tipoCafe, tamaño: tamano }).filter(esCafe),
+    );
+  }, [productos, tipoCafe, tamano]);
 
   const productoElegido =
     variedad === null
@@ -81,6 +60,9 @@ export default function SelectorCafe() {
       : opcionesCafe.find(
           (p) => esCafe(p) && p.variedad.nombre === variedad,
         );
+
+  const sinCoincidencias =
+    tipoCafe !== null && tamano !== null && opcionesCafe.length === 0;
 
   function agregarAlCarrito() {
     if (!productoElegido) {
@@ -147,17 +129,12 @@ export default function SelectorCafe() {
       {tipoCafe !== null && tamano !== null && (
         <fieldset className="mb-3">
           <legend className="form-label fw-semibold">Origen</legend>
-          {cargando && (
+          {sinCoincidencias && (
             <p className="text-muted mb-2" role="status">
-              Cargando orígenes...
+              No hay orígenes para esta combinación en el catálogo.
             </p>
           )}
-          {error !== null && (
-            <p className="text-danger mb-2" role="alert">
-              {error}
-            </p>
-          )}
-          {!cargando && error === null && (
+          {!sinCoincidencias && (
             <div className="d-flex flex-column gap-2" role="radiogroup" aria-label="Origen del café">
               {(Object.keys(ETIQUETAS_ORIGEN) as Origen[]).map((origen) => {
                 const producto = opcionesCafe.find(

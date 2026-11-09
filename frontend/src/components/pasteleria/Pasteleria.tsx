@@ -1,8 +1,12 @@
-import { useEffect, useId, useState } from "react";
-import { buscarProductos } from "../../api/productos";
-import type { Producto } from "../../api/esquemas/productos";
+import { useId, useMemo } from "react";
+import type { Producto, Productos } from "../../api/esquemas/productos";
 import { useCarrito } from "../../hooks/useCarrito";
+import { filtrarProductos } from "../../utils/filtrarProductos";
 import { formatoPrecio } from "../../utils/formatoPrecio";
+
+type PasteleriaProps = {
+  productos: Productos;
+};
 
 function esPasteleria(
   producto: Producto,
@@ -10,39 +14,13 @@ function esPasteleria(
   return producto.tipo === "pasteleria";
 }
 
-export default function Pasteleria() {
+export default function Pasteleria({ productos }: PasteleriaProps) {
   const tituloId = useId();
   const { agregarProducto } = useCarrito();
-  const [productos, setProductos] = useState<Producto[]>([]);
-  const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelado = false;
-
-    (async () => {
-      try {
-        const resultados = await buscarProductos({ tipo: "pasteleria" });
-        if (!cancelado) {
-          setProductos(resultados.filter(esPasteleria));
-        }
-      } catch (err) {
-        if (!cancelado) {
-          setError(
-            err instanceof Error ? err.message : "No se pudo cargar pastelería",
-          );
-        }
-      } finally {
-        if (!cancelado) {
-          setCargando(false);
-        }
-      }
-    })();
-
-    return () => {
-      cancelado = true;
-    };
-  }, []);
+  const itemsPasteleria = useMemo(
+    () => filtrarProductos(productos, { tipo: "pasteleria" }).filter(esPasteleria),
+    [productos],
+  );
 
   return (
     <section className="pasteleria mb-4" aria-labelledby={tituloId}>
@@ -50,21 +28,15 @@ export default function Pasteleria() {
         Pastelería
       </h2>
 
-      {cargando && (
-        <p className="text-muted" role="status">
-          Cargando pastelería...
+      {itemsPasteleria.length === 0 && (
+        <p className="text-muted mb-0" role="status">
+          No hay pastelería disponible en el catálogo.
         </p>
       )}
 
-      {error !== null && (
-        <p className="text-danger" role="alert">
-          {error}
-        </p>
-      )}
-
-      {!cargando && error === null && (
+      {itemsPasteleria.length > 0 && (
         <ul className="list-unstyled d-flex flex-column gap-3 mb-0">
-          {productos.map((producto) => (
+          {itemsPasteleria.map((producto) => (
             <li
               key={producto.id}
               className="border rounded p-3 d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2"
