@@ -1,8 +1,8 @@
 # Planificación del TP3 — Cafetería Origen
 
-El trabajo se organiza según [TP3.pdf](TP3.pdf). Los ticks indican tareas implementadas y probadas; se actualizan al completar una tarea. La instalación y API están en [README.md](../README.md) y la arquitectura y pruebas del frontend en [FRONTEND.md](FRONTEND.md).
+Registro del reparto y del alcance entregado según [TP3.pdf](TP3.pdf). Las tareas de los cuatro integrantes están implementadas, probadas e integradas en `main`; los ticks identifican ese trabajo completado. La instalación y API están en [README.md](../README.md) y la arquitectura y pruebas del frontend en [FRONTEND.md](FRONTEND.md).
 
-## Reparto y estado actual
+## Reparto y tareas completadas
 
 | Integrante | Responsabilidad | Estado |
 | --- | --- | --- |
@@ -15,7 +15,7 @@ El trabajo se organiza según [TP3.pdf](TP3.pdf). Los ticks indican tareas imple
 
 - Los productos se seleccionan por campos separados: `tipo`, `tipoCafe`, `tamaño` y `variedad`. Los contratos completos están en README.
 - Los precios unitarios y el total confirmado provienen de la API. El carrito muestra subtotales orientativos, sin reproducir las fórmulas del dominio.
-- Las mesas válidas son los enteros del 1 al 8, por decisión del grupo. Omitir la mesa significa barra. En la URL, una mesa ausente o inválida debe interpretarse como barra.
+- Las mesas válidas son los enteros del 1 al 8, por decisión del grupo. Omitir la mesa significa barra. En la URL, una mesa ausente o inválida se interpreta como barra.
 - El frontend usa `crearPedido(items, mesaId?)` y `consultarPedido(id)`. Antes de enviar, transforma el carrito a `{ productoId, cantidad }`. No envía estado; la API asigna `pendiente`.
 - Los componentes consultan mediante el cliente HTTP y validan respuestas con Zod. Los tipos se derivan con `z.infer` y se mantiene TypeScript estricto sin `any` explícito.
 - Pedir y Ver productos reciben el catálogo validado mediante `ContenedorCatalogo`. El selector y la pastelería lo filtran en memoria; la vista Buscar productos consulta `/productos/buscar`, que rechaza filtros repetidos.
@@ -47,7 +47,7 @@ El trabajo se organiza según [TP3.pdf](TP3.pdf). Los ticks indican tareas imple
 ### H4. Documentación e integración — completo
 
 - [x] Documentar instalación, comandos, arquitectura y contratos implementados.
-- [x] Mantener el reparto y las tareas completadas/pendientes.
+- [x] Documentar el reparto y el alcance completado por cada integrante.
 - [x] Documentar las vistas Pedir/Ver/Buscar, el filtro puro, la búsqueda HTTP, los estilos y la cobertura móvil con carrito cargado.
 - [x] Documentar el recorrido E2E completo y el contrato de reset/seed.
 - [x] Verificar tests, E2E, build, lint, configuraciones y documentación del sistema completo.
@@ -77,7 +77,7 @@ El trabajo se organiza según [TP3.pdf](TP3.pdf). Los ticks indican tareas imple
 - [x] Preparar los datos antes de cada E2E mediante seed, que reinicia los pedidos y carga ocho casos conocidos; comprobar la respuesta 201.
 - [x] Probar el recorrido `/?mesa=4`: elegir café, agregar pastelería, revisar carrito y confirmar ID, estado y total recibidos.
 - [x] Consultar el estado sin recargar y comprobar el recorrido completo a 375 px sin scroll horizontal.
-- [x] Probar barra ante una mesa inválida y el rechazo de la API con carrito conservado y reintento exitoso.
+- [x] Probar barra ante una mesa inválida y el rechazo de la API con carrito conservado y reintento exitoso; conservar el seguimiento anterior si falla un nuevo pedido y reemplazarlo después del éxito.
 
 ## Tareas de Matias
 
@@ -139,17 +139,9 @@ El [contrato de reset/seed](../README.md#datos-de-prueba-reset-y-seed) detalla r
 - [x] Probar con MSW los componentes de creación para mesa/barra, cuerpo del POST, bloqueo, rechazo con carrito conservado y contrato incompatible.
 - [x] Probar la integración en App y el seguimiento con MSW, incluidos errores de red/contrato, consultas repetidas e IDs fuera de rango seguro.
 
-## Dependencias y próximo trabajo
-
-| Trabajo | Qué necesita |
-| --- | --- |
-| Integración final | Guardar los cambios, completar la revisión cruzada y llevar la entrega a `main`. |
-
-**Para Homero:** las funcionalidades planificadas están implementadas y verificadas. Queda completar el proceso de revisión e integración de la entrega.
-
 ## Funcionalidades del PDF
 
-| N.º | Funcionalidad | Estado actual |
+| N.º | Funcionalidad | Comportamiento entregado |
 | --- | --- | --- |
 | 1 | Mesa desde QR/URL o barra. | Implementado y conectado a App; mesa válida o retiro en barra. |
 | 2 | Menú desde API, carga, error y reintento. | Implementado y probado. |
@@ -163,22 +155,20 @@ El [contrato de reset/seed](../README.md#datos-de-prueba-reset-y-seed) detalla r
 
 ## Metodología y entrega
 
-- Trabajar un comportamiento por vez mediante **RED → GREEN → REFACTOR**, verificando el resultado de cada etapa. En el trabajo asistido se espera autorización antes de avanzar a la siguiente.
-- Usar commits separados: `RED: descripción`, `GREEN: descripción` y `REFACTOR: descripción`. El refactor debe tener una mejora justificable y conservar los tests verdes.
-- Si una prueba nueva ya pasa, registrarla como regresión sin romper código para fabricar un RED. Documentación y cobertura existente usan `docs:` y `test:`.
-- Mantener tests de API con Jest/Supertest; unitarios, componentes e integración de frontend con Vitest/Testing Library/MSW; pocos E2E con Playwright y API real, incluyendo un recorrido completo y la preparación de datos mediante seed antes de cada test.
-- Consultar la interfaz por rol, etiqueta o texto. Usar `getByTestId` cuando no haya una alternativa adecuada.
-- Cada integrante guarda sus commits y trabaja en sus tareas. El asistente entrega comandos y no ejecuta `git add`, `git commit` ni `git push`; cambiar ramas requiere autorización.
-- Integrar por PR con revisión cruzada y preservar la evidencia TDD. Homero revisa a Federico; Federico a Homero; Matias a Nicolas; Nicolas a Matias. La entrega final debe quedar en `main`.
-- Mantener la documentación centrada en uso, contratos vigentes y tareas completadas/pendientes. El historial detallado permanece en Git.
+- El trabajo está integrado en `main` mediante Pull Requests de las ramas de funcionalidades y correcciones, con participación de los cuatro integrantes.
+- El historial conserva ciclos **RED → GREEN → REFACTOR**, junto con commits de correcciones (`fix:`), cobertura de regresión (`test:`) y documentación (`docs:`).
+- Las pruebas de API utilizan Jest/Supertest. El frontend separa unitarios, componentes e integración con Vitest/Testing Library/MSW de los E2E con Playwright y API real.
+- Las pruebas de interfaz consultan por rol, etiqueta o texto. Los handlers MSW reproducen las rutas, códigos y errores de la API; cada E2E prepara sus datos mediante seed.
+- La documentación describe el uso, los contratos y el alcance entregado. El detalle de commits y revisiones permanece en Git y en las Pull Requests.
 
 ### Checklist de entrega
 
 - [x] Backend y frontend conviven en el repositorio con comandos de instalación, desarrollo y pruebas.
 - [x] API de productos y pedidos, proxy, cliente HTTP validado y carrito implementados con sus pruebas.
-- [x] Incorporar Bootstrap personalizado con SASS y controles del menú accesibles a 375 px.
-- [x] Completar las nueve funcionalidades, incluida la mesa desde URL, confirmación y seguimiento.
-- [x] Habilitar reset/seed solo en test y preparar los datos de cada E2E mediante seed.
-- [x] Aprobar el recorrido completo de compra y seguimiento a 375 px.
-- [x] Ejecutar tests, build y lint sobre el sistema completo, y actualizar sus instrucciones finales.
-- [ ] Completar revisiones cruzadas e integrar la entrega en `main`, con participación de los cuatro integrantes y TDD visible.
+- [x] Bootstrap personalizado con SASS y controles del menú accesibles a 375 px.
+- [x] Nueve funcionalidades implementadas, incluida la mesa desde URL, confirmación y seguimiento.
+- [x] Reset/seed disponibles solo en test y preparación de datos antes de cada E2E mediante seed.
+- [x] Recorrido completo de compra y seguimiento a 375 px verificado.
+- [x] Tests, E2E, build y lint del sistema completo aprobados y documentados.
+- [x] Funcionalidades integradas en `main` mediante Pull Requests.
+- [x] Historial con participación de los cuatro integrantes y ciclos TDD visibles.
