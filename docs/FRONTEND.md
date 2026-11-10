@@ -1,6 +1,6 @@
 # Frontend — Cafetería Origen
 
-Guía de arquitectura, contratos y pruebas. La instalación general está en [README.md](../README.md); las tareas terminadas y pendientes están en [planificacion.md](planificacion.md).
+Guía de arquitectura, contratos y pruebas del frontend entregado. La instalación general está en [README.md](../README.md); el reparto y las tareas completadas están en [planificacion.md](planificacion.md).
 
 ## Arquitectura
 
@@ -12,7 +12,7 @@ frontend/
     api/          # Cliente HTTP, consultas y esquemas Zod
     components/   # Componentes comunes, carrito, selección y pedidos
     context/      # Context, proveedor y reducer del carrito
-    hooks/        # useMenu y useCarrito
+    hooks/        # useMenu, useCarrito y usePedido
     pages/        # MenuPage, VerProductosPage y BuscarProductosPage
     utils/        # Filtro puro, subtotales y formato de precios
     styles/       # Bootstrap y variables SASS compartidas
@@ -26,7 +26,7 @@ frontend/
   e2e/            # Pruebas con frontend y API reales
 ```
 
-El selector, la pastelería y los estilos compartidos están implementados. Los componentes de mesa y confirmación están preparados para conectarlos a App; el seguimiento continúa pendiente.
+`App` integra el catálogo, la selección de café y pastelería, el carrito, la mesa desde la URL, la confirmación y el seguimiento. Las secciones Pedir, Ver productos y Buscar productos comparten el carrito y conservan el último pedido confirmado. El recorrido completo está implementado y probado con la API real, incluido su uso a 375 px de ancho.
 
 | Configuración | Responsabilidad |
 | --- | --- |
@@ -36,7 +36,7 @@ El selector, la pastelería y los estilos compartidos están implementados. Los 
 | `playwright.config.ts` | Chromium, viewport 375 × 812 y servidores reales administrados por Playwright. |
 | `src/styles/_variables.scss` / `main.scss` | Colores y variables definidos antes de importar Bootstrap; distribución del menú y controles sin recortes. |
 | `eslint.config.js` | Reglas de TypeScript/React y rechazo de `any` explícito. |
-| `.npmrc` / `package.json` | Versiones exactas y override de `tinypool` 2.1.2 limitado a Vitest 3.2.7; revisar el override al actualizar Vitest. |
+| `.npmrc` / `package.json` | Versiones exactas y override de `tinypool` 2.1.2 aplicado únicamente a Vitest 3.2.7. |
 
 El build ejecuta `tsc -b` antes de Vite y comprueba también los tipos de tests y configuraciones. Ejecutar Vitest o Playwright no sustituye esa comprobación.
 
@@ -46,7 +46,7 @@ Los componentes utilizan `src/api/` para consultar la API. Las rutas se resuelve
 
 | Función | Responsabilidad |
 | --- | --- |
-| `solicitarJson(ruta, opciones?)` | Ejecutar la petición, interpretar JSON y manejar errores HTTP/red. Devuelve `unknown`. |
+| `solicitarJson(ruta, opciones?)` | Ejecutar la petición, interpretar JSON y manejar errores HTTP/red, con límite de 15 segundos y cancelación. Devuelve `unknown`. |
 | `solicitarValidado(ruta, esquema, opciones?)` | Validar una respuesta exitosa con Zod y devolver su tipo inferido. |
 | `listarProductos(): Promise<Productos>` | Consultar `GET /productos` y validar la lista. |
 | `buscarProductos(criterios: CriteriosBusquedaProducto): Promise<Productos>` | Consultar `GET /productos/buscar` con parámetros codificados mediante `URLSearchParams` y validar la lista. |
@@ -121,7 +121,7 @@ El límite de 15 segundos cubre la conexión y la lectura del JSON. Al vencer, e
 
 `SelectorCafe` recibe ese catálogo, filtra por bebida y tamaño y muestra descripción y precio de cada origen. Agregar queda bloqueado hasta completar una combinación válida; cambiar bebida o tamaño limpia el origen. `Pasteleria` filtra el mismo catálogo y permite agregar muffin o torta. Ambos muestran disponibilidad según los productos recibidos, sin realizar consultas adicionales.
 
-`DetalleProducto` deriva el producto seleccionado del catálogo validado. Si está vacío, muestra un mensaje y no consulta un ID inventado. La función HTTP `obtenerProducto()` queda disponible para consultas directas por ID.
+`DetalleProducto` deriva el producto seleccionado del catálogo validado. Si está vacío, muestra un mensaje y no consulta un ID inventado. La función HTTP `obtenerProducto()` permite consultas directas por ID.
 
 El carrito usa un reducer puro con `AGREGAR`, `RESTAR`, `ELIMINAR` y `VACIAR`. Agregar un producto repetido acumula cantidad; restar desde uno quita el ítem. `useCarrito()` expone `items`, `agregarProducto`, `restarProducto`, `eliminarProducto` y `vaciarCarrito`; debe usarse dentro del proveedor. Las acciones por producto reciben `ProductoBase`.
 
@@ -131,7 +131,7 @@ El carrito usa un reducer puro con `AGREGAR`, `RESTAR`, `ELIMINAR` y `VACIAR`. A
 
 `leerMesa(new URLSearchParams(window.location.search))` lee `?mesa=N`; acepta las mesas 1–8 y devuelve `undefined` para barra cuando falta o es inválida, sin lanzar errores. El parámetro de URL es `mesa`; el campo enviado a la API es `mesaId`.
 
-`ConfirmarPedido` recibe `mesaId` opcional y usa el Context para enviar solo IDs/cantidades mediante el cliente H2. Bloquea el carrito vacío y las confirmaciones repetidas, muestra los datos devueltos por API y vacía el carrito tras el éxito. Los errores HTTP, de red, timeout y contrato se muestran sin perder el contenido. El último pedido confirmado se conserva durante los intentos posteriores y se identifica como Último pedido confirmado mientras hay otro carrito o envío pendiente; se reemplaza únicamente después de una nueva creación exitosa.
+`ConfirmarPedido` recibe `mesaId` opcional y usa el Context para enviar solo IDs/cantidades mediante `crearPedido()`. Bloquea el carrito vacío y las confirmaciones repetidas, muestra los datos devueltos por API y vacía el carrito tras el éxito. Los errores HTTP, de red, timeout y contrato se muestran sin perder el contenido. El último pedido confirmado se conserva durante los intentos posteriores y se identifica como Último pedido confirmado mientras hay otro carrito o envío pendiente; se reemplaza únicamente después de una nueva creación exitosa.
 
 Mientras se envía el pedido, `ConfirmarPedido` comunica el estado a App mediante `onCambiarEnvio`. Un fieldset deshabilita la selección, navegación y edición del carrito hasta recibir la respuesta; así no se pierden cambios agregados durante un envío. Ante éxito o error, los controles vuelven a habilitarse.
 
@@ -218,6 +218,12 @@ Para comprobar mesa, confirmación y seguimiento, incluidos los componentes cone
 npm run test:frontend -- src/test/unit/leerMesa.test.ts src/test/components/Encabezado.test.tsx src/test/integration/pedidos.test.tsx src/test/integration/app.pedidos.test.tsx src/test/integration/seguimiento.test.tsx
 ```
 
+Para comprobar el límite de tiempo, la cancelación y la recuperación de los controles sin perder el carrito ni el pedido anterior:
+
+```powershell
+npm run test:frontend -- src/test/unit/cliente.timeout.test.ts src/test/integration/app.pedidos.test.tsx
+```
+
 Los tests de interfaz de pedidos y seguimiento son independientes de los del cliente HTTP. Las respuestas pendientes se controlan con promesas para verificar carga y bloqueo sin depender de demoras arbitrarias.
 
 ### Pruebas E2E
@@ -239,6 +245,6 @@ Seed elimina los pedidos anteriores, reinicia los IDs y carga ocho pedidos conoc
 
 Los E2E comprueban el catálogo, la navegación, el bloqueo de confirmación en vacío y los pedidos iniciales. El recorrido completo elige dos expresos medianos de Colombia y un muffin, confirma el pedido y consulta su estado desde la confirmación. Se ejecuta para mesa 4 y para barra con una mesa inválida; verifica el cuerpo del POST, ID 9, estado pendiente y total de $17.220, el vaciado del carrito y la consulta sin navegación de página. Los controles, el carrito, la confirmación y el seguimiento se comprueban a 375 px sin recortes ni scroll horizontal.
 
-Otra prueba envía primero una mesa inexistente a la API real, comprueba el rechazo 400 sin perder ítems ni cantidades y reintenta con la mesa correcta. Los E2E se ejecutan por separado de las pruebas unitarias y de integración, en una misma suite secuencial para que la preparación de datos no interfiera entre recorridos.
+Las pruebas de rechazo envían una mesa inexistente a la API real, comprueban el error 400 sin perder ítems ni cantidades y reintentan con la mesa correcta. También verifican que el seguimiento del último pedido confirmado se conserva si falla el siguiente y se reemplaza únicamente tras una nueva creación exitosa. Los E2E se ejecutan por separado de las pruebas unitarias y de integración, en una misma suite secuencial para que la preparación de datos no interfiera entre recorridos.
 
 El flujo TDD y los criterios de entrega están en [planificacion.md](planificacion.md#metodología-y-entrega).

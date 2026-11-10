@@ -1,6 +1,6 @@
 # Reparto del trabajo — Cafetería Origen (Parcial I)
 
-Referencia del alcance del primer parcial y de la base de backend. El reparto vigente del TP3 y su estado están en [planificacion.md](planificacion.md).
+Referencia histórica del alcance del primer parcial y de la base de backend conservada en el proyecto. El reparto y las tareas completadas del TP3 están en [planificacion.md](planificacion.md).
 
 ## Responsabilidades
 
@@ -22,6 +22,6 @@ Referencia del alcance del primer parcial y de la base de backend. El reparto vi
 
 Los contratos HTTP vigentes, incluidos los campos agregados para TP3, se consultan en [README.md](../README.md#api).
 
-## Video del Parcial I
+## Referencia de la consigna del video del Parcial I
 
-Duración de 5 a 8 minutos, en MP4 o mediante un enlace no listado. Debe incluir nombres y legajos, explicación de cada integrante sobre su parte, ejecución de tests y una demostración de requests a la API.
+La consigna del primer parcial establece un video de 5 a 8 minutos, en MP4 o mediante un enlace no listado, con nombres y legajos, explicación de cada integrante sobre su parte, ejecución de tests y una demostración de requests a la API. Esta referencia corresponde al Parcial I; el alcance de la entrega del TP3 está en [TP3.pdf](TP3.pdf).
