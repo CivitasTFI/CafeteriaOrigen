@@ -1,6 +1,6 @@
 # Cafetería Origen
 
-Proyecto del Grupo 14 para Programación IV, Tecnicatura Universitaria en Programación, UTN FRBB. Incluye una API Express y el frontend del TP3 en React.
+Proyecto del Grupo 14 para Programación IV, Tecnicatura Universitaria en Programación, UTN FRBB. Incluye una API Express y el menú del TP3 en React, implementados e integrados en `main`.
 
 | Integrante | Legajo |
 | --- | --- |
@@ -14,7 +14,7 @@ Proyecto del Grupo 14 para Programación IV, Tecnicatura Universitaria en Progra
 | Documento | Contenido |
 | --- | --- |
 | [FRONTEND.md](docs/FRONTEND.md) | Arquitectura, cliente HTTP, carrito y pruebas del frontend. |
-| [planificacion.md](docs/planificacion.md) | Reparto del TP3, tareas completadas, pendientes y dependencias. |
+| [planificacion.md](docs/planificacion.md) | Reparto del TP3, tareas completadas y funcionalidades entregadas. |
 | [TP3.pdf](docs/TP3.pdf) | Consigna académica. |
 | [Reparto del Parcial I](<docs/Reparto del trabajo – Cafetería Origen (Parcial I).md>) | Referencia de la base de backend y del reparto del primer parcial. |
 
@@ -30,7 +30,7 @@ npm run install:all
 
 Este comando ejecuta `npm ci` en `backend/` y `frontend/` usando sus lockfiles. La raíz solo agrupa comandos y no tiene dependencias propias.
 
-## Desarrollo
+## Ejecución local
 
 Iniciar la API en una terminal:
 
@@ -53,7 +53,11 @@ El proxy de Vite envía `/productos` y `/pedidos`, incluidas sus subrutas, a la 
 
 Los pedidos se guardan en memoria y se pierden al reiniciar el servidor.
 
-El frontend ofrece las secciones **Pedir**, **Ver productos** y **Buscar productos**. Permite elegir cafés, agregar pastelería, modificar el carrito y confirmar el pedido. Al abrir `http://localhost:5173/?mesa=4`, el encabezado muestra la mesa y el pedido la conserva; sin una mesa válida, corresponde retiro en barra. La confirmación muestra el número, estado y total recibidos de la API, y permite consultar el estado sin recargar. Ante un rechazo se conserva el carrito y se puede reintentar.
+El frontend ofrece las secciones **Pedir**, **Ver productos** y **Buscar productos**. Permite elegir café en tres pasos, consultar el precio y la descripción de cada origen, agregar pastelería y modificar cantidades en el carrito. Funciona a 375 px de ancho sin scroll horizontal.
+
+Al abrir `http://localhost:5173/?mesa=4`, el encabezado muestra la mesa y el pedido la conserva; sin una mesa válida, corresponde retiro en barra. La confirmación muestra el número, estado y total recibidos de la API, y permite consultar el estado sin recargar, manteniendo un único estado visible. El carrito se vacía solo después de una creación exitosa. Ante un rechazo se conserva su contenido y el último pedido confirmado, que se reemplaza cuando el siguiente pedido se crea correctamente.
+
+Las solicitudes tienen un límite de 15 segundos que incluye la lectura de la respuesta. Ante un timeout, se muestra el error y se recuperan los controles; no hay reenvíos automáticos. El [cliente HTTP](docs/FRONTEND.md#cliente-http) documenta los errores y las limitaciones de esa cancelación.
 
 ## Comandos
 
@@ -88,7 +92,7 @@ npm run test:backend -- --runTestsByPath tests/integration/pedidos.mesa.test.ts
 npm run test:frontend -- src/test/integration/pedidos.api.test.ts
 ```
 
-Después del build, `npm --prefix backend start` ejecuta la API compilada y `npm --prefix frontend run preview` permite inspeccionar el frontend compilado. La configuración de despliegue se define por separado.
+Después del build, `npm --prefix backend start` ejecuta la API compilada y `npm --prefix frontend run preview` permite inspeccionar el frontend compilado. Estos comandos permiten verificar la entrega localmente; el repositorio no incluye infraestructura de hosting.
 
 ## Estructura
 
