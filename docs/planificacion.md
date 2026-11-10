@@ -31,7 +31,7 @@ El trabajo se organiza según [TP3.pdf](TP3.pdf). Los ticks indican tareas imple
 
 ### H2. Contratos y cliente HTTP — completo
 
-- [x] Implementar el cliente común con errores HTTP/JSON/red y validación Zod de respuestas exitosas.
+- [x] Implementar el cliente común con errores HTTP/JSON/red, límite de 15 segundos para conexión/cuerpo y validación Zod de respuestas exitosas.
 - [x] Definir contratos y tipos inferidos de errores, productos, ítems, pedidos y respuesta de creación.
 - [x] Entregar `listarProductos()`, `buscarProductos(criterios)`, `obtenerProducto(id)`, `crearPedido(items, mesaId?)` y `consultarPedido(id)`.
 - [x] Admitir mesa opcional del 1 al 8, conservarla en respuestas y omitirla para barra.
@@ -133,9 +133,9 @@ El [contrato de reset/seed](../README.md#datos-de-prueba-reset-y-seed) detalla r
 - [x] Mostrar mesa o retiro en barra en el encabezado de App.
 - [x] Enviar la confirmación con ítems y mesa mediante el cliente H2; bloquear carrito vacío y envíos repetidos.
 - [x] Mostrar ID, estado y total de API en el componente de confirmación; vaciar el carrito únicamente después del éxito.
-- [x] Mostrar errores HTTP, de conexión o contrato conservando el carrito y permitir reintentar.
+- [x] Mostrar errores HTTP, de conexión, timeout o contrato conservando el carrito y el último pedido confirmado.
 - [x] Conectar los componentes a App y pasar la mesa leída de la URL; bloquear selección, navegación y edición mientras se envía.
-- [x] Consultar desde la confirmación el estado del ID recibido, sin recargar, con estados de carga, error y reintento.
+- [x] Consultar desde la confirmación el estado del ID recibido, sin recargar, con carga, error y reintento; mantener un único estado visible y descartar actualizaciones de pedidos anteriores.
 - [x] Probar con MSW los componentes de creación para mesa/barra, cuerpo del POST, bloqueo, rechazo con carrito conservado y contrato incompatible.
 - [x] Probar la integración en App y el seguimiento con MSW, incluidos errores de red/contrato, consultas repetidas e IDs fuera de rango seguro.
 

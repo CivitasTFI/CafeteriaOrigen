@@ -7,14 +7,16 @@ import MensajeError from "../comunes/MensajeError";
 type EstadoSeguimiento =
     | { estado: "inicial" }
     | { estado: "cargando" }
+    | { estado: "actualizado" }
     | { estado: "listo"; pedido: Pedido }
     | { estado: "error"; mensaje: string };
 
 interface SeguimientoPedidoProps {
     pedidoId?: number;
+    onActualizarPedido?: (pedido: Pedido) => void;
 }
 
-export default function SeguimientoPedido({ pedidoId }: SeguimientoPedidoProps) {
+export default function SeguimientoPedido({ pedidoId, onActualizarPedido }: SeguimientoPedidoProps) {
     const { consultarEstadoPedido } = usePedido();
     const tituloId = useId();
     const entradaId = useId();
@@ -45,11 +47,12 @@ export default function SeguimientoPedido({ pedidoId }: SeguimientoPedidoProps) 
 
         try {
             const pedido = await consultarEstadoPedido(idConsulta);
-
-            setEstado({
-                estado: "listo",
-                pedido,
-            });
+            if (onActualizarPedido !== undefined) {
+                onActualizarPedido(pedido);
+                setEstado({ estado: "actualizado" });
+            } else {
+                setEstado({ estado: "listo", pedido });
+            }
         } catch (error) {
             setEstado({
                 estado: "error",

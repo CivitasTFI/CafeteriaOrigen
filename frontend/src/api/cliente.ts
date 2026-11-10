@@ -1,6 +1,8 @@
 import { obtenerMensajeError } from "./errores";
 import type { z } from "zod";
 
+const TIEMPO_LIMITE_MS = 15_000;
+
 async function realizarPeticion(
   ruta: string,
   opciones?: RequestInit,
@@ -12,7 +14,7 @@ async function realizarPeticion(
   }
 }
 
-export async function solicitarJson(
+async function leerRespuestaJson(
   ruta: string,
   opciones?: RequestInit,
 ): Promise<unknown> {
@@ -30,6 +32,35 @@ export async function solicitarJson(
   }
 
   return datos;
+}
+
+export async function solicitarJson(
+  ruta: string,
+  opciones?: RequestInit,
+): Promise<unknown> {
+  const controlador = new AbortController();
+  const senalExterna = opciones?.signal;
+  const cancelar = () => controlador.abort();
+  if (senalExterna?.aborted) cancelar();
+  else senalExterna?.addEventListener("abort", cancelar, { once: true });
+
+  let temporizador: ReturnType<typeof setTimeout> | undefined;
+  const limite = new Promise<never>((_resolve, reject) => {
+    temporizador = setTimeout(() => {
+      reject(new Error("El servidor tardó demasiado en responder"));
+      controlador.abort();
+    }, TIEMPO_LIMITE_MS);
+  });
+
+  try {
+    return await Promise.race([
+      leerRespuestaJson(ruta, { ...opciones, signal: controlador.signal }),
+      limite,
+    ]);
+  } finally {
+    clearTimeout(temporizador);
+    senalExterna?.removeEventListener("abort", cancelar);
+  }
 }
 
 export async function solicitarValidado<Esquema extends z.ZodType>(

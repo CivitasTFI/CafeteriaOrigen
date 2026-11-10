@@ -100,9 +100,12 @@ Zod valida las respuestas; los datos enviados los valida la API. El llamador deb
 | Error HTTP con JSON incompatible | `No se pudo interpretar la respuesta de error del servidor` |
 | HTML, JSON incompleto o cuerpo vacío | `No se pudo interpretar la respuesta del servidor` |
 | Fallo de conexión | `No se pudo conectar con el servidor` |
+| Solicitud o lectura del cuerpo pendiente durante 15 segundos | `El servidor tardó demasiado en responder` |
 | Respuesta exitosa incompatible | `La respuesta del servidor no tiene el formato esperado` |
 
 Por ejemplo, un POST con mesa 9 conserva el 400 `Mesa inexistente`; una respuesta exitosa con esa mesa se rechaza como error de contrato.
+
+El límite de 15 segundos cubre la conexión y la lectura del JSON. Al vencer, el cliente cancela la petición con `AbortController`; los temporizadores y escuchas de cancelación se liberan al finalizar. Las cancelaciones indicadas por el llamador se conservan. El cliente no reenvía automáticamente solicitudes: un timeout del POST no permite asegurar si la API llegó a guardar el pedido.
 
 ## Menú y carrito
 
@@ -128,17 +131,17 @@ El carrito usa un reducer puro con `AGREGAR`, `RESTAR`, `ELIMINAR` y `VACIAR`. A
 
 `leerMesa(new URLSearchParams(window.location.search))` lee `?mesa=N`; acepta las mesas 1–8 y devuelve `undefined` para barra cuando falta o es inválida, sin lanzar errores. El parámetro de URL es `mesa`; el campo enviado a la API es `mesaId`.
 
-`ConfirmarPedido` recibe `mesaId` opcional y usa el Context para enviar solo IDs/cantidades mediante el cliente H2. Bloquea el carrito vacío y las confirmaciones repetidas, muestra los datos devueltos por API y vacía el carrito tras el éxito. Los errores HTTP, de red y de contrato se muestran sin perder el contenido; se puede reintentar. `ConfirmacionPedido` presenta el ID, estado y total formateado con la utilidad compartida.
+`ConfirmarPedido` recibe `mesaId` opcional y usa el Context para enviar solo IDs/cantidades mediante el cliente H2. Bloquea el carrito vacío y las confirmaciones repetidas, muestra los datos devueltos por API y vacía el carrito tras el éxito. Los errores HTTP, de red, timeout y contrato se muestran sin perder el contenido. El último pedido confirmado se conserva durante los intentos posteriores y se identifica como Último pedido confirmado mientras hay otro carrito o envío pendiente; se reemplaza únicamente después de una nueva creación exitosa.
 
 Mientras se envía el pedido, `ConfirmarPedido` comunica el estado a App mediante `onCambiarEnvio`. Un fieldset deshabilita la selección, navegación y edición del carrito hasta recibir la respuesta; así no se pierden cambios agregados durante un envío. Ante éxito o error, los controles vuelven a habilitarse.
 
-`ConfirmacionPedido` incorpora `SeguimientoPedido` con el ID recibido de la API. El botón Consultar estado usa `consultarPedido(id)` sin pedir que el cliente vuelva a escribir ese número. Muestra carga, estado actual o error y permite repetir la consulta. Cada nueva confirmación inicia su propio seguimiento, sin conservar resultados del pedido anterior. El componente también admite una consulta manual por ID al montarlo sin `pedidoId`; rechaza valores fuera del rango de enteros seguros y bloquea solicitudes simultáneas.
+`ConfirmacionPedido` incorpora `SeguimientoPedido` con el ID recibido de la API. El botón Consultar estado usa `consultarPedido(id)` sin pedir que el cliente vuelva a escribir ese número. La respuesta actualiza el único estado visible del pedido confirmado; un error conserva su último valor conocido. Las respuestas tardías de otro pedido no reemplazan el pedido vigente. Cada creación exitosa inicia su propio seguimiento. El componente también admite una consulta manual por ID al montarlo sin `pedidoId`; rechaza valores fuera del rango de enteros seguros y bloquea solicitudes simultáneas.
 
 ## Pruebas
 
 | Nivel | Herramientas y alcance |
 | --- | --- |
-| Unitarias | Vitest: esquemas Zod, las 18 combinaciones del filtro de café, acciones e inmutabilidad del reducer, subtotales, formato y configuración. |
+| Unitarias | Vitest: esquemas Zod, las 18 combinaciones del filtro de café, acciones e inmutabilidad del reducer, timeout/cancelación del cliente, subtotales, formato y configuración. |
 | Componentes | Testing Library y user-event: precios/descripciones de los tres orígenes, producto exacto agregado por selector/pastelería, carrito y navegación de App. |
 | Integración | MSW: cliente HTTP, proxy, búsquedas, catálogo/detalle vacío, pedidos, mesa desde URL, envío desde App, bloqueo de edición, seguimiento, errores/reintentos, Context y handlers compartidos. |
 | E2E | Playwright: navegador con frontend y API reales. |
