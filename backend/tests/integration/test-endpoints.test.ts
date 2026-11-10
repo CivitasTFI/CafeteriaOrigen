@@ -20,7 +20,7 @@ describe("endpoints de test", () => {
         )
         const response = await request(app)
             .post("/__test__/reset")
-            
+
         expect(response.status).toBe(200);
         expect(response.body).toHaveProperty(
             "mensaje",
@@ -54,24 +54,13 @@ describe("endpoints de test", () => {
 
         expect(pedidos.status).toBe(200);
         expect(pedidos.body).toHaveLength(8);
-        //pedido id
-        expect(pedidos.body[0].id).toBe(1);
-        expect(pedidos.body[1].id).toBe(2);
-        expect(pedidos.body[2].id).toBe(3);
-        expect(pedidos.body[3].id).toBe(4);
-        expect(pedidos.body[4].id).toBe(5);
-        expect(pedidos.body[5].id).toBe(6);
-        expect(pedidos.body[6].id).toBe(7);
-        expect(pedidos.body[7].id).toBe(8);
-        //mesas
-        expect(pedidos.body[0].mesaId).toBe(1);
-        expect(pedidos.body[1].mesaId).toBe(2);
-        expect(pedidos.body[2].mesaId).toBe(3);
-        expect(pedidos.body[3].mesaId).toBe(4);
-        expect(pedidos.body[4].mesaId).toBe(5);
-        expect(pedidos.body[5].mesaId).toBe(6);
-        expect(pedidos.body[6].mesaId).toBe(7);
-        expect(pedidos.body[7].mesaId).toBe(8);
+        expect(pedidos.body).toMatchObject(
+            Array.from({ length: 8 }, (_, indice) => ({
+                id: indice + 1,
+                mesaId: indice + 1,
+                estado: "pendiente"
+            }))
+        );
         //items
         expect(pedidos.body[0].items).toEqual([
             {
@@ -171,20 +160,31 @@ describe("endpoints de test", () => {
         ]);
     });
 
-    it("verificar el resultado de ejecutar dos veces el seed", async() => {
-        
-        await request(app).post("/__test__/seed");
-        const primerosPedidos = await request(app).get("/pedidos");
+    it("seed reemplaza los pedidos agregados y recupera los ocho casos iniciales", async () => {
+        await request(app).post("/__test__/seed").expect(201);
+        const primerosPedidos = await request(app).get("/pedidos").expect(200);
+        expect(primerosPedidos.body).toHaveLength(8);
 
-        await request(app).post("/__test__/seed");
-        const segundosPedidos = await request(app).get("/pedidos");
+        const adicional = await request(app).post("/pedidos")
+            .send({ items: [{ productoId: 19, cantidad: 1 }] })
+            .expect(201);
+        expect(adicional.body.pedido.id).toBe(9);
+        const antesDelSeed = await request(app).get("/pedidos").expect(200);
+        expect(antesDelSeed.body).toHaveLength(9);
 
-        expect(primerosPedidos.body).toEqual(segundosPedidos.body);
+        await request(app).post("/__test__/seed").expect(201);
+        const segundosPedidos = await request(app).get("/pedidos").expect(200);
+        expect(segundosPedidos.body).toHaveLength(8);
+        expect(segundosPedidos.body).toEqual(primerosPedidos.body);
+
+        await request(app).post("/__test__/seed").expect(201);
+        const tercerosPedidos = await request(app).get("/pedidos").expect(200);
+        expect(tercerosPedidos.body).toEqual(primerosPedidos.body);
     });
 
     it("verificar regularidad en los ids", async () => {
 
-        await request(app).post("/__test__/seed");
+        await request(app).post("/__test__/seed").expect(201);
 
         crearPedido(
             [{
@@ -193,7 +193,7 @@ describe("endpoints de test", () => {
             }]
         )
 
-        const pedidos = await request(app).get("/pedidos");
+        const pedidos = await request(app).get("/pedidos").expect(200);
 
         expect(pedidos.body[8].id).toBe(9);
     })
@@ -202,19 +202,18 @@ describe("endpoints de test", () => {
 
 describe("rutas de testing deshabilitadas",() => {
   it("responde 404 fuera de entorno test", async () => {
-  jest.resetModules();
+    const entornoAnterior = process.env.NODE_ENV;
+    try {
+      jest.resetModules();
+      process.env.NODE_ENV = "development";
+      const appFueraDeTest = require("../../src/app").default;
 
-  process.env.NODE_ENV = "development";
-
-  const app = require("../../src/app").default;
-
-  const response = await request(app)
-    .post("/__test__/reset");
-
-  const response2 = await request(app)
-    .post("/__test__/seed");
-
-  expect(response.status).toBe(404);
-  expect(response2.status).toBe(404);
-});
+      await request(appFueraDeTest).post("/__test__/reset").expect(404);
+      await request(appFueraDeTest).post("/__test__/seed").expect(404);
+    } finally {
+      if (entornoAnterior === undefined) delete process.env.NODE_ENV;
+      else process.env.NODE_ENV = entornoAnterior;
+      jest.resetModules();
+    }
+  });
 });

@@ -20,7 +20,7 @@ Referencia del alcance del primer parcial y de la base de backend. El reparto vi
 - Los reportes calculan facturación, cantidades vendidas y productos más vendidos a partir de los pedidos.
 - Los tests cubren precios, validaciones, consultas, reportes sin pedidos, empates y creación de pedidos con consulta de reportes.
 
-Los contratos HTTP vigentes, incluidos los campos agregados para TP3, se consultan en [README.md](README.md#api).
+Los contratos HTTP vigentes, incluidos los campos agregados para TP3, se consultan en [README.md](../README.md#api).
 
 ## Video del Parcial I
 

@@ -13,10 +13,10 @@ Proyecto del Grupo 14 para Programación IV, Tecnicatura Universitaria en Progra
 
 | Documento | Contenido |
 | --- | --- |
-| [FRONTEND.md](FRONTEND.md) | Arquitectura, cliente HTTP, carrito y pruebas del frontend. |
-| [planificacion.md](planificacion.md) | Reparto del TP3, tareas completadas, pendientes y dependencias. |
-| [TP3.pdf](TP3.pdf) | Consigna académica. |
-| [Reparto del Parcial I](<Reparto del trabajo – Cafetería Origen (Parcial I).md>) | Referencia de la base de backend y del reparto del primer parcial. |
+| [FRONTEND.md](docs/FRONTEND.md) | Arquitectura, cliente HTTP, carrito y pruebas del frontend. |
+| [planificacion.md](docs/planificacion.md) | Reparto del TP3, tareas completadas, pendientes y dependencias. |
+| [TP3.pdf](docs/TP3.pdf) | Consigna académica. |
+| [Reparto del Parcial I](<docs/Reparto del trabajo – Cafetería Origen (Parcial I).md>) | Referencia de la base de backend y del reparto del primer parcial. |
 
 ## Requisitos e instalación
 
@@ -53,6 +53,8 @@ El proxy de Vite envía `/productos` y `/pedidos`, incluidas sus subrutas, a la 
 
 Los pedidos se guardan en memoria y se pierden al reiniciar el servidor.
 
+El frontend ofrece las secciones **Pedir**, **Ver productos** y **Buscar productos**. Permite elegir cafés, agregar pastelería, modificar el carrito y confirmar el pedido. Al abrir `http://localhost:5173/?mesa=4`, el encabezado muestra la mesa y el pedido la conserva; sin una mesa válida, corresponde retiro en barra. La confirmación muestra el número, estado y total recibidos de la API, y permite consultar el estado sin recargar. Ante un rechazo se conserva el carrito y se puede reintentar.
+
 ## Comandos
 
 Todos se ejecutan desde la raíz.
@@ -77,7 +79,7 @@ npm run build
 npm run lint
 ```
 
-Las pruebas de Jest/Vitest no requieren servidores externos. Los requisitos y comandos de Playwright están en [Pruebas E2E](FRONTEND.md#pruebas-e2e).
+Las pruebas de Jest/Vitest no requieren servidores externos. Los requisitos y comandos de Playwright están en [Pruebas E2E](docs/FRONTEND.md#pruebas-e2e).
 
 Para ejecutar un archivo específico:
 
@@ -97,10 +99,12 @@ backend/
 frontend/
   src/          # Aplicación React y pruebas con Vitest/MSW
   e2e/          # Pruebas Playwright
+docs/
+  FRONTEND.md
+  planificacion.md
+  TP3.pdf
+  Reparto del trabajo – Cafetería Origen (Parcial I).md
 README.md
-FRONTEND.md
-planificacion.md
-TP3.pdf
 ```
 
 ## API
@@ -108,6 +112,7 @@ TP3.pdf
 | Método | Ruta | Respuesta exitosa |
 | --- | --- | --- |
 | GET | `/productos` | Lista de productos. |
+| GET | `/productos/buscar` | Lista de productos que coinciden con los filtros. |
 | GET | `/productos/:id` | Un producto. |
 | POST | `/pedidos` | 201 con `{ mensaje, pedido }`. |
 | GET | `/pedidos` | Lista de pedidos. |
@@ -211,6 +216,18 @@ Ejemplos de productos:
 
 Las descripciones de acidez, cuerpo y notas están en `variedadesDescripcion`, dentro de `backend/src/services/formar-respuesta.service.ts`. El frontend selecciona por los campos del contrato, sin extraer información de `nombre` ni reproducir las fórmulas de precios.
 
+### Búsqueda de productos
+
+`GET /productos/buscar` acepta los filtros `tipo`, `tipoCafe`, `tamaño` y `variedad`, con los valores del contrato de productos. Debe enviarse al menos uno; cada filtro puede aparecer una sola vez. Los filtros se combinan y la respuesta 200 contiene una lista con las mismas representaciones del catálogo.
+
+Un filtro inválido, repetido o la ausencia de criterios devuelve 400 con `{ "error": "Criterios de búsqueda inválidos o vacíos" }`. Si no hay coincidencias, devuelve 404 con `{ "error": "Producto no encontrado" }`.
+
+Ejemplo para consultar los cafés de Colombia de tipo expreso:
+
+```powershell
+Invoke-RestMethod -Uri "http://localhost:3000/productos/buscar?tipoCafe=expreso&variedad=colombia" -Method Get
+```
+
 ### Pedidos y mesas
 
 `POST /pedidos` recibe `{ items: [{ productoId, cantidad }], mesaId?, estado? }`.
@@ -251,7 +268,7 @@ Respuesta 201, suponiendo que es el primer pedido del servidor:
 }
 ```
 
-`GET /pedidos/:id` devuelve directamente el objeto `pedido`; el listado devuelve esos objetos en un arreglo. Las funciones para consumirlos desde React están en [Cliente HTTP](FRONTEND.md#cliente-http).
+`GET /pedidos/:id` devuelve directamente el objeto `pedido`; el listado devuelve esos objetos en un arreglo. Las funciones para consumirlos desde React están en [Cliente HTTP](docs/FRONTEND.md#cliente-http).
 
 ### Errores
 
