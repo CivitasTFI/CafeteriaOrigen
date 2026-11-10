@@ -130,7 +130,8 @@ for (const caso of [
       confirmacion.getByRole("button", { name: "Consultar estado" }).click(),
     ]);
     expect(consulta.status()).toBe(200);
-    await expect(confirmacion.getByText("Estado actual: pendiente", { exact: true })).toBeVisible();
+    await expect(confirmacion.getByText("Estado: pendiente", { exact: true })).toBeVisible();
+    await expect(confirmacion.getByText(/^Estado(?: actual)?:/)).toHaveCount(1);
     expect(navegaciones).toEqual([]);
     await comprobarAnchoMovil(page);
   });
@@ -164,4 +165,37 @@ test("un rechazo real conserva el carrito y permite confirmar al reintentar", as
   await expect(page.getByText("Tu carrito está vacio", { exact: true })).toBeVisible();
   await expect(page.getByRole("alert")).toHaveCount(0);
   expect(intentos).toBe(2);
+});
+
+test("conserva el seguimiento del pedido anterior si falla el siguiente y lo reemplaza tras el éxito", async ({ page, request }) => {
+  await page.goto("/?mesa=4");
+  await agregarPedidoDeEjemplo(page);
+  await page.getByRole("button", { name: "Confirmar pedido" }).click();
+  await expect(page.getByText("Número de pedido: 9", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Agregar Muffin de Chocolate", exact: true }).click();
+  await page.route("**/pedidos", async (ruta) => {
+    await ruta.continue({
+      postData: JSON.stringify({ mesaId: 9, items: [{ productoId: 19, cantidad: 1 }] }),
+    });
+  });
+  await page.getByRole("button", { name: "Confirmar pedido" }).click();
+  await expect(page.getByRole("alert")).toHaveText("Mesa inexistente");
+  const anterior = page.getByRole("region", { name: "Último pedido confirmado" });
+  await expect(anterior.getByText("Número de pedido: 9", { exact: true })).toBeVisible();
+  await expect(page.getByText("Subtotal orientativo: $2.500", { exact: true })).toBeVisible();
+  const [consulta] = await Promise.all([
+    page.waitForResponse((respuesta) => new URL(respuesta.url()).pathname === "/pedidos/9" && respuesta.request().method() === "GET"),
+    anterior.getByRole("button", { name: "Consultar estado" }).click(),
+  ]);
+  expect(consulta.status()).toBe(200);
+  await expect(anterior.getByText(/^Estado(?: actual)?:/)).toHaveCount(1);
+  expect(await (await request.get("http://localhost:3000/pedidos")).json()).toHaveLength(9);
+  await comprobarAnchoMovil(page);
+
+  await page.unroute("**/pedidos");
+  await page.getByRole("button", { name: "Confirmar pedido" }).click();
+  await expect(page.getByText("Número de pedido: 10", { exact: true })).toBeVisible();
+  await expect(page.getByText("Número de pedido: 9", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  await expect(page.getByText("Tu carrito está vacio", { exact: true })).toBeVisible();
 });

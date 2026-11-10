@@ -168,7 +168,7 @@ test("permite reintentar después de un rechazo y limpia el error tras el éxito
   expect(solicitudes).toBe(2);
 });
 
-test("no presenta una confirmación anterior como resultado de un nuevo envío fallido", async () => {
+test("conserva identificado el último pedido confirmado si falla el nuevo envío", async () => {
   const usuario = userEvent.setup();
   server.use(crearHandlerCreacionPedido(respuestaCrearPedidoApi));
   renderizarConfirmacion();
@@ -177,9 +177,19 @@ test("no presenta una confirmación anterior como resultado de un nuevo envío f
   await screen.findByRole("heading", { name: "Pedido confirmado" });
   await cargarCarrito(usuario);
   const carritoInicial = contenidoCarrito();
-  server.use(http.post(urlPedidos, () => HttpResponse.json({ error: "Pedido rechazado" }, { status: 400 })));
+  server.use(
+    http.post(urlPedidos, () => HttpResponse.json({ error: "Pedido rechazado" }, { status: 400 })),
+    http.get(`${urlPedidos}/${respuestaCrearPedidoApi.pedido.id}`, () => HttpResponse.json({
+      ...respuestaCrearPedidoApi.pedido, estado: "en preparación",
+    })),
+  );
   await usuario.click(botonConfirmar());
   await screen.findByRole("alert");
-  expect(screen.queryByRole("heading", { name: "Pedido confirmado" })).not.toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: "Último pedido confirmado" })).toBeInTheDocument();
+  expect(screen.getByText("Número de pedido: 1")).toBeInTheDocument();
+  expect(contenidoCarrito()).toBe(carritoInicial);
+  await usuario.click(screen.getByRole("button", { name: "Consultar estado" }));
+  expect(await screen.findByText("Estado: en preparación")).toBeInTheDocument();
+  expect(screen.queryByText("Estado: pendiente")).not.toBeInTheDocument();
   expect(contenidoCarrito()).toBe(carritoInicial);
 });

@@ -17,13 +17,16 @@ export default function ConfirmarPedido({ mesaId, onCambiarEnvio }: ConfirmarPed
   const [pedidoCreado, setPedidoCreado] = useState<Pedido | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  function actualizarPedido(pedido: Pedido) {
+    setPedidoCreado((actual) => actual?.id === pedido.id ? pedido : actual);
+  }
+
   async function confirmarPedido() {
     if (solicitudEnCurso.current || items.length === 0) return;
     solicitudEnCurso.current = true;
     setEnviando(true);
     onCambiarEnvio?.(true);
     setError(null);
-    setPedidoCreado(null);
     const itemsPedido = items.map(({ productoId, cantidad }) => ({ productoId, cantidad }));
 
     try {
@@ -51,7 +54,13 @@ export default function ConfirmarPedido({ mesaId, onCambiarEnvio }: ConfirmarPed
         {enviando ? "Enviando pedido..." : "Confirmar pedido"}
       </button>
       {error !== null && <p className="text-danger mt-3" role="alert">{error}</p>}
-      {pedidoCreado !== null && <ConfirmacionPedido pedido={pedidoCreado} />}
+      {pedidoCreado !== null && (
+        <ConfirmacionPedido
+          pedido={pedidoCreado}
+          esAnterior={items.length > 0 || enviando}
+          onActualizarPedido={actualizarPedido}
+        />
+      )}
     </>
   );
 }

@@ -1,8 +1,9 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent, { type UserEvent } from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { afterEach, beforeEach, expect, test } from "vitest";
+import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import App from "../../App";
+import * as apiPedidos from "../../api/pedidos";
 import { catalogoCompleto } from "../fixtures/productos";
 import { pedidoApi, respuestaCrearPedidoApi } from "../fixtures/pedidos";
 import { crearHandlerProductos, crearHandlerProductoPorId } from "../mocks/handlers";
@@ -98,7 +99,9 @@ test("consulta desde la confirmación el ID recibido de API y conserva el pedido
   await screen.findByRole("list", { name: "Productos del menú" });
   const confirmacion = screen.getByRole("region", { name: "Pedido confirmado" });
   await usuario.click(within(confirmacion).getByRole("button", { name: "Consultar estado" }));
-  expect(await within(confirmacion).findByText("Estado actual: en preparación")).toBeInTheDocument();
+  expect(await within(confirmacion).findByText("Estado: en preparación")).toBeInTheDocument();
+  expect(within(confirmacion).queryByText("Estado: pendiente")).not.toBeInTheDocument();
+  expect(within(confirmacion).getAllByText(/^Estado(?: actual)?:/)).toHaveLength(1);
   expect(consultas).toEqual([`${urlPedidos}/9`]);
   expect(screen.getByRole("main")).toBe(pagina);
 });
@@ -197,18 +200,137 @@ test("cada confirmación sigue su propio ID y un error de seguimiento conserva e
   await usuario.click(screen.getByRole("button", { name: "Confirmar pedido" }));
   await screen.findByText("Número de pedido: 9");
   await usuario.click(screen.getByRole("button", { name: "Consultar estado" }));
-  await screen.findByText("Estado actual: en preparación");
+  await screen.findByText("Estado: en preparación");
   await usuario.click(screen.getByRole("button", { name: "Agregar Muffin de Chocolate" }));
   await usuario.click(screen.getByRole("button", { name: "Consultar estado" }));
   await screen.findByRole("alert");
+  expect(screen.getByText("Estado: en preparación")).toBeInTheDocument();
   expect(screen.getByText("Cantidad: 1")).toBeInTheDocument();
   expect(screen.getByText("Subtotal orientativo: $2.500")).toBeInTheDocument();
   await usuario.click(screen.getByRole("button", { name: "Confirmar pedido" }));
   await screen.findByText("Número de pedido: 10");
   expect(screen.queryByText("Número de pedido: 9")).not.toBeInTheDocument();
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-  expect(screen.queryByText("Estado actual: en preparación")).not.toBeInTheDocument();
+  expect(screen.queryByText("Estado: en preparación")).not.toBeInTheDocument();
   await usuario.click(screen.getByRole("button", { name: "Consultar estado" }));
-  await screen.findByText("Estado actual: completado");
+  await screen.findByText("Estado: completado");
   expect(consultas).toEqual(["9", "9", "10"]);
+});
+
+test("un envío sin respuesta recupera los controles a los 15 segundos sin perder el carrito ni reenviar", async () => {
+  const usuario = userEvent.setup();
+  let solicitudes = 0;
+  let liberarRespuesta: (() => void) | undefined;
+  const espera = new Promise<void>((resolve) => { liberarRespuesta = resolve; });
+  server.use(http.post(urlPedidos, async () => {
+    solicitudes++;
+    await espera;
+    return HttpResponse.json(respuestaCrearPedidoApi, { status: 201 });
+  }));
+  render(<App />);
+  await prepararPedido(usuario);
+  try {
+    vi.useFakeTimers();
+    fireEvent.click(screen.getByRole("button", { name: "Confirmar pedido" }));
+    await act(async () => { await vi.advanceTimersByTimeAsync(0); });
+    expect(screen.getByRole("button", { name: "Enviando pedido..." })).toBeDisabled();
+
+    await act(async () => { await vi.advanceTimersByTimeAsync(15_000); });
+
+    expect(screen.getByRole("alert")).toHaveTextContent("El servidor tardó demasiado en responder");
+    expect(screen.getByRole("button", { name: "Confirmar pedido" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Agregar Muffin de Chocolate" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Ver productos" })).toBeEnabled();
+    expect(screen.getByText("Cantidad: 2")).toBeInTheDocument();
+    expect(screen.getByText("Cantidad: 1")).toBeInTheDocument();
+    expect(screen.getByText("Subtotal orientativo: $17.220")).toBeInTheDocument();
+    await act(async () => { await vi.advanceTimersByTimeAsync(30_000); });
+    expect(solicitudes).toBe(1);
+  } finally {
+    vi.useRealTimers();
+    liberarRespuesta?.();
+    await waitFor(() => expect(screen.queryByRole("button", { name: "Enviando pedido..." })).not.toBeInTheDocument());
+  }
+});
+
+test("mantiene el pedido anterior identificado durante un nuevo envío y después del rechazo", async () => {
+  const usuario = userEvent.setup();
+  let liberarRespuesta: (() => void) | undefined;
+  const espera = new Promise<void>((resolve) => { liberarRespuesta = resolve; });
+  server.use(
+    http.post(urlPedidos, () => HttpResponse.json(respuestaCrearPedidoApi, { status: 201 })),
+    http.get(`${urlPedidos}/1`, () => HttpResponse.json({ ...pedidoApi, estado: "completado" })),
+  );
+  render(<App />);
+  await prepararPedido(usuario);
+  await usuario.click(screen.getByRole("button", { name: "Confirmar pedido" }));
+  await screen.findByText("Número de pedido: 1");
+  await usuario.click(screen.getByRole("button", { name: "Agregar Muffin de Chocolate" }));
+  server.use(http.post(urlPedidos, async () => {
+    await espera;
+    return HttpResponse.json({ error: "Nuevo pedido rechazado" }, { status: 400 });
+  }));
+  try {
+    await usuario.click(screen.getByRole("button", { name: "Confirmar pedido" }));
+    expect(screen.getByRole("region", { name: "Último pedido confirmado" })).toBeInTheDocument();
+    expect(screen.getByText("Número de pedido: 1")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Enviando pedido..." })).toBeDisabled();
+  } finally {
+    liberarRespuesta?.();
+  }
+  expect(await screen.findByRole("alert")).toHaveTextContent("Nuevo pedido rechazado");
+  const anterior = screen.getByRole("region", { name: "Último pedido confirmado" });
+  await usuario.click(within(anterior).getByRole("button", { name: "Consultar estado" }));
+  expect(await within(anterior).findByText("Estado: completado")).toBeInTheDocument();
+  expect(screen.getByText("Cantidad: 1")).toBeInTheDocument();
+  expect(screen.getByText("Subtotal orientativo: $2.500")).toBeInTheDocument();
+});
+
+test("una consulta antigua que llega tarde no sobrescribe un pedido nuevo", async () => {
+  const usuario = userEvent.setup();
+  let creaciones = 0;
+  let liberarConsulta: (() => void) | undefined;
+  const espera = new Promise<void>((resolve) => { liberarConsulta = resolve; });
+  let consultasAntiguas = 0;
+  let finalizarConsulta: (() => void) | undefined;
+  const consultaFinalizada = new Promise<void>((resolve) => { finalizarConsulta = resolve; });
+  const consultarOriginal = apiPedidos.consultarPedido;
+  const espiaConsulta = vi.spyOn(apiPedidos, "consultarPedido").mockImplementation(async (id) => {
+    try {
+      return await consultarOriginal(id);
+    } finally {
+      finalizarConsulta?.();
+    }
+  });
+  server.use(
+    http.post(urlPedidos, () => HttpResponse.json({
+      ...respuestaCrearPedidoApi,
+      pedido: { ...pedidoApi, id: 9 + creaciones++ },
+    }, { status: 201 })),
+    http.get(`${urlPedidos}/9`, async () => {
+      consultasAntiguas++;
+      await espera;
+      return HttpResponse.json({ ...pedidoApi, id: 9, estado: "completado" });
+    }),
+  );
+  render(<App />);
+  await prepararPedido(usuario);
+  await usuario.click(screen.getByRole("button", { name: "Confirmar pedido" }));
+  await screen.findByText("Número de pedido: 9");
+  try {
+    await usuario.click(screen.getByRole("button", { name: "Consultar estado" }));
+    await waitFor(() => expect(consultasAntiguas).toBe(1));
+    await usuario.click(screen.getByRole("button", { name: "Agregar Muffin de Chocolate" }));
+    await usuario.click(screen.getByRole("button", { name: "Confirmar pedido" }));
+    await screen.findByText("Número de pedido: 10");
+  } finally {
+    await act(async () => {
+      liberarConsulta?.();
+      if (consultasAntiguas > 0) await consultaFinalizada;
+    });
+    espiaConsulta.mockRestore();
+  }
+  expect(screen.queryByText("Estado: completado")).not.toBeInTheDocument();
+  expect(screen.getByText("Número de pedido: 10")).toBeInTheDocument();
+  expect(screen.getByText("Estado: pendiente")).toBeInTheDocument();
 });
